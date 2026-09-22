@@ -1,0 +1,10 @@
+{
+  "name": "com.riseon.utils.network",
+  "version": "1.0.0",
+  "displayName": "Utils Network",
+  "description": "Network utilities: current time from NTP with an HTTP Date fallback, and a real internet connectivity check",
+  "documentationUrl": "https://github.com/riseongamestudio/Utils/blob/com.riseon.utils.network/1.0.0/Network/README.md",
+  "author": {
+    "name": "RiseOn"
+  }
+}
