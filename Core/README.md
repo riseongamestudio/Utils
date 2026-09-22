@@ -1,8 +1,7 @@
 # RiseOn.Utils
 
-Bộ tiện ích nền cho game Unity: lớp cơ sở thay cho `MonoBehaviour` /
-`ScriptableObject`, `Singleton`, `Bounds2D`, extension và helper cho những việc
-lặp đi lặp lại (vector, transform, collection, coroutine, DOTween, Undo,
+Bộ tiện ích nền cho game Unity: `Singleton`, `Bounds2D`, extension và lớp utils cho
+những việc lặp đi lặp lại (vector, transform, collection, coroutine, DOTween, Undo,
 UnityEvent), hai attribute cho Odin và vài tool Editor.
 
 Package `com.riseon.utils`. Code runtime nằm trong namespace `RiseOn.Utils`,
@@ -14,8 +13,8 @@ code Editor trong `RiseOn.Utils.Editor`.
 - [Cài đặt](#cài-đặt)
 - [Tổng quan](#tổng-quan)
 - [Hướng dẫn nhanh](#hướng-dẫn-nhanh)
-  - [Lớp nền và Singleton](#lớp-nền-và-singleton)
-  - [Extension và helper](#extension-và-helper)
+  - [Singleton](#singleton)
+  - [Extension và utils](#extension-và-utils)
   - [Sửa dữ liệu trong Editor](#sửa-dữ-liệu-trong-editor)
   - [Tool Editor](#tool-editor)
 - [Thành phần](#thành-phần)
@@ -27,7 +26,7 @@ code Editor trong `RiseOn.Utils.Editor`.
 | Phụ thuộc | Cách có | Dùng cho |
 |---|---|---|
 | Unity 6000.3 | | Bản đang dùng để phát triển |
-| [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute Inspector ở nhiều lớp, `SerializedScriptableObjectExt`, `EnumLabel`, `ForwardAttributesTo`, drawer và tool Editor |
+| [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute Inspector ở nhiều lớp, `EnumLabel`, `ForwardAttributesTo`, drawer và tool Editor |
 | [DOTween](https://dotween.demigiant.com) | Cài tay từ Asset Store, rồi chạy *Tools → Demigiant → DOTween Utility Panel → Setup DOTween* | `DOTweenExtensions` |
 
 Package không có phụ thuộc UPM nào. Odin và DOTween không có trên UPM nên không
@@ -75,7 +74,7 @@ Package gồm hai assembly:
 
 | Assembly | Nội dung |
 |---|---|
-| `RiseOn.Utils` | Lớp nền, `Singleton`, `Bounds2D`, attribute, extension, helper. Chạy cả trong game lẫn Editor |
+| `RiseOn.Utils` | `Singleton`, `Bounds2D`, attribute, extension, utils. Chạy cả trong game lẫn Editor |
 | `RiseOn.Utils.Editor` | Drawer cho attribute, tool Editor, cửa sổ tìm kiếm. Chỉ có trong Editor |
 
 Nhiều hàm phục vụ việc sửa dữ liệu trong Editor (Undo, dirty, persistent
@@ -89,11 +88,9 @@ Hai package cùng repo xây trên nền này:
 
 ## Hướng dẫn nhanh
 
-### Lớp nền và Singleton
+### Singleton
 
-Kế thừa `MonoBehaviourExt` thay cho `MonoBehaviour` để có `TF` (transform được
-cache) và cặp hàm `RecordForUndo` / `MarkDirty`. Lớp chỉ có một bản trong game
-thì kế thừa `Singleton<T>`:
+Lớp chỉ có một bản trong game thì kế thừa `Singleton<T>`:
 
 ```csharp
 using RiseOn.Utils;
@@ -105,9 +102,9 @@ public class GameManager : Singleton<GameManager> {
     }
 }
 
-public class Spawner : MonoBehaviourExt {
+public class Spawner : MonoBehaviour {
     private void Start() {
-        TF.SetPositionXY(Vector2.zero);
+        transform.SetPositionXY(Vector2.zero);
         Debug.Log(GameManager.Ins.name);
     }
 }
@@ -117,20 +114,20 @@ Singleton còn truy cập được qua interface (`IAudio.Ins`), có tùy chọn
 `DontDestroyOnLoad` và cách xử lý bản trùng. Chi tiết:
 [Singleton](Runtime/Singleton/README.md).
 
-### Extension và helper
+### Extension và utils
 
-Extension gọi thẳng trên đối tượng, helper gọi theo tên lớp:
+Extension gọi thẳng trên đối tượng, lớp utils gọi theo tên lớp:
 
 ```csharp
 var clip  = clips.RandomInside();                   // phần tử ngẫu nhiên
-var flat  = TF.position.With(VecAxis.Z, 0);         // đổi một trục
+var flat  = transform.position.With(VecAxis.Z, 0);  // đổi một trục
 this.DelayedCall_Second(1f, ShowResult);            // gọi sau 1 giây
-TF.DOJump_BetterHeight(target, 1f, 0.5f);           // nhảy với đỉnh và nhịp tự nhiên hơn DOJump
-float k = MathHelper.Evaluate(t, 3);                // ease-out bậc 3
+transform.DOJump_BetterHeight(target, 1f, 0.5f);    // nhảy với đỉnh và nhịp tự nhiên hơn DOJump
+float k = MathUtils.Evaluate(t, 3);                 // ease-out bậc 3
 ```
 
 Danh sách đầy đủ: [Extension](Runtime/Extensions/README.md),
-[Helper](Runtime/Helpers/README.md).
+[Utils](Runtime/Utils/README.md).
 
 ### Sửa dữ liệu trong Editor
 
@@ -138,13 +135,13 @@ Code sửa object trong Edit mode (nút Odin, `OnValidate`, tool) nên ghi Undo 
 và đánh dấu dirty sau, để `Ctrl+Z` hoạt động và scene / prefab được lưu:
 
 ```csharp
-UndoHelper.RecordForUndo(target);   // trong lớp kế thừa MonoBehaviourExt: RecordForUndo(target)
+UndoUtils.RecordForUndo(target);
 target.name = "Renamed";
-UndoHelper.MarkDirty(target);       // hoặc MarkDirty(target)
+UndoUtils.MarkDirty(target);
 ```
 
 Tạo object, đổi cha, thêm component, gắn persistent listener cho UnityEvent cũng
-có bản kèm Undo: xem [Helper](Runtime/Helpers/README.md#undohelper) và
+có bản kèm Undo: xem [Utils](Runtime/Utils/README.md#undoutils) và
 [Extension](Runtime/Extensions/README.md#undo).
 
 ### Tool Editor
@@ -161,17 +158,16 @@ Cách dùng từng tool: [Tool trong Editor](Editor/Tools/README.md).
 
 | Thành phần | Việc | Chi tiết |
 |---|---|---|
-| Lớp nền | `MonoBehaviourExt`, `ScriptableObjectExt`, `SerializedScriptableObjectExt` | [Runtime/Bases](Runtime/Bases/README.md) |
 | Singleton | `Singleton<T>`, `ISingleton<T>` | [Runtime/Singleton](Runtime/Singleton/README.md) |
 | Bounds2D | `Bounds` bản 2D, serialize được | [Runtime/Bounds2D](Runtime/Bounds2D/README.md) |
 | Extension | Vector, Transform, Collection, Random, Coroutine, DOTween, Undo, UnityEvent... | [Runtime/Extensions](Runtime/Extensions/README.md) |
-| Helper | `UndoHelper`, `HandlesHelper`, `MathHelper`, `WaitForSecondCache` | [Runtime/Helpers](Runtime/Helpers/README.md) |
+| Utils | `UndoUtils`, `HandlesUtils`, `MathUtils`, `WaitForSecondCache` | [Runtime/Utils](Runtime/Utils/README.md) |
 | EnumLabel | Đặt nhãn phần tử mảng theo enum (Odin) | [Runtime/EnumLabel](Runtime/EnumLabel/README.md) |
 | ForwardAttributesTo | Chuyển attribute Odin từ field wrapper xuống field bên trong | [Runtime/ForwardAttributes](Runtime/ForwardAttributes/README.md) |
 | Tool Editor | Capture Game View, Find References, Replace Component | [Editor/Tools](Editor/Tools/README.md) |
 | Cửa sổ tìm kiếm | `ComponentSearchWindow`, `ObjectSearchWindow` cho drawer riêng | [Editor/SearchWindow](Editor/SearchWindow/README.md) |
 | Extension Editor | `PrefabExtensions` | [Editor/Extensions](Editor/Extensions/README.md) |
-| Helper Editor | `InlineEditorImitator` cho người viết drawer | [Editor/Helpers](Editor/Helpers/README.md) |
+| Utils Editor | `InlineEditorImitator` cho người viết drawer | [Editor/Utils](Editor/Utils/README.md) |
 
 ## Lịch sử thay đổi
 

@@ -6,7 +6,7 @@ using Sirenix.OdinInspector;
 namespace RiseOn.Utils.Renderers {
     [ExecuteAlways]
     [HideMonoScript]
-    public abstract class RendererAnchorer<TRenderer> : MonoBehaviourExt where TRenderer : Renderer {
+    public abstract class RendererAnchorer<TRenderer> : MonoBehaviour where TRenderer : Renderer {
         #region PROPERTIES
 
         [SerializeField]
@@ -33,9 +33,9 @@ namespace RiseOn.Utils.Renderers {
         private void SetPropThenUpdate<T>(ref T orgVal, T newVal) {
             if (EqualityComparer<T>.Default.Equals(orgVal, newVal)) return;
 
-            RecordForUndo(this);
+            UndoUtils.RecordForUndo(this);
             orgVal = newVal;
-            MarkDirty(this);
+            UndoUtils.MarkDirty(this);
 
             UpdatePosFromAnchor();
         }
@@ -57,7 +57,7 @@ namespace RiseOn.Utils.Renderers {
         protected virtual bool IsNeedUpdateRdrTrackingProps() {
             if (Target == null) return false;
 
-            if (TF.hasChanged) return true;
+            if (transform.hasChanged) return true;
             if (prevTargetL2WMatrix != GetTargetL2WMatrix()) return true;
             if (prevTargetSize != GetTargetSize()) return true;
 
@@ -68,7 +68,7 @@ namespace RiseOn.Utils.Renderers {
             prevTargetL2WMatrix = GetTargetL2WMatrix();
             prevTargetSize      = GetTargetSize();
             
-            TF.hasChanged = false;
+            transform.hasChanged = false;
         }
 
         private void LateUpdate() {
@@ -111,11 +111,11 @@ namespace RiseOn.Utils.Renderers {
               , _ => throw new ArgumentOutOfRangeException()
             });
 
-            if (TF.position == newPos) return;
+            if (transform.position == newPos) return;
             
-            RecordForUndo(TF);
-            TF.position = newPos;
-            MarkDirty(TF);
+            UndoUtils.RecordForUndo(transform);
+            transform.position = newPos;
+            UndoUtils.MarkDirty(transform);
         }
     }
 }

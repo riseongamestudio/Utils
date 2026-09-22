@@ -33,9 +33,9 @@ namespace RiseOn.Utils {
         }
 
         public static void AddPositionXYUndo(this Transform target, Vector2 value) {
-            UndoHelper.RecordForUndo(target);
+            UndoUtils.RecordForUndo(target);
             target.AddPositionXY(value);
-            UndoHelper.MarkDirty(target);
+            UndoUtils.MarkDirty(target);
         }
 
         public static void ResetLocalValues(this Transform target) {

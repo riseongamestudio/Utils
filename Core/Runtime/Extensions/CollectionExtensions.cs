@@ -18,7 +18,7 @@ namespace RiseOn.Utils {
         }
 
         public static IEnumerable<Vector2Int> IEIndex2D<T>(this T[,] list) {
-            return MathHelper.IEIndex2D(
+            return MathUtils.IEIndex2D(
                 0, list.GetLength(0)
               , 0, list.GetLength(1));
         }

@@ -1,4 +1,4 @@
-# Helper trong Editor
+# Utils trong Editor
 
 [← RiseOn.Utils](../../README.md)
 

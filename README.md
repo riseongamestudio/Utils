@@ -5,7 +5,7 @@ UPM riêng, cài và đánh version độc lập.
 
 | Thư mục | Package | Nội dung |
 |---|---|---|
-| [Core](Core/README.md) | `com.riseon.utils` | Lớp nền, Singleton, Bounds2D, extension, helper, attribute cho Odin, tool Editor |
+| [Core](Core/README.md) | `com.riseon.utils` | Singleton, Bounds2D, extension, utils, attribute cho Odin, tool Editor |
 | [UI](UI/README.md) | `com.riseon.utils.ui` | Tiện ích UGUI |
 | [Renderers](Renderers/README.md) | `com.riseon.utils.renderers` | Tiện ích SpriteRenderer, SpriteMask, thứ tự vẽ 2D |
 

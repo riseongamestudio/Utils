@@ -18,14 +18,14 @@ Extension method cho các kiểu hay dùng, tất cả trong namespace `RiseOn.U
 `VecAxis` (`X`, `Y`, `Z`) chọn trục cho các hàm theo trục.
 
 ```csharp
-TF.SetPositionXY(target);                   // đặt x, y, giữ nguyên z
-TF.SetLocalPositionXY(Vector2.zero);
-TF.AddPosition(VecAxis.Y, 0.5f);
-TF.AddPositionXY(new Vector2(1, 0));
+transform.SetPositionXY(target);            // đặt x, y, giữ nguyên z
+transform.SetLocalPositionXY(Vector2.zero);
+transform.AddPosition(VecAxis.Y, 0.5f);
+transform.AddPositionXY(new Vector2(1, 0));
 child.ResetLocalValues();                   // localPosition 0, localRotation identity, localScale 1
 
-var flat   = TF.position.With(VecAxis.Z, 0);   // bản sao đổi một trục
-var y      = TF.position.Get(VecAxis.Y);
+var flat   = transform.position.With(VecAxis.Z, 0); // bản sao đổi một trục
+var y      = transform.position.Get(VecAxis.Y);
 var ratio  = size.Div(baseSize);               // chia từng thành phần
 var turned = gridSize.YX();                    // Vector2 / Vector2Int đảo x và y
 ```
@@ -78,19 +78,19 @@ Cần DOTween trong project (đã chạy *Setup DOTween*).
 ```csharp
 // Nhảy tới endPos (world). Đỉnh cao hơn điểm cao nhất của hai đầu một đoạn jumpHeight,
 // thời gian lên / xuống chia theo công thức rơi tự do.
-TF.DOJump_BetterHeight(endPos, jumpHeight: 1f, duration: 0.5f, onReachTop: PlayWhoosh);
+transform.DOJump_BetterHeight(endPos, jumpHeight: 1f, duration: 0.5f, onReachTop: PlayWhoosh);
 
 // Như trên, nhưng đích là độ lệch so với vị trí của cha, bỏ qua rotation và scale của cha.
-TF.DOLocalJumpPure(offsetFromParent, 1f, 0.5f);
+transform.DOLocalJumpPure(offsetFromParent, 1f, 0.5f);
 
 // Rung lần lượt với từng độ mạnh, tổng thời gian chia đều.
-TF.DOShakePositionDynamic(0.6f, new[] { Vector3.one * 0.3f, Vector3.one * 0.1f });
+transform.DOShakePositionDynamic(0.6f, new[] { Vector3.one * 0.3f, Vector3.one * 0.1f });
 
 // Giá trị của một kiểu Ease tại t (0 tới 1).
 float k = Ease.OutBack.Evaluate(t);
 ```
 
-Các tween đều gắn target là transform, nên `DOTween.Kill(TF)` dừng được.
+Các tween đều gắn target là transform, nên `DOTween.Kill(transform)` dừng được.
 
 ## Undo
 
@@ -98,12 +98,12 @@ Bản có Undo của vài thao tác Transform / GameObject. Trong bản build ch
 như hàm thường:
 
 ```csharp
-go.transform.SetParentUndo(TF);              // như SetParent
+go.transform.SetParentUndo(transform);       // như SetParent
 var col = go.AddComponentUndo<BoxCollider2D>();
-TF.AddPositionXYUndo(Vector2.up);            // dời, ghi Undo và đánh dấu dirty
+transform.AddPositionXYUndo(Vector2.up);     // dời, ghi Undo và đánh dấu dirty
 ```
 
-Tạo GameObject, ghi Undo cho object tùy ý: [`UndoHelper`](../Helpers/README.md#undohelper).
+Tạo GameObject, ghi Undo cho object tùy ý: [`UndoUtils`](../Utils/README.md#undoutils).
 
 ## UnityEvent
 

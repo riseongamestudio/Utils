@@ -8,47 +8,47 @@ using Debug = UnityEngine.Debug;
 namespace RiseOn.Utils.Renderers {
     [ExecuteAlways]
     [HideMonoScript]
-    public abstract partial class RendererExt<TRenderer> : MonoBehaviourExt where TRenderer : Renderer {
+    public abstract partial class RendererExt<TRenderer> : MonoBehaviour where TRenderer : Renderer {
         #region CREATE & SETUP RENDERER
 
         protected virtual Vector3 RdrNomLocScale => Vector3.one;
 
         private void CreateRenderer() {
-            Rdr = UndoHelper.CreateGameObjectUndo(nameof(Renderer)).AddComponentUndo<TRenderer>();
+            Rdr = UndoUtils.CreateGameObjectUndo(nameof(Renderer)).AddComponentUndo<TRenderer>();
 
             SetParentRdrThenUpdate(resetScale: true);
         }
 
         private void SetParentRdrThenUpdate(bool resetScale) {
-            RecordForUndo(Rdr.transform);
+            UndoUtils.RecordForUndo(Rdr.transform);
 
-            Rdr.transform.SetParentUndo(TF);
+            Rdr.transform.SetParentUndo(transform);
             if (resetScale) Rdr.transform.localScale = Vector3.one;
 
-            MarkDirty(Rdr.transform);
+            UndoUtils.MarkDirty(Rdr.transform);
 
             UpdateRdrPosFromPivot();
         }
 
         private bool IsNeedApplyRdrLocScaleToThis() =>
             Rdr != null
-         && Rdr.transform.parent == TF
+         && Rdr.transform.parent == transform
          && Rdr.transform.localScale != RdrNomLocScale;
 
         protected void TryApplyRdrLocScaleToThis() {
             if (IsNeedApplyRdrLocScaleToThis()) {
-                RecordForUndo(TF, Rdr.transform);
+                UndoUtils.RecordForUndo(transform, Rdr.transform);
                 
-                TF.localScale            = Vector3.Scale(TF.localScale, Rdr.transform.localScale.Div(RdrNomLocScale));
+                transform.localScale     = Vector3.Scale(transform.localScale, Rdr.transform.localScale.Div(RdrNomLocScale));
                 Rdr.transform.localScale = RdrNomLocScale;
                 
-                MarkDirty(TF, Rdr.transform);
+                UndoUtils.MarkDirty(transform, Rdr.transform);
             }
         }
 
         private void Reset() {
             if (null == Rdr
-             && null == (Rdr = TF.Find(nameof(Renderer))?.GetComponent<TRenderer>())) {
+             && null == (Rdr = transform.Find(nameof(Renderer))?.GetComponent<TRenderer>())) {
                 CreateRenderer();
             }
         }
@@ -83,9 +83,9 @@ namespace RiseOn.Utils.Renderers {
         protected void SetThisPropThenUpdate<T>(ref T orgVal, T newVal) {
             if (EqualityComparer<T>.Default.Equals(orgVal, newVal)) return;
 
-            RecordForUndo(this);
+            UndoUtils.RecordForUndo(this);
             orgVal = newVal;
-            MarkDirty(this);
+            UndoUtils.MarkDirty(this);
 
             UpdateRdrPosFromPivot();
         }
@@ -109,9 +109,9 @@ namespace RiseOn.Utils.Renderers {
         protected void SetRdrPropThenUpdate<T>(Func<T> getter, Action<T> setter, T newVal) {
             if (EqualityComparer<T>.Default.Equals(getter(), newVal)) return;
 
-            RecordForUndo(Rdr);
+            UndoUtils.RecordForUndo(Rdr);
             setter(newVal);
-            MarkDirty(Rdr);
+            UndoUtils.MarkDirty(Rdr);
 
             UpdateRdrPosFromPivot();
         }
@@ -170,9 +170,9 @@ namespace RiseOn.Utils.Renderers {
             if (Rdr == null) return;
             
             if (Rdr.transform.localRotation != Quaternion.identity) {
-                RecordForUndo(Rdr.transform);
+                UndoUtils.RecordForUndo(Rdr.transform);
                 Rdr.transform.localRotation = Quaternion.identity;
-                MarkDirty(Rdr.transform);
+                UndoUtils.MarkDirty(Rdr.transform);
             }
 
             TryApplyRdrLocScaleToThis();
@@ -207,9 +207,9 @@ namespace RiseOn.Utils.Renderers {
             void SetRdrLocPos(Vector3 rdrLocPos) {
                 if (Rdr.transform.localPosition == rdrLocPos) return;
 
-                RecordForUndo(Rdr.transform);
+                UndoUtils.RecordForUndo(Rdr.transform);
                 Rdr.transform.localPosition = rdrLocPos;
-                MarkDirty(Rdr.transform);
+                UndoUtils.MarkDirty(Rdr.transform);
             }
         }
 

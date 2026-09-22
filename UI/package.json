@@ -2,7 +2,7 @@
   "name": "com.riseon.utils.ui",
   "version": "1.0.0",
   "displayName": "Utils UI",
-  "description": "UGUI helpers: AspectRatioFitterElement, RebuildLayoutFixer and Image extensions",
+  "description": "UGUI utilities: AspectRatioFitterElement, RebuildLayoutFixer and Image extensions",
   "documentationUrl": "https://github.com/riseongamestudio/Utils/blob/com.riseon.utils.ui/1.0.0/UI/README.md",
   "author": {
     "name": "RiseOn"

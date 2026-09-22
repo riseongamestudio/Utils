@@ -7,7 +7,7 @@ namespace RiseOn.Utils {
     /// Record/MarkDirty stay static on purpose: TMPro ships a public <c>MarkDirty(this Object)</c> extension,
     /// so an extension of the same shape would be ambiguous in every file that imports TMPro.
     /// </remarks>
-    public static class UndoHelper {
+    public static class UndoUtils {
         [Conditional("UNITY_EDITOR")]
         public static void RecordForUndo(Object target) {
             #if UNITY_EDITOR

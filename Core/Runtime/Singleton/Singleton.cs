@@ -9,7 +9,7 @@ namespace RiseOn.Utils {
         public static bool ExistIns => SingletonHub.ExistIns<T>();
     }
 
-    public abstract class Singleton : MonoBehaviourExt {
+    public abstract class Singleton : MonoBehaviour {
         [InfoBox(
             "DontDestroyOnLoad only works on root GameObjects."
           , InfoMessageType.Warning,

@@ -21,7 +21,7 @@ trên [RiseOn.Utils](../Core/README.md).
 | Phụ thuộc | Cách có | Dùng cho |
 |---|---|---|
 | Unity 6000.3 | | Bản đang dùng để phát triển |
-| [`com.riseon.utils`](../Core/README.md) 1.0.0 | Tự cài theo `package.json` | Lớp nền, Undo, extension |
+| [`com.riseon.utils`](../Core/README.md) 1.0.0 | Tự cài theo `package.json` | Undo, extension |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute và Inspector của các component |
 | [DOTween](https://dotween.demigiant.com) | Cài tay từ Asset Store | `com.riseon.utils` cần |
 

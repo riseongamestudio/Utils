@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace RiseOn.Utils {
-    public static class MathHelper {
+    public static class MathUtils {
         public static float Pow(float a, uint x) {
             float result = 1f;
 

@@ -48,9 +48,9 @@ namespace RiseOn.Utils.UI {
         protected void SetThisPropThenDirty<T>(ref T orgVal, T newVal) {
             if (EqualityComparer<T>.Default.Equals(orgVal, newVal)) return;
 
-            UndoHelper.RecordForUndo(this);
+            UndoUtils.RecordForUndo(this);
             orgVal = newVal;
-            UndoHelper.MarkDirty(this);
+            UndoUtils.MarkDirty(this);
 
             SetDirty();
         }

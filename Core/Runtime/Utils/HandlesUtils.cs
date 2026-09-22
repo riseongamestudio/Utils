@@ -2,7 +2,7 @@ using System.Diagnostics;
 using UnityEngine;
 
 namespace RiseOn.Utils {
-    public static class HandlesHelper {
+    public static class HandlesUtils {
         private static Vector3[] rectCorners;
 
         /// <inheritdoc cref="UnityEditor.Handles.matrix"/>

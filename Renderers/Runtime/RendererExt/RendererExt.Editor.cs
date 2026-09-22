@@ -29,7 +29,7 @@ namespace RiseOn.Utils.Renderers {
                 var castedTarget = (RendererExt<TRenderer>)target;
                 if (castedTarget.Rdr != null) {
                     validTargets.Add(castedTarget);
-                    if (castedTarget.Rdr.transform.parent != castedTarget.TF) indirectTargets.Add(castedTarget);
+                    if (castedTarget.Rdr.transform.parent != castedTarget.transform) indirectTargets.Add(castedTarget);
                 } else invalidTargets.Add(castedTarget);
             }
 

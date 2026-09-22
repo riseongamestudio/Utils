@@ -16,13 +16,13 @@ namespace RiseOn.Utils.Renderers {
             set {
                 if (Rdr.drawMode == value) return;
 
-                RecordForUndo(TF, Rdr, Rdr.transform);
+                UndoUtils.RecordForUndo(transform, Rdr, Rdr.transform);
 
                 Rdr.drawMode = value;
 
                 TryApplyRdrLocScaleToThis();
 
-                MarkDirty(TF, Rdr, Rdr.transform);
+                UndoUtils.MarkDirty(transform, Rdr, Rdr.transform);
 
                 UpdateRdrPosFromPivot();
             }
