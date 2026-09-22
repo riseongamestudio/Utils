@@ -1,0 +1,10 @@
+{
+  "name": "com.riseon.utils",
+  "version": "1.0.0",
+  "displayName": "Utils",
+  "description": "Extensions, helpers and base classes shared by RiseOn packages: MonoBehaviourExt, Singleton, EnumLabel, undo helpers and editor tools",
+  "documentationUrl": "https://github.com/riseongamestudio/Utils/blob/com.riseon.utils/1.0.0/Core/README.md",
+  "author": {
+    "name": "RiseOn"
+  }
+}

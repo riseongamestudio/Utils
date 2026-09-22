@@ -1,0 +1,13 @@
+{
+  "name": "com.riseon.utils.renderers",
+  "version": "1.0.0",
+  "displayName": "Utils Renderers",
+  "description": "Renderer helpers: RendererAnchorer, RendererExt, RenderOrder2DRaycaster, SpriteRenderer and ParticleSystem extensions",
+  "documentationUrl": "https://github.com/riseongamestudio/Utils/blob/com.riseon.utils.renderers/1.0.0/Renderers/README.md",
+  "author": {
+    "name": "RiseOn"
+  },
+  "dependencies": {
+    "com.riseon.utils": "1.0.0"
+  }
+}
