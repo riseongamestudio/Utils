@@ -6,5 +6,8 @@
   "documentationUrl": "https://github.com/riseongamestudio/Utils/blob/com.riseon.utils/1.0.0/Core/README.md",
   "author": {
     "name": "RiseOn"
+  },
+  "dependencies": {
+    "com.unity.modules.uielements": "1.0.0"
   }
 }

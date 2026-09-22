@@ -1,120 +1,100 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using UnityEditor;
+using UnityEditor.Compilation;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace RiseOn.Utils.Editor.SearchWindow {
+    /// <summary>
+    /// Window that browses and searches trees of <see cref="SearchNode"/>, one tab per section. Built with UI Toolkit:
+    /// the list only creates rows for what is on screen, so long lists stay fast. Opens as an aux window, like Unity's
+    /// own object picker: it moves by its title bar, resizes by its edges, and remembers its size per window type.
+    /// Subclasses add sections in <see cref="RegisterSections"/> and open the window with <see cref="Show"/>.
+    /// </summary>
     public abstract class SearchWindow : EditorWindow {
-        // UI Layout Constants
-        private const float HEADER_HEIGHT = 24f;
-        private const float SEARCH_HEIGHT = 18f;
-        private const float BREADCRUMB_HEIGHT = 22f;
-        private const float ITEM_HEIGHT = 20f;
-        private const float BORDER_WIDTH = 1f;
-        private const float ICON_WIDTH = 16f;
-        private const float SCROLLBAR_WIDTH = 13f;
-        private const float ANIMATION_DURATION = 0.4f;
-        private const float TAB_BAR_HEIGHT = 22f;
+        private const float  ItemHeight        = 20f;
+        private const double AnimationDuration = 0.4;
+        private const string StyleSheetPath    = "SearchWindow/SearchWindow.uss"; // relative to this assembly's asmdef
 
-        // Custom Theme Colors
-        private readonly Color darkSelectionColor = new Color(23f / 255f, 26f / 255f, 9f / 255f, 1f); // #171a09
-        private readonly Color lightSelectionColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+        private static readonly Vector2 minWindowSize = new(250f, 200f);
 
-        // Core State
+        private static Texture2D  cachedNoneIcon;
+        private static StyleSheet cachedStyleSheet;
 
-        private int activeSectionIndex;
-        private string searchText = string.Empty;
-        private string lastSearchText = string.Empty;
-        private bool isInSearchMode;
+        private readonly List<SectionState>  sections        = new();
+        private readonly List<ToolbarToggle> tabs            = new();
+        private readonly List<VisualElement> tabProgressBars = new();
+        private readonly List<ScoredNode>    scoredNodes     = new();
 
-        private readonly List<SectionState> sections = new();
-
-        private SectionState ActiveSection => sections.Count > 0 && activeSectionIndex < sections.Count ? sections[activeSectionIndex] : null;
-
-        // Search Debounce Implementation
-        private const double SEARCH_DEBOUNCE_DELAY = 0.15;
-
-        private double lastSearchInputTime;
-        private bool isSearchPending;
-
-        // Interaction & Animation State
-        private enum NavAnimDir {
-            Forward
-          , Backward
-        }
-
-        private bool isDragging;
-        private Vector2 dragOffset;
-        private bool isAnimating;
-        private float animationProgress;
-        private NavAnimDir animationDirection;
-        private List<SearchNode> previousItems = new();
-        private Vector2 previousScrollPosition;
-        private int previousSelectedIndex = -1;
-        private float animationStartTime;
-        private string previousBreadcrumbText = string.Empty;
-        private bool previousHasBreadcrumb;
-        private string headerText = "Search";
+        private int                activeSectionIndex;
+        private string             searchText = string.Empty;
         private Action<SearchNode> onItemSelected;
+        private bool               isInSearchMode;
 
-        // Styles Cache
-        private GUIStyle headerStyle;
-        private GUIStyle breadcrumbStyle;
-        private GUIStyle itemStyle;
-        private GUIStyle itemSelectedStyle;
-        private GUIStyle searchFieldStyle;
-        private Texture2D backIcon;
-        private Texture2D breadcrumbBgTex;
-        private Texture2D breadcrumbHoverTex;
-        private static Texture2D cachedNoneIcon;
+        // What to highlight when the window opens: the value the field holds now (null highlights None).
+        private object initialData;
+        private bool   isInitialDataPending;
+
+        // Set once the user types, switches tab or moves through the tree; a section that finishes building later no
+        // longer pulls the window over to show the initial value.
+        private bool userTookOver;
+
+        // Where the pointer last was, in panel space, so a scroll can move the highlight to the row now under it.
+        private Vector2 lastPointerPosition;
+        private bool    isPointerInside;
+
+        private ToolbarSearchField searchField;
+        private VisualElement      content;
+        private ProgressBar        buildProgressBar;
+        private Page               page;
+
+        private bool                        isAnimating;
+        private Page                        outgoingPage;
+        private IVisualElementScheduledItem animation;
+
+        private SectionState ActiveSection => activeSectionIndex < sections.Count ? sections[activeSectionIndex] : null;
+
+        private string SizePrefKey => $"RiseOn.SearchWindow.{GetType().Name}";
+        private string TabPrefKey  => $"RiseOn.SearchWindow.{StateKey}.Tab";
+
+        /// <summary>Key the last open tab is remembered under. Override to remember it per filter, for example.</summary>
+        protected virtual string StateKey => GetType().Name;
 
         protected abstract void RegisterSections();
 
+        /// <summary>
+        /// Highlights the node whose <see cref="SearchNode.Data"/> equals <paramref name="data"/> once its section is
+        /// built, opening the folders above it and switching to its tab. Null highlights the None row. Call before
+        /// <see cref="Show"/>.
+        /// </summary>
+        protected void PreselectOnOpen(object data) {
+            initialData          = data;
+            isInitialDataPending = true;
+        }
+
+        /// <param name="defaultSize">Size of the first open. Later opens reuse whatever size the window was left at.</param>
         protected void Show(
             Rect btnRect
           , string headerText
           , Action<SearchNode> onItemSelected
+          , Vector2 defaultSize
           , string searchText = "") {
-            Setup(headerText, onItemSelected);
-            Vector2 screenPos = GUIUtility.GUIToScreenRect(btnRect).position;
-            screenPos.y += btnRect.height;
-            position    =  new Rect(screenPos, minSize);
-
-            ShowPopup();
-            Focus();
-
-            if (!string.IsNullOrEmpty(searchText)) {
-                this.searchText = searchText;
-                ExecuteFilterNow();
-            }
-        }
-
-        private void Setup(string headerText, Action<SearchNode> onItemSelected) {
-            this.headerText     = headerText;
             this.onItemSelected = onItemSelected;
+            this.searchText     = searchText ?? string.Empty;
 
             sections.Clear();
-            activeSectionIndex = 0;
-
             RegisterSections();
-            LoadIcons();
-            InitializeStyles();
 
-            wantsMouseMove             =  true;
-            wantsMouseEnterLeaveWindow =  true;
-            EditorApplication.update   += EditorUpdate;
-        }
+            var lastTab = EditorPrefs.GetString(TabPrefKey, null);
+            activeSectionIndex = Math.Max(0, sections.FindIndex(section => section.Label == lastTab));
 
-        private void OnLostFocus() => Close();
-
-        private void OnDestroy() {
-            EditorApplication.update -= EditorUpdate;
-            EditorApplication.update -= UpdateAnimation;
-
-            if (breadcrumbBgTex != null) DestroyImmediate(breadcrumbBgTex);
-            if (breadcrumbHoverTex != null) DestroyImmediate(breadcrumbHoverTex);
-            if (cachedNoneIcon != null) DestroyImmediate(cachedNoneIcon);
+            titleContent = new GUIContent(headerText);
+            minSize      = minWindowSize;
+            position     = PlaceUnderButton(GUIUtility.GUIToScreenRect(btnRect), LoadSize(defaultSize));
+            ShowAuxWindow();
         }
 
         protected void AddSection(string label, Action<SectionBuildContext> builder) {
@@ -125,22 +105,10 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             };
         }
 
-        internal void OnSectionReady(SectionState state) {
-            state.NavigationStack.Clear();
-            if (state.Root != null) {
-                state.NavigationStack.Push(state.Root);
-            }
-
-            RefreshSection(state);
-
-            if (state == ActiveSection) ExecuteFilterNow();
-            Repaint();
-        }
-
         public static SearchNode ConstructNoneNode(string label = "None") {
             if (cachedNoneIcon == null) {
                 cachedNoneIcon = new Texture2D(16, 16) { hideFlags = HideFlags.HideAndDontSave };
-                var pixels                                        = new Color32[16 * 16];
+                var pixels = new Color32[16 * 16];
                 for (int i = 0; i < pixels.Length; i++) pixels[i] = new Color32(0, 0, 0, 0);
 
                 for (int i = 3; i < 13; i++) {
@@ -162,80 +130,198 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             return new SearchNode { Label = label, Icon = cachedNoneIcon };
         }
 
-        #region Search Logic & Navigation
+        // Clicking anywhere else closes it, so a pick never lands on an object the Inspector has stopped showing.
+        // Moving and resizing through the title bar and edges keep the focus.
+        private void OnLostFocus() => Close();
 
-        private void EditorUpdate() {
-            if (isSearchPending && EditorApplication.timeSinceStartup - lastSearchInputTime > SEARCH_DEBOUNCE_DELAY) {
-                isSearchPending = false;
-                ExecuteFilterNow();
-                Repaint();
+        private void OnDestroy() {
+            SaveSize();
+            if (sections.Count > 1 && ActiveSection != null) EditorPrefs.SetString(TabPrefKey, ActiveSection.Label);
+
+            animation?.Pause();
+            if (cachedNoneIcon != null) DestroyImmediate(cachedNoneIcon);
+        }
+
+        #region Placement
+
+        /// <summary>
+        /// Under the button, or above it when there is no room below. Kept inside the main editor window only when the
+        /// button is in it: Unity exposes no bounds for a floating window on another display.
+        /// </summary>
+        private static Rect PlaceUnderButton(Rect button, Vector2 size) {
+            var rect   = new Rect(button.x, button.yMax, size.x, size.y);
+            var bounds = EditorGUIUtility.GetMainWindowPosition();
+            if (!bounds.Contains(button.center)) return rect;
+
+            if (rect.yMax > bounds.yMax && button.y - size.y >= bounds.y) rect.y = button.y - size.y;
+            rect.x = Mathf.Clamp(rect.x, bounds.x, Mathf.Max(bounds.x, bounds.xMax - size.x));
+            return rect;
+        }
+
+        private Vector2 LoadSize(Vector2 defaultSize) {
+            var size = new Vector2(
+                EditorPrefs.GetFloat($"{SizePrefKey}.Width", defaultSize.x),
+                EditorPrefs.GetFloat($"{SizePrefKey}.Height", defaultSize.y));
+
+            return Vector2.Max(size, minWindowSize);
+        }
+
+        private void SaveSize() {
+            if (position.width <= 0f || position.height <= 0f) return;
+
+            EditorPrefs.SetFloat($"{SizePrefKey}.Width", position.width);
+            EditorPrefs.SetFloat($"{SizePrefKey}.Height", position.height);
+        }
+
+        #endregion
+
+        #region Sections
+
+        internal void OnSectionProgress(SectionState state) {
+            if (content == null) return;
+
+            UpdateTabs();
+            if (state == ActiveSection) buildProgressBar.value = state.BuildProgress;
+        }
+
+        internal void OnSectionReady(SectionState state) {
+            state.NavigationStack.Clear();
+            if (state.Root != null) state.NavigationStack.Push(state.Root);
+
+            RefreshSection(state);
+
+            state.PickableCount = 0;
+            foreach (var node in state.AllFlattened) {
+                if (node.Data != null) state.PickableCount++;
             }
-        }
 
-        private void QueueFilter() {
-            lastSearchInputTime = EditorApplication.timeSinceStartup;
-            isSearchPending     = true;
-        }
+            // A real object pulls the window over to its tab. None sits in every tab, so it is highlighted in each and
+            // moves nothing.
+            if (isInitialDataPending && RevealInitialData(state) && initialData != null) {
+                isInitialDataPending = false;
+                if (!userTookOver) activeSectionIndex = sections.IndexOf(state);
+            }
 
-        private void ExecuteFilterNow() {
-            if (ActiveSection == null || ActiveSection.IsBuilding) return;
+            // The window may not have built its UI yet; CreateGUI shows the section then.
+            if (content == null) return;
 
-            ActiveSection.FilteredItems.Clear();
-            if (string.IsNullOrEmpty(searchText)) {
-                isInSearchMode = false;
-                ActiveSection.FilteredItems.AddRange(ActiveSection.CurrentItems);
+            if (state == ActiveSection) {
+                ApplyFilter();
+                RefreshView(restoreScroll: true);
             } else {
-                isInSearchMode = true;
-                foreach (var node in ActiveSection.AllFlattened) {
-                    if (MatchesSearch(node, searchText)) {
-                        ActiveSection.FilteredItems.Add(node);
-                    }
-                }
-
-                if (ActiveSection.FilteredItems.Count > 0 && ActiveSection.SelectedIndex < 0) {
-                    ActiveSection.SelectedIndex = 0;
-                } else if (ActiveSection.SelectedIndex >= ActiveSection.FilteredItems.Count) {
-                    ActiveSection.SelectedIndex = ActiveSection.FilteredItems.Count - 1;
-                }
+                UpdateTabs();
             }
         }
 
-        private bool MatchesSearch(SearchNode item, string search) {
-            if (item == null || item.HasChildren) return false;
+        /// <summary>Opens the folders above the initial value in this section and selects it; false when it is not here.</summary>
+        private bool RevealInitialData(SectionState state) {
+            if (state.Root == null || !string.IsNullOrWhiteSpace(searchText)) return false;
 
-            bool validLabel       = !string.IsNullOrEmpty(item.Label);
-            bool validLabelSearch = !string.IsNullOrEmpty(item.LabelSearch);
-            if (!validLabel && !validLabelSearch) return false;
+            var ancestors = new List<SearchNode>();
+            if (!FindLeaf(state.Root, initialData, ancestors, out var index)) return false;
 
-            // Every term must appear in at least one label the node actually has. Folding the validity
-            // flags into one && chain let an empty label short-circuit the whole test and pass everything.
-            foreach (string term in search.Split(' ', StringSplitOptions.RemoveEmptyEntries)) {
-                bool inLabel       = validLabel       && item.Label.Contains(term, StringComparison.OrdinalIgnoreCase);
-                bool inLabelSearch = validLabelSearch && item.LabelSearch.Contains(term, StringComparison.OrdinalIgnoreCase);
-
-                if (!inLabel && !inLabelSearch) return false;
-            }
-
+            foreach (var ancestor in ancestors) state.NavigationStack.Push(ancestor);
+            RefreshSection(state);
+            state.SelectedIndex = index;
+            state.ScrollOffset  = 0f;
+            state.RevealPending = true;
             return true;
         }
 
-        private void RefreshSection(SectionState s) {
-            s.CurrentItems.Clear();
-            if (s.NavigationStack.Count > 0) {
-                var current = s.NavigationStack.Peek();
-                if (current.Children != null) s.CurrentItems.AddRange(current.Children);
+        private static bool FindLeaf(SearchNode parent, object data, List<SearchNode> ancestors, out int index) {
+            index = -1;
+            var children = parent.Children;
+            if (children == null) return false;
+
+            for (var i = 0; i < children.Count; i++) {
+                var child = children[i];
+                if (child == null) continue;
+
+                if (!child.HasChildren) {
+                    if (data == null ? child.Data == null : Equals(child.Data, data)) {
+                        index = i;
+                        return true;
+                    }
+
+                    continue;
+                }
+
+                // None sits at the top level, so there is nothing to look for inside folders.
+                if (data == null) continue;
+
+                ancestors.Add(child);
+                if (FindLeaf(child, data, ancestors, out index)) return true;
+
+                ancestors.RemoveAt(ancestors.Count - 1);
             }
 
-            s.AllFlattened.Clear();
-            if (s.NavigationStack.Count > 0) FlattenTree(s.NavigationStack.Last(), s.AllFlattened);
+            return false;
         }
 
-        private void FlattenTree(SearchNode node, List<SearchNode> result) {
-            if (node?.Children == null || node.Children.Count == 0) return;
+        private static void RefreshSection(SectionState state) {
+            state.CurrentItems.Clear();
+            if (state.NavigationStack.Count > 0) {
+                var current = state.NavigationStack.Peek();
+                if (current.Children != null) state.CurrentItems.AddRange(current.Children);
+            }
+
+            // A search always covers the whole tree, whatever level is open.
+            state.AllFlattened.Clear();
+            if (state.Root != null) FlattenTree(state.Root, state.AllFlattened);
+        }
+
+        private static void FlattenTree(SearchNode node, List<SearchNode> result) {
+            if (node?.Children == null) return;
+
             foreach (var child in node.Children) {
                 if (child == null) continue;
+
                 result.Add(child);
                 if (child.HasChildren) FlattenTree(child, result);
+            }
+        }
+
+        #endregion
+
+        #region Search and navigation
+
+        private void OnSearchChanged(string text) {
+            searchText   = text ?? string.Empty;
+            userTookOver = true;
+
+            // Start from the top so the best match is the one highlighted.
+            if (ActiveSection != null) ActiveSection.SelectedIndex = -1;
+
+            FinishAnimation();
+            ApplyFilter();
+            RefreshView();
+        }
+
+        private void ApplyFilter() {
+            var section = ActiveSection;
+            if (section == null || section.IsBuilding) return;
+
+            section.FilteredItems.Clear();
+            if (string.IsNullOrWhiteSpace(searchText)) {
+                isInSearchMode = false;
+                section.FilteredItems.AddRange(section.CurrentItems);
+                return;
+            }
+
+            isInSearchMode = true;
+            var terms = searchText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            scoredNodes.Clear();
+            foreach (var node in section.AllFlattened) {
+                if (node.TryScore(terms, out var score)) scoredNodes.Add(new ScoredNode(node, score, scoredNodes.Count));
+            }
+
+            scoredNodes.Sort(ScoredNode.Comparison);
+            foreach (var scored in scoredNodes) section.FilteredItems.Add(scored.Node);
+
+            if (section.FilteredItems.Count > 0 && section.SelectedIndex < 0) {
+                section.SelectedIndex = 0;
+            } else if (section.SelectedIndex >= section.FilteredItems.Count) {
+                section.SelectedIndex = section.FilteredItems.Count - 1;
             }
         }
 
@@ -245,487 +331,512 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         private void NavigateInto(SearchNode item) {
-            if (!item.HasChildren || ActiveSection == null) return;
+            var section = ActiveSection;
+            if (section == null || !item.HasChildren) return;
 
-            SaveCurrentState();
-            StartAnimation(NavAnimDir.Forward);
-
-            ActiveSection.NavigationStack.Push(item);
-            searchText = string.Empty;
-
-            RefreshSection(ActiveSection);
-            RestoreState();
-            ExecuteFilterNow();
+            userTookOver = true;
+            SaveLevelState(section);
+            var previousPage = page;
+            section.NavigationStack.Push(item);
+            OpenLevel(section, previousPage, forward: true);
         }
 
         private void NavigateBack() {
-            if (ActiveSection == null || ActiveSection.NavigationStack.Count <= 1) return;
+            var section = ActiveSection;
+            if (section == null || section.NavigationStack.Count <= 1) return;
 
-            SaveCurrentState();
-            StartAnimation(NavAnimDir.Backward);
+            userTookOver = true;
+            SaveLevelState(section);
+            var previousPage = page;
+            section.NavigationStack.Pop();
+            OpenLevel(section, previousPage, forward: false);
+        }
 
-            ActiveSection.NavigationStack.Pop();
+        private void OpenLevel(SectionState section, Page previousPage, bool forward) {
             searchText = string.Empty;
+            searchField.SetValueWithoutNotify(string.Empty);
 
-            RefreshSection(ActiveSection);
-            RestoreState();
-            ExecuteFilterNow();
+            RefreshSection(section);
+            RestoreLevelState(section);
+            ApplyFilter();
+
+            FinishAnimation();
+            page = CreatePage();
+            content.Add(page.Root);
+            RefreshView(restoreScroll: true);
+            StartAnimation(previousPage, forward);
         }
 
-        private void SaveCurrentState() {
-            if (ActiveSection == null || ActiveSection.NavigationStack.Count == 0) return;
-            var current = ActiveSection.NavigationStack.Peek();
-            if (!ActiveSection.LevelStates.ContainsKey(current)) {
-                ActiveSection.LevelStates[current] = new LevelState();
+        private void SaveLevelState(SectionState section) {
+            if (section.NavigationStack.Count == 0) return;
+
+            var current = section.NavigationStack.Peek();
+            if (!section.LevelStates.TryGetValue(current, out var state)) {
+                state                        = new LevelState();
+                section.LevelStates[current] = state;
             }
 
-            ActiveSection.LevelStates[current].ScrollPosition = ActiveSection.ScrollPosition;
-            ActiveSection.LevelStates[current].SelectedIndex  = ActiveSection.SelectedIndex;
+            state.ScrollOffset  = page.List.Q<ScrollView>().scrollOffset.y;
+            state.SelectedIndex = section.SelectedIndex;
         }
 
-        private void RestoreState() {
-            if (ActiveSection == null || ActiveSection.NavigationStack.Count == 0) return;
-            var current = ActiveSection.NavigationStack.Peek();
-            if (ActiveSection.LevelStates.TryGetValue(current, out var state)) {
-                ActiveSection.ScrollPosition = state.ScrollPosition;
-                ActiveSection.SelectedIndex  = state.SelectedIndex;
+        private static void RestoreLevelState(SectionState section) {
+            var current = section.NavigationStack.Peek();
+            if (section.LevelStates.TryGetValue(current, out var state)) {
+                section.ScrollOffset  = state.ScrollOffset;
+                section.SelectedIndex = state.SelectedIndex;
             } else {
-                ActiveSection.ScrollPosition = Vector2.zero;
-                ActiveSection.SelectedIndex  = -1;
+                section.ScrollOffset  = 0f;
+                section.SelectedIndex = -1;
             }
+        }
+
+        private void SwitchSection(int index) {
+            if (index == activeSectionIndex || sections[index].IsBuilding) return;
+
+            userTookOver = true;
+            FinishAnimation();
+            if (ActiveSection != null) ActiveSection.ScrollOffset = page.List.Q<ScrollView>().scrollOffset.y;
+
+            activeSectionIndex = index;
+            ApplyFilter();
+            RefreshView(restoreScroll: true);
+        }
+
+        private bool TryGetSelected(out SearchNode item) {
+            var index = page.SelectedIndex;
+            item = index >= 0 && index < page.Items.Count ? page.Items[index] : null;
+            return item != null;
+        }
+
+        private void Select(int index, bool scrollTo) {
+            var previous = page.SelectedIndex;
+            page.SelectedIndex = index;
+            if (ActiveSection != null) ActiveSection.SelectedIndex = index;
+
+            if (previous != index && previous >= 0 && previous < page.Items.Count) page.List.RefreshItem(previous);
+            if (index < 0 || index >= page.Items.Count) return;
+
+            page.List.RefreshItem(index);
+            if (scrollTo) page.List.ScrollToItem(index);
         }
 
         #endregion
 
-        #region GUI Rendering & Animation
+        #region UI
 
-        private void InitializeStyles() {
-            if (headerStyle != null) return;
-
-            headerStyle = new GUIStyle(EditorStyles.label) {
-                alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold, richText = true, fixedHeight = HEADER_HEIGHT
-            };
-
-            breadcrumbBgTex    = CreateColorTexture(new Color(0.3f, 0.3f, 0.3f, 0.3f));
-            breadcrumbHoverTex = CreateColorTexture(new Color(0.4f, 0.4f, 0.4f, 0.4f));
-
-            breadcrumbStyle = new GUIStyle(EditorStyles.label) {
-                alignment = TextAnchor.MiddleCenter, richText = true, fontStyle = FontStyle.Bold, normal = { background = breadcrumbBgTex, textColor = EditorGUIUtility.isProSkin ? new Color(0.8f, 0.8f, 0.8f) : new Color(0.2f, 0.2f, 0.2f) }, hover = { background = breadcrumbHoverTex }, padding = new RectOffset(4, 4, 2, 2), margin = new RectOffset(0, 0, 0, 0)
-            };
-
-            itemStyle         = new GUIStyle(EditorStyles.label) { richText = true };
-            itemSelectedStyle = new GUIStyle(itemStyle);
-            searchFieldStyle  = new GUIStyle(EditorStyles.toolbarSearchField) { alignment = TextAnchor.MiddleLeft };
-        }
-
-        private void LoadIcons() {
-            backIcon = EditorGUIUtility.IconContent("back").image as Texture2D
-             ?? EditorGUIUtility.IconContent("TreeEditor.Trash").image as Texture2D;
-        }
-
-        private Texture2D CreateColorTexture(Color color) {
-            var tex = new Texture2D(1, 1) { hideFlags = HideFlags.HideAndDontSave };
-            tex.SetPixel(0, 0, color);
-            tex.Apply();
-            return tex;
-        }
-
-        private void StartAnimation(NavAnimDir direction) {
-            if (ActiveSection == null || ActiveSection.NavigationStack.Count == 0) return;
-
-            isAnimating        = true;
-            animationDirection = direction;
-            animationProgress  = 0f;
-            animationStartTime = (float)EditorApplication.timeSinceStartup;
-
-            previousItems          = new List<SearchNode>(ActiveSection.FilteredItems);
-            previousScrollPosition = ActiveSection.ScrollPosition;
-            previousSelectedIndex  = ActiveSection.SelectedIndex;
-
-            var currentNode = ActiveSection.NavigationStack.Peek();
-            previousBreadcrumbText = currentNode.Label ?? string.Empty;
-            previousHasBreadcrumb  = ActiveSection.NavigationStack.Count > 1;
-
-            EditorApplication.update -= UpdateAnimation;
-            EditorApplication.update += UpdateAnimation;
-        }
-
-        private void UpdateAnimation() {
-            if (!isAnimating) {
-                EditorApplication.update -= UpdateAnimation;
+        private void CreateGUI() {
+            // A domain reload recreates the window without its callback, so there is nothing to pick for.
+            if (onItemSelected == null) {
+                Close();
                 return;
             }
 
-            float elapsed = (float)EditorApplication.timeSinceStartup - animationStartTime;
-            animationProgress = Mathf.Clamp01(elapsed / ANIMATION_DURATION);
+            var root = rootVisualElement;
+            root.AddToClassList(Uss.Root);
 
-            if (animationProgress >= 1f) {
-                isAnimating              =  false;
-                EditorApplication.update -= UpdateAnimation;
-            }
+            var styleSheet = LoadStyleSheet();
+            if (styleSheet != null) root.styleSheets.Add(styleSheet);
 
-            Repaint();
+            searchField = new ToolbarSearchField();
+            searchField.AddToClassList(Uss.Search);
+            searchField.SetValueWithoutNotify(searchText);
+            searchField.RegisterValueChangedCallback(evt => OnSearchChanged(evt.newValue));
+            root.Add(searchField);
+
+            if (sections.Count > 1) root.Add(CreateTabBar());
+
+            content = new VisualElement();
+            content.AddToClassList(Uss.Content);
+            root.Add(content);
+
+            buildProgressBar = new ProgressBar { title = "Building...", lowValue = 0f, highValue = 1f };
+            buildProgressBar.AddToClassList(Uss.BuildProgress);
+            content.Add(buildProgressBar);
+
+            page = CreatePage();
+            content.Add(page.Root);
+
+            root.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
+            root.RegisterCallback<NavigationMoveEvent>(IgnoreNavigation, TrickleDown.TrickleDown);
+            root.RegisterCallback<NavigationSubmitEvent>(IgnoreNavigation, TrickleDown.TrickleDown);
+            root.RegisterCallback<NavigationCancelEvent>(IgnoreNavigation, TrickleDown.TrickleDown);
+            root.RegisterCallback<PointerUpEvent>(_ => FocusSearchField());
+            root.RegisterCallback<PointerMoveEvent>(evt => {
+                lastPointerPosition = evt.position;
+                isPointerInside     = true;
+            }, TrickleDown.TrickleDown);
+            root.RegisterCallback<PointerLeaveEvent>(_ => isPointerInside = false);
+
+            ApplyFilter();
+            RefreshView(restoreScroll: true);
+            FocusSearchField();
         }
 
-        private float EaseOutCubic(float t) => 1f - Mathf.Pow(1f - t, 3f);
+        /// <summary>
+        /// The stylesheet sits next to this script. It is found through this assembly's asmdef rather than a fixed
+        /// "Packages/..." path, so it still loads when the package is renamed or embedded under Assets.
+        /// </summary>
+        private static StyleSheet LoadStyleSheet() {
+            if (cachedStyleSheet != null) return cachedStyleSheet;
 
-        private void OnGUI() {
-            if (headerStyle == null) InitializeStyles();
+            var assemblyName = typeof(SearchWindow).Assembly.GetName().Name;
+            var asmdefPath   = CompilationPipeline.GetAssemblyDefinitionFilePathFromAssemblyName(assemblyName);
+            if (string.IsNullOrEmpty(asmdefPath)) return null;
 
-            if (!isAnimating) {
-                HandleKeyboardInput();
-                HandleMouseSelection();
-            }
+            var path = $"{Path.GetDirectoryName(asmdefPath)?.Replace('\\', '/')}/{StyleSheetPath}";
+            cachedStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(path);
+            if (cachedStyleSheet == null) Debug.LogWarning($"[{nameof(SearchWindow)}] No stylesheet at {path}");
 
-            DrawBorder();
-
-            var contentRect = new Rect(BORDER_WIDTH, BORDER_WIDTH, position.width - BORDER_WIDTH * 2, position.height - BORDER_WIDTH * 2);
-            GUILayout.BeginArea(contentRect);
-
-            DrawHeader();
-            DrawSearchBar();
-            DrawTabBar();
-
-            if (isAnimating) DrawBreadcrumbAndListAnimated();
-            else {
-                DrawBreadcrumb();
-                DrawItemList();
-            }
-
-            GUILayout.EndArea();
-            if (Event.current.type == EventType.MouseMove) Repaint();
+            return cachedStyleSheet;
         }
 
-        private void DrawBorder() {
-            EditorGUI.DrawRect(new Rect(0, 0, position.width, BORDER_WIDTH), Color.black);
-            EditorGUI.DrawRect(new Rect(0, position.height - BORDER_WIDTH, position.width, BORDER_WIDTH), Color.black);
-            EditorGUI.DrawRect(new Rect(0, 0, BORDER_WIDTH, position.height), Color.black);
-            EditorGUI.DrawRect(new Rect(position.width - BORDER_WIDTH, 0, BORDER_WIDTH, position.height), Color.black);
-        }
+        private VisualElement CreateTabBar() {
+            var bar = new Toolbar();
+            bar.AddToClassList(Uss.TabBar);
 
-        private void DrawHeader() {
-            var headerRect = GUILayoutUtility.GetRect(0, HEADER_HEIGHT, GUILayout.ExpandWidth(true));
-            int controlID  = GUIUtility.GetControlID(FocusType.Passive);
-            var evt        = Event.current;
+            for (var i = 0; i < sections.Count; i++) {
+                var index = i;
+                var tab   = new ToolbarToggle();
+                tab.AddToClassList(Uss.Tab);
+                tab.RegisterValueChangedCallback(evt => {
+                    if (evt.newValue) SwitchSection(index);
+                    tab.SetValueWithoutNotify(index == activeSectionIndex);
+                });
 
-            switch (evt.GetTypeForControl(controlID)) {
-                case EventType.MouseDown:
-                    if (headerRect.Contains(evt.mousePosition)) {
-                        isDragging            = true;
-                        dragOffset            = evt.mousePosition;
-                        GUIUtility.hotControl = controlID;
-                        evt.Use();
-                    }
+                var progress = new VisualElement { pickingMode = PickingMode.Ignore };
+                progress.AddToClassList(Uss.TabProgress);
+                tab.Add(progress);
 
-                    break;
-                case EventType.MouseDrag:
-                    if (isDragging && GUIUtility.hotControl == controlID) {
-                        var np = GUIUtility.GUIToScreenPoint(evt.mousePosition) - dragOffset;
-                        position = new Rect(np.x, np.y, position.width, position.height);
-                        evt.Use();
-                    }
-
-                    break;
-                case EventType.MouseUp:
-                    if (GUIUtility.hotControl == controlID) {
-                        isDragging            = false;
-                        GUIUtility.hotControl = 0;
-                        evt.Use();
-                    }
-
-                    break;
+                tabs.Add(tab);
+                tabProgressBars.Add(progress);
+                bar.Add(tab);
             }
 
-            GUI.Box(headerRect, headerText, headerStyle);
+            return bar;
         }
 
-        private void DrawSearchBar() {
-            EditorGUI.BeginChangeCheck();
-            var searchRect = GUILayoutUtility.GetRect(0, SEARCH_HEIGHT, GUILayout.ExpandWidth(true));
-            searchRect.x     += 3;
-            searchRect.width -= 4;
+        private void UpdateTabs() {
+            for (var i = 0; i < tabs.Count; i++) {
+                var section = sections[i];
+                tabs[i].text = section.IsBuilding
+                    ? $"{section.Label}  {section.BuildProgress:P0}"
+                    : $"{section.Label} ({section.PickableCount})";
+                tabs[i].SetValueWithoutNotify(i == activeSectionIndex);
+                tabs[i].SetEnabled(!section.IsBuilding);
 
-            // Explicitly set the mouse cursor to the text I-beam when hovering over this rect
-            EditorGUIUtility.AddCursorRect(searchRect, MouseCursor.Text);
-
-            GUI.SetNextControlName("SearchField");
-            searchText = GUI.TextField(searchRect, searchText, searchFieldStyle);
-
-            if (EditorGUI.EndChangeCheck() && searchText != lastSearchText) {
-                QueueFilter();
-                lastSearchText = searchText;
-            }
-
-            if (Event.current.type == EventType.Repaint && string.IsNullOrEmpty(GUI.GetNameOfFocusedControl())) {
-                EditorGUI.FocusTextInControl("SearchField");
+                tabProgressBars[i].style.display = section.IsBuilding ? DisplayStyle.Flex : DisplayStyle.None;
+                tabProgressBars[i].style.width   = Length.Percent(section.BuildProgress * 100f);
             }
         }
 
-        private void DrawTabBar() {
-            if (sections.Count <= 1) return;
-            GUILayout.BeginHorizontal(EditorStyles.toolbar, GUILayout.Height(TAB_BAR_HEIGHT));
-            for (int i = 0; i < sections.Count; i++) {
-                var  s          = sections[i];
-                bool isBuilding = s.IsBuilding;
+        /// <param name="restoreScroll">
+        /// True when the list shows another level or tab, so it goes back to where that one was scrolled. Typing keeps
+        /// the current scroll and only brings the selected row into view.
+        /// </param>
+        private void RefreshView(bool restoreScroll = false) {
+            if (content == null) return;
 
-                using (new EditorGUI.DisabledScope(isBuilding)) {
-                    // Count nodes that actually have data (ignoring group headers and the "None" node)
-                    int candidateCount = s.AllFlattened.Count(n => n.Data != null);
+            UpdateTabs();
 
-                    // Append the count to the label if it's done building
-                    string label    = isBuilding ? $"{s.Label}  {s.BuildProgress:P0}" : $"{s.Label} ({candidateCount})";
-                    bool   isActive = (i == activeSectionIndex);
-
-                    if (GUILayout.Toggle(isActive, label, EditorStyles.toolbarButton)) {
-                        if (!isActive && !isBuilding) {
-                            activeSectionIndex       =  i;
-                            isAnimating              =  false;
-                            EditorApplication.update -= UpdateAnimation;
-                            ExecuteFilterNow();
-                            Repaint();
-                        }
-                    }
-                }
-
-                // Draw the building progress bar under the tab if it's still loading
-                if (isBuilding) {
-                    var rect         = GUILayoutUtility.GetLastRect();
-                    var progressRect = new Rect(rect.x, rect.yMax - 2, rect.width * s.BuildProgress, 2);
-                    EditorGUI.DrawRect(progressRect, new Color(0.3f, 0.7f, 1f));
-                }
+            var section    = ActiveSection;
+            var isBuilding = section == null || section.IsBuilding;
+            buildProgressBar.style.display = isBuilding ? DisplayStyle.Flex : DisplayStyle.None;
+            page.Root.style.display        = isBuilding ? DisplayStyle.None : DisplayStyle.Flex;
+            if (isBuilding) {
+                buildProgressBar.value = section?.BuildProgress ?? 0f;
+                return;
             }
 
-            GUILayout.EndHorizontal();
+            page.IsInSearchMode = isInSearchMode;
+            page.SelectedIndex  = section.SelectedIndex;
+            page.Items.Clear();
+            page.Items.AddRange(section.FilteredItems);
+
+            var hasBreadcrumb = section.NavigationStack.Count > 1;
+            page.Breadcrumb.style.display = hasBreadcrumb ? DisplayStyle.Flex : DisplayStyle.None;
+            page.BreadcrumbLabel.text     = hasBreadcrumb ? section.NavigationStack.Peek().Label ?? string.Empty : string.Empty;
+
+            page.List.RefreshItems();
+
+            // Search results and a value revealed on open both bring the selected row into view.
+            var scrollToSelection = isInSearchMode || section.RevealPending;
+            section.RevealPending = false;
+
+            // The scroll view clamps offsets until it has a size, so both run after the next layout.
+            var scrollOffset = section.ScrollOffset;
+            var boundPage    = page;
+            page.List.schedule.Execute(() => {
+                if (restoreScroll) boundPage.List.Q<ScrollView>().scrollOffset = new Vector2(0f, scrollOffset);
+                if (scrollToSelection && boundPage.SelectedIndex >= 0) boundPage.List.ScrollToItem(boundPage.SelectedIndex);
+            });
         }
 
-        private void DrawBreadcrumb() {
-            if (ActiveSection == null || ActiveSection.NavigationStack.Count <= 1) return;
-            var bRect = GUILayoutUtility.GetRect(0, BREADCRUMB_HEIGHT, GUILayout.ExpandWidth(true));
-            if (GUI.Button(bRect, new GUIContent(ActiveSection.NavigationStack.Peek().Label ?? "", backIcon), breadcrumbStyle)) {
+        private Page CreatePage() {
+            var newPage = new Page { Root = new VisualElement() };
+            newPage.Root.AddToClassList(Uss.Page);
+
+            newPage.Breadcrumb = new VisualElement();
+            newPage.Breadcrumb.AddToClassList(Uss.Breadcrumb);
+            newPage.Breadcrumb.RegisterCallback<PointerDownEvent>(evt => {
+                if (evt.button != 0 || isAnimating || newPage != page) return;
+
+                evt.StopPropagation();
                 NavigateBack();
+            });
+
+            var backIcon = new Image {
+                image       = EditorGUIUtility.IconContent("back").image,
+                scaleMode   = ScaleMode.ScaleToFit,
+                pickingMode = PickingMode.Ignore
+            };
+            backIcon.AddToClassList(Uss.BreadcrumbIcon);
+            newPage.Breadcrumb.Add(backIcon);
+
+            newPage.BreadcrumbLabel = new Label { pickingMode = PickingMode.Ignore };
+            newPage.BreadcrumbLabel.AddToClassList(Uss.BreadcrumbLabel);
+            newPage.Breadcrumb.Add(newPage.BreadcrumbLabel);
+            newPage.Root.Add(newPage.Breadcrumb);
+
+            newPage.List = new ListView {
+                itemsSource                = newPage.Items,
+                fixedItemHeight            = ItemHeight,
+                virtualizationMethod       = CollectionVirtualizationMethod.FixedHeight,
+                selectionType              = SelectionType.None,
+                horizontalScrollingEnabled = false,
+                focusable                  = false,
+                makeItem                   = () => MakeRow(newPage),
+                bindItem                   = (row, index) => BindRow(newPage, row, index)
+            };
+            newPage.List.AddToClassList(Uss.List);
+
+            // The wheel moves the rows but not the pointer, so no move event follows; pick the new row once it is laid out.
+            // Trickle down: the inner ScrollView stops the wheel event after scrolling, so it never bubbles up to here.
+            newPage.List.RegisterCallback<WheelEvent>(_ => newPage.List.schedule.Execute(SelectRowUnderPointer), TrickleDown.TrickleDown);
+            newPage.Root.Add(newPage.List);
+
+            return newPage;
+        }
+
+        private VisualElement MakeRow(Page owner) {
+            var row = new VisualElement();
+            row.AddToClassList(Uss.Row);
+
+            var icon = new Image { scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
+            icon.AddToClassList(Uss.RowIcon);
+            row.Add(icon);
+
+            var label = new Label { enableRichText = true, pickingMode = PickingMode.Ignore };
+            label.AddToClassList(Uss.RowLabel);
+            row.Add(label);
+
+            var arrow = new Label("►") { pickingMode = PickingMode.Ignore };
+            arrow.AddToClassList(Uss.RowArrow);
+            row.Add(arrow);
+
+            // The highlight follows the mouse, like Unity's Add Component popup.
+            row.RegisterCallback<PointerMoveEvent>(_ => {
+                if (isAnimating || owner != page || row.userData is not int index || index == page.SelectedIndex) return;
+
+                Select(index, scrollTo: false);
+            });
+
+            row.RegisterCallback<PointerDownEvent>(evt => {
+                if (evt.button != 0 || isAnimating || owner != page) return;
+                if (row.userData is not int index || index >= page.Items.Count) return;
+
+                evt.StopPropagation();
+                Select(index, scrollTo: false);
+
+                var item = page.Items[index];
+                if (evt.clickCount == 2 || !item.HasChildren || isInSearchMode) SelectItem(item);
+                else NavigateInto(item);
+            });
+
+            return row;
+        }
+
+        /// <summary>Moves the highlight to the row under the pointer, so it keeps covering the list's own hover shade.</summary>
+        private void SelectRowUnderPointer() {
+            if (!isPointerInside || isAnimating || rootVisualElement.panel == null) return;
+
+            for (var element = rootVisualElement.panel.Pick(lastPointerPosition); element != null; element = element.parent) {
+                if (!element.ClassListContains(Uss.Row)) continue;
+
+                if (page.List.Contains(element) && element.userData is int index && index != page.SelectedIndex) {
+                    Select(index, scrollTo: false);
+                }
+
+                return;
             }
         }
 
-        private void DrawItemList() {
-            if (ActiveSection == null) return;
+        private static void BindRow(Page owner, VisualElement row, int index) {
+            var item = owner.Items[index];
+            row.userData = index;
+            row.tooltip  = item.PlainLabel;
+            row.EnableInClassList(Uss.SelectedRow, index == owner.SelectedIndex);
 
-            float tabBarHeightOffset     = sections.Count > 1 ? TAB_BAR_HEIGHT : 0;
-            float breadcrumbHeightOffset = ActiveSection.NavigationStack.Count > 1 ? BREADCRUMB_HEIGHT : 0;
+            ((Image)row[0]).image = item.Icon;
+            ((Label)row[1]).text = owner.IsInSearchMode && !string.IsNullOrEmpty(item.LabelSearch)
+                ? item.LabelSearch
+                : item.Label ?? string.Empty;
+            row[2].style.display = !owner.IsInSearchMode && item.HasChildren ? DisplayStyle.Flex : DisplayStyle.None;
+        }
 
-            var listRect = GUILayoutUtility.GetRect(
-                0, position.height - HEADER_HEIGHT - SEARCH_HEIGHT - tabBarHeightOffset - breadcrumbHeightOffset - BORDER_WIDTH * 2 - 10,
-                GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true)
-            );
-
-            if (ActiveSection.IsBuilding) {
-                var barRect = new Rect(listRect.x + 20, listRect.y + listRect.height / 2 - 10, listRect.width - 40, 20);
-                EditorGUI.ProgressBar(barRect, ActiveSection.BuildProgress, "Building...");
-                Repaint();
+        private void OnKeyDown(KeyDownEvent evt) {
+            if (evt.keyCode is KeyCode.Escape) {
+                Consume(evt);
+                Close();
                 return;
             }
 
-            ActiveSection.ScrollPosition = GUI.BeginScrollView(listRect, ActiveSection.ScrollPosition, new Rect(0, 0, listRect.width - 20, ActiveSection.FilteredItems.Count * ITEM_HEIGHT));
-
-            for (int i = 0; i < ActiveSection.FilteredItems.Count; i++) {
-                DrawItem(i, ActiveSection.FilteredItems[i], 0f, ActiveSection.SelectedIndex, false);
+            var section = ActiveSection;
+            if (isAnimating || section == null || section.IsBuilding) {
+                if (evt.keyCode is KeyCode.UpArrow or KeyCode.DownArrow or KeyCode.Return or KeyCode.KeypadEnter) Consume(evt);
+                return;
             }
 
-            GUI.EndScrollView();
-        }
-
-        private void DrawItem(int index, SearchNode item, float xOffset, int selectedIdx, bool isInAnimation) {
-            if (item == null || ActiveSection == null) return;
-
-            var  itemRect   = new Rect(xOffset, index * ITEM_HEIGHT, position.width - BORDER_WIDTH * 2 - SCROLLBAR_WIDTH, ITEM_HEIGHT);
-            bool isSelected = (index == selectedIdx);
-
-            if (isSelected) {
-                EditorGUI.DrawRect(itemRect, EditorGUIUtility.isProSkin ? darkSelectionColor : lightSelectionColor);
-            }
-
-            if (!string.IsNullOrEmpty(item.Label)) {
-                GUI.Label(itemRect, new GUIContent(string.Empty, item.Label));
-            }
-
-            var iconRect = new Rect(itemRect.x, itemRect.y + (ITEM_HEIGHT - ICON_WIDTH) / 2, ICON_WIDTH, ICON_WIDTH);
-            if (item.Icon != null) GUI.DrawTexture(iconRect, item.Icon);
-
-            var    labelRect    = new Rect(itemRect.x + iconRect.width + 2, itemRect.y, itemRect.width - iconRect.width - 2, itemRect.height);
-            string displayLabel = isInSearchMode && !string.IsNullOrEmpty(item.LabelSearch) ? item.LabelSearch : item.Label ?? string.Empty;
-            GUI.Label(labelRect, displayLabel, isSelected ? itemSelectedStyle : itemStyle);
-
-            if (!isInSearchMode && item.HasChildren) {
-                GUI.Label(new Rect(itemRect.xMax - 14, itemRect.y, 14, itemRect.height), "►");
-            }
-
-            if (!isInAnimation && Event.current.type == EventType.MouseDown && itemRect.Contains(Event.current.mousePosition)) {
-                ActiveSection.SelectedIndex = index;
-                if (Event.current.clickCount == 2 || !item.HasChildren || isInSearchMode) {
-                    SelectItem(item);
-                    Event.current.Use();
-                } else {
-                    NavigateInto(item);
-                    Event.current.Use();
-                }
-            }
-        }
-
-        private void DrawBreadcrumbAndListAnimated() {
-            if (ActiveSection == null || ActiveSection.NavigationStack.Count == 0) return;
-
-            float progress   = EaseOutCubic(animationProgress);
-            float totalWidth = position.width - BORDER_WIDTH * 2;
-            float curOff, prevOff;
-
-            if (animationDirection == NavAnimDir.Forward) {
-                curOff  = totalWidth * (1f - progress);
-                prevOff = -totalWidth * progress;
-            } else {
-                curOff  = -totalWidth * (1f - progress);
-                prevOff = totalWidth * progress;
-            }
-
-            float tabBarHeightOffset = sections.Count > 1 ? TAB_BAR_HEIGHT : 0;
-            float remainH            = position.height - BORDER_WIDTH * 2 - HEADER_HEIGHT - SEARCH_HEIGHT - tabBarHeightOffset;
-            var   animRect           = GUILayoutUtility.GetRect(0, remainH, GUILayout.ExpandWidth(true));
-
-            GUI.BeginGroup(animRect);
-            GUI.BeginClip(new Rect(0, 0, animRect.width, animRect.height));
-
-            DrawBreadcrumbAndListPanel(prevOff, 0, totalWidth, animRect.height, previousBreadcrumbText, previousHasBreadcrumb, previousItems, previousScrollPosition, previousSelectedIndex, true);
-
-            var curNode = ActiveSection.NavigationStack.Peek();
-            DrawBreadcrumbAndListPanel(curOff, 0, totalWidth, animRect.height, curNode.Label ?? "", ActiveSection.NavigationStack.Count > 1, ActiveSection.FilteredItems, ActiveSection.ScrollPosition, ActiveSection.SelectedIndex, true);
-
-            GUI.EndClip();
-            GUI.EndGroup();
-        }
-
-        private void DrawBreadcrumbAndListPanel(float x, float y, float width, float height, string breadcrumbText, bool hasBreadcrumb, List<SearchNode> items, Vector2 scroll, int selectedIdx, bool isInAnimation = false) {
-            GUI.BeginGroup(new Rect(x, y, width, height));
-            float curY = 0f;
-
-            if (hasBreadcrumb) {
-                var bRect = new Rect(0, curY, width, BREADCRUMB_HEIGHT);
-                EditorGUI.DrawRect(bRect, new Color(0.3f, 0.3f, 0.3f, 0.3f));
-                GUI.Label(bRect, new GUIContent(breadcrumbText ?? "", backIcon), breadcrumbStyle);
-                curY += BREADCRUMB_HEIGHT;
-            }
-
-            float cw         = width - SCROLLBAR_WIDTH;
-            float ch         = items.Count * ITEM_HEIGHT;
-            float viewHeight = height - curY;
-
-            GUI.BeginGroup(new Rect(0, curY, width, viewHeight));
-            GUI.BeginGroup(new Rect(0, 0, cw, viewHeight));
-            GUI.BeginGroup(new Rect(0, -scroll.y, cw, ch));
-
-            for (int i = 0; i < items.Count; i++) DrawItem(i, items[i], 0f, selectedIdx, isInAnimation);
-
-            GUI.EndGroup();
-            GUI.EndGroup();
-
-            if (ch > viewHeight) GUI.VerticalScrollbar(new Rect(cw, 0, SCROLLBAR_WIDTH, viewHeight), scroll.y, viewHeight, 0, ch);
-            GUI.EndGroup();
-            GUI.EndGroup();
-        }
-
-        private void HandleMouseSelection() {
-            if (Event.current.type != EventType.MouseMove || ActiveSection == null || ActiveSection.IsBuilding) return;
-
-            var   mousePos           = Event.current.mousePosition;
-            float tabBarHeightOffset = sections.Count > 1 ? TAB_BAR_HEIGHT : 0;
-            float breadcrumbOffset   = ActiveSection.NavigationStack.Count > 1 ? BREADCRUMB_HEIGHT + 2 : 0;
-            float listStartY         = BORDER_WIDTH + HEADER_HEIGHT + SEARCH_HEIGHT + tabBarHeightOffset + 2 + breadcrumbOffset;
-            float listStopX          = position.width - BORDER_WIDTH - SCROLLBAR_WIDTH;
-
-            if (mousePos.y < listStartY || mousePos.x > listStopX) return;
-
-            float relativeY = mousePos.y - listStartY + ActiveSection.ScrollPosition.y;
-            int   newIndex  = Mathf.FloorToInt(relativeY / ITEM_HEIGHT);
-
-            if (newIndex >= 0 && newIndex < ActiveSection.FilteredItems.Count && ActiveSection.SelectedIndex != newIndex) {
-                ActiveSection.SelectedIndex = newIndex;
-                Repaint();
-            }
-        }
-
-        private void HandleKeyboardInput() {
-            if (Event.current.type != EventType.KeyDown || ActiveSection == null || ActiveSection.IsBuilding) return;
-
-            switch (Event.current.keyCode) {
-                case KeyCode.Escape:
-                    Close();
-                    Event.current.Use();
-                    break;
+            switch (evt.keyCode) {
                 case KeyCode.UpArrow:
-                    if (ActiveSection.FilteredItems.Count > 0) {
-                        ActiveSection.SelectedIndex = ActiveSection.SelectedIndex <= 0 ? ActiveSection.FilteredItems.Count - 1 : ActiveSection.SelectedIndex - 1;
-                        ScrollToSelected();
-                        GUI.FocusControl(null);
-                    }
-
-                    Event.current.Use();
-                    Repaint();
+                    userTookOver = true;
+                    if (page.Items.Count > 0) Select(page.SelectedIndex <= 0 ? page.Items.Count - 1 : page.SelectedIndex - 1, scrollTo: true);
+                    Consume(evt);
                     break;
                 case KeyCode.DownArrow:
-                    if (ActiveSection.FilteredItems.Count > 0) {
-                        ActiveSection.SelectedIndex = ActiveSection.SelectedIndex < 0 || ActiveSection.SelectedIndex >= ActiveSection.FilteredItems.Count - 1 ? 0 : ActiveSection.SelectedIndex + 1;
-                        ScrollToSelected();
-                        GUI.FocusControl(null);
-                    }
-
-                    Event.current.Use();
-                    Repaint();
+                    userTookOver = true;
+                    if (page.Items.Count > 0) Select(page.SelectedIndex < 0 || page.SelectedIndex >= page.Items.Count - 1 ? 0 : page.SelectedIndex + 1, scrollTo: true);
+                    Consume(evt);
                     break;
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
-                    if (ActiveSection.SelectedIndex >= 0 && ActiveSection.SelectedIndex < ActiveSection.FilteredItems.Count) {
-                        var item = ActiveSection.FilteredItems[ActiveSection.SelectedIndex];
-                        if (item.HasChildren && !isInSearchMode) NavigateInto(item);
-                        else SelectItem(item);
-                    }
+                    Consume(evt);
+                    if (!TryGetSelected(out var chosen)) break;
 
-                    Event.current.Use();
+                    if (chosen.HasChildren && !isInSearchMode) NavigateInto(chosen);
+                    else SelectItem(chosen);
                     break;
                 case KeyCode.Backspace:
                 case KeyCode.LeftArrow:
-                    if (string.IsNullOrEmpty(searchText)) {
-                        NavigateBack();
-                        Event.current.Use();
-                    }
+                    if (!string.IsNullOrEmpty(searchText)) break;
 
+                    Consume(evt);
+                    NavigateBack();
                     break;
                 case KeyCode.RightArrow:
-                    if (ActiveSection.SelectedIndex >= 0 && ActiveSection.SelectedIndex < ActiveSection.FilteredItems.Count) {
-                        var item = ActiveSection.FilteredItems[ActiveSection.SelectedIndex];
-                        if (item.HasChildren && !isInSearchMode) {
-                            NavigateInto(item);
-                            Event.current.Use();
-                        }
-                    }
+                    if (!string.IsNullOrEmpty(searchText) || !TryGetSelected(out var folder) || !folder.HasChildren) break;
 
+                    Consume(evt);
+                    NavigateInto(folder);
                     break;
             }
         }
 
-        private void ScrollToSelected() {
-            if (ActiveSection == null || ActiveSection.SelectedIndex < 0) return;
+        private void Consume(EventBase evt) {
+            evt.StopImmediatePropagation();
+            rootVisualElement.focusController?.IgnoreEvent(evt);
+        }
 
-            float itemY              = ActiveSection.SelectedIndex * ITEM_HEIGHT;
-            float tabBarHeightOffset = sections.Count > 1 ? TAB_BAR_HEIGHT : 0;
-            float breadcrumbOffset   = ActiveSection.NavigationStack.Count > 1 ? BREADCRUMB_HEIGHT : 0;
-            float viewHeight         = position.height - HEADER_HEIGHT - SEARCH_HEIGHT - tabBarHeightOffset - breadcrumbOffset - BORDER_WIDTH * 2 - 10;
+        /// <summary>Keeps arrow keys and Enter from moving focus out of the search field.</summary>
+        private void IgnoreNavigation(EventBase evt) => Consume(evt);
 
-            Vector2 currentScrollPos = ActiveSection.ScrollPosition;
+        private void FocusSearchField() {
+            rootVisualElement.schedule.Execute(() => searchField?.Q<TextField>()?.Focus());
+        }
 
-            if (itemY < currentScrollPos.y) {
-                currentScrollPos.y = itemY;
-            } else if (itemY + ITEM_HEIGHT > currentScrollPos.y + viewHeight) {
-                currentScrollPos.y = itemY + ITEM_HEIGHT - viewHeight;
+        private void StartAnimation(Page previousPage, bool forward) {
+            isAnimating  = true;
+            outgoingPage = previousPage;
+
+            var start     = EditorApplication.timeSinceStartup;
+            var direction = forward ? 1f : -1f;
+            SetHorizontalOffset(page.Root, direction * 100f);
+
+            animation = rootVisualElement.schedule.Execute(() => {
+                if (!isAnimating) return;
+
+                var progress = Mathf.Clamp01((float)((EditorApplication.timeSinceStartup - start) / AnimationDuration));
+                var eased    = 1f - Mathf.Pow(1f - progress, 3f);
+
+                SetHorizontalOffset(page.Root, direction * 100f * (1f - eased));
+                SetHorizontalOffset(outgoingPage.Root, -direction * 100f * eased);
+
+                if (progress >= 1f) FinishAnimation();
+            }).Every(10);
+        }
+
+        private void FinishAnimation() {
+            if (!isAnimating) return;
+
+            animation?.Pause();
+            animation = null;
+            outgoingPage?.Root.RemoveFromHierarchy();
+            outgoingPage = null;
+            SetHorizontalOffset(page.Root, 0f);
+            isAnimating = false;
+        }
+
+        private static void SetHorizontalOffset(VisualElement element, float percent) {
+            element.style.translate = new Translate(Length.Percent(percent), 0f);
+        }
+
+        /// <summary>One level of the tree on screen. Navigating creates a new page and slides the old one out.</summary>
+        private sealed class Page {
+            public readonly List<SearchNode> Items = new();
+
+            public VisualElement Root;
+            public VisualElement Breadcrumb;
+            public Label         BreadcrumbLabel;
+            public ListView      List;
+            public int           SelectedIndex = -1;
+            public bool          IsInSearchMode;
+        }
+
+        /// <summary>A search hit. Best score first; a shorter name wins a tie, then the order of the tree.</summary>
+        private readonly struct ScoredNode {
+            public static readonly Comparison<ScoredNode> Comparison = Compare;
+
+            public readonly SearchNode Node;
+            public readonly long       Score;
+            public readonly int        Order;
+
+            public ScoredNode(SearchNode node, long score, int order) {
+                Node  = node;
+                Score = score;
+                Order = order;
             }
 
-            ActiveSection.ScrollPosition = currentScrollPos;
+            private static int Compare(ScoredNode a, ScoredNode b) {
+                var byScore = b.Score.CompareTo(a.Score);
+                if (byScore != 0) return byScore;
+
+                var byLength = a.Node.RankLength.CompareTo(b.Node.RankLength);
+                return byLength != 0 ? byLength : a.Order.CompareTo(b.Order);
+            }
+        }
+
+        /// <summary>Class names used in SearchWindow.uss.</summary>
+        private static class Uss {
+            public const string Root = "search-window";
+
+            public const string Search        = "search-window__search";
+            public const string TabBar        = "search-window__tab-bar";
+            public const string Tab           = "search-window__tab";
+            public const string TabProgress   = "search-window__tab-progress";
+            public const string Content       = "search-window__content";
+            public const string BuildProgress = "search-window__build-progress";
+
+            public const string Page            = "search-window__page";
+            public const string Breadcrumb      = "search-window__breadcrumb";
+            public const string BreadcrumbIcon  = "search-window__breadcrumb-icon";
+            public const string BreadcrumbLabel = "search-window__breadcrumb-label";
+            public const string List            = "search-window__list";
+
+            public const string Row         = "search-window__row";
+            public const string SelectedRow = "search-window__row--selected";
+            public const string RowIcon     = "search-window__row-icon";
+            public const string RowLabel    = "search-window__row-label";
+            public const string RowArrow    = "search-window__row-arrow";
         }
 
         #endregion

@@ -28,10 +28,11 @@ code Editor trong `RiseOn.Utils.Editor`.
 | Unity 6000.3 | | Bản đang dùng để phát triển |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute Inspector ở nhiều lớp, `EnumLabel`, `ForwardAttributesTo`, drawer và tool Editor |
 | [DOTween](https://dotween.demigiant.com) | Cài tay từ Asset Store, rồi chạy *Tools → Demigiant → DOTween Utility Panel → Setup DOTween* | `DOTweenExtensions` |
+| `com.unity.modules.uielements` (UI Toolkit) | Tự cài theo `package.json`, có sẵn trong Unity | Cửa sổ tìm kiếm |
 
-Package không có phụ thuộc UPM nào. Odin và DOTween không có trên UPM nên không
-khai được trong `package.json`, phải cài vào project trước; thiếu một trong hai
-thì assembly `RiseOn.Utils` không biên dịch được.
+UI Toolkit là module có sẵn của Unity, bật mặc định. Odin và DOTween không có trên
+UPM nên không khai được trong `package.json`, phải cài vào project trước; thiếu
+một trong hai thì assembly `RiseOn.Utils` không biên dịch được.
 
 ## Cài đặt
 

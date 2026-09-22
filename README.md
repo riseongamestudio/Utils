@@ -14,7 +14,7 @@ UPM riêng, cài và đánh version độc lập.
 
 | Package | Tự cài theo `package.json` | Phải cài tay (không có trên UPM) |
 |---|---|---|
-| `com.riseon.utils` | | [Odin Inspector](https://odininspector.com), [DOTween](https://dotween.demigiant.com) |
+| `com.riseon.utils` | `com.unity.modules.uielements` | [Odin Inspector](https://odininspector.com), [DOTween](https://dotween.demigiant.com) |
 | `com.riseon.utils.ui` | `com.riseon.utils`, `com.unity.ugui` | Odin Inspector, DOTween |
 | `com.riseon.utils.renderers` | `com.riseon.utils` | Odin Inspector, DOTween |
 | `com.riseon.utils.network` | | |

@@ -1,91 +1,132 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
 namespace RiseOn.Utils.Editor.SearchWindow {
+    /// <summary>
+    /// Picks a component type from the same set Unity's Add Component offers, in the same folders: native components as
+    /// the Component menu files them, scripts by their AddComponentMenu path or else by namespace.
+    /// </summary>
     public class ComponentSearchWindow : SearchWindow {
+        private const string ComponentsLabel   = "Components";
+        private const string ScriptsFolder     = "Scripts";
+        private const string ComponentMenuRoot = "Component";
+
+        // Component types only change with a domain reload, which also clears this.
+        private static SearchNode cachedRoot;
+
         public static void Open(Rect btnRect, Action<Type> onSelected, string searchText = "") {
             var window = CreateInstance<ComponentSearchWindow>();
-            window.minSize = new Vector2(333, 333);
-            window.Show(btnRect, "Components", node => onSelected?.Invoke(node.Data as Type), searchText);
+            window.Show(btnRect, ComponentsLabel, node => onSelected?.Invoke(node.Data as Type), new Vector2(333, 333), searchText);
         }
 
         protected override void RegisterSections() {
-            AddSection("Components", BuildComponentSection);
+            AddSection(ComponentsLabel, ctx => ctx.Complete(cachedRoot ??= BuildTree()));
         }
 
-        private void BuildComponentSection(SectionBuildContext ctx) {
-            var root              = new SearchNode { Label = "Components" };
+        private static SearchNode BuildTree() {
+            var root              = new SearchNode { Label = ComponentsLabel };
             var defaultScriptIcon = EditorGUIUtility.IconContent("cs Script Icon").image as Texture2D;
             var folderIcon        = EditorGUIUtility.IconContent("Folder Icon").image as Texture2D;
+            var rootFolder        = new FolderBuilder();
+            var nativeFolders     = GetNativeMenuFolders();
+            var scriptTypes       = GetScriptTypes();
 
-            // Fetch and rigorously filter Component types from the Unity TypeCache
-            var componentTypes = TypeCache.GetTypesDerivedFrom<Component>()
-                .Where(type => 
-                        type.IsClass && 
-                        !type.IsAbstract && 
-                        type.IsPublic && 
-                        !type.IsGenericTypeDefinition && // Lọc bỏ các class Generic (chưa xác định kiểu)
-                        !IsHiddenByAttribute(type)       // Lọc bỏ các class bị giấu bởi AddComponentMenu("")
-                )
-                .ToList();
+            foreach (var type in TypeCache.GetTypesDerivedFrom<Component>()) {
+                if (!type.IsClass || type.IsAbstract || !type.IsPublic || type.IsGenericTypeDefinition) continue;
 
-            var rootFolder = new FolderBuilder();
+                // AddComponentMenu("") hides a component from the menu on purpose.
+                var menu = (AddComponentMenu)Attribute.GetCustomAttribute(type, typeof(AddComponentMenu), false);
+                if (menu != null && string.IsNullOrEmpty(menu.componentMenu)) continue;
 
-            for (int i = 0; i < componentTypes.Count; i++) {
-                var    type     = componentTypes[i];
-                string menuPath = GetMenuPath(type);
+                string folder;
+                if (typeof(MonoBehaviour).IsAssignableFrom(type)) {
+                    // Unity only stores a script component whose class sits in a file of the same name; any other one
+                    // turns into a missing script on the next reload.
+                    if (!scriptTypes.Contains(type)) continue;
+
+                    folder = menu != null ? GetFolder(menu.componentMenu) : GetScriptFolder(type);
+                } else if (!nativeFolders.TryGetValue(type.Name, out folder)) {
+                    // Not in the Component menu: a base class (Collider, Renderer), one Unity adds by itself (Transform,
+                    // ParticleSystemRenderer), or one from a built-in module that is turned off.
+                    continue;
+                }
 
                 var componentNode = new SearchNode {
                     Label       = type.Name,
-                    LabelSearch = $"{type.Name} <color=#888888>({type.Namespace})</color>",
-                    Icon        = AssetPreview.GetMiniTypeThumbnail(type) ?? defaultScriptIcon,
+                    LabelSearch = string.IsNullOrEmpty(type.Namespace) ? null : $"{type.Name} <color=#888888>({type.Namespace})</color>",
+                    SearchName  = type.Name,
+                    IconLoader  = () => AssetPreview.GetMiniTypeThumbnail(type) ?? defaultScriptIcon,
                     Data        = type
                 };
 
-                AddNodeToFolderBuilder(rootFolder, menuPath, componentNode);
+                AddNodeToFolderBuilder(rootFolder, folder, componentNode);
             }
 
             BuildNodeHierarchy(rootFolder, root, folderIcon);
-            ctx.Complete(root);
+            return root;
         }
 
-        // Hàm hỗ trợ kiểm tra xem Component có bị cố tình giấu đi không
-        private bool IsHiddenByAttribute(Type type) {
-            var attributes = type.GetCustomAttributes(typeof(AddComponentMenu), false);
-            if (attributes.Length > 0) {
-                var addComponentMenu = attributes[0] as AddComponentMenu;
-                // Nếu path rỗng hoặc null, tức là tác giả muốn giấu nó khỏi menu
-                return string.IsNullOrEmpty(addComponentMenu?.componentMenu);
+        /// <summary>
+        /// The folder of every native component in Unity's Component menu, keyed by type name: "Component/Physics/Box
+        /// Collider" gives BoxCollider → "Physics". The menu already leaves out what cannot be added by hand.
+        /// </summary>
+        private static Dictionary<string, string> GetNativeMenuFolders() {
+            var folders = new Dictionary<string, string>();
+            foreach (var item in Unsupported.GetSubmenus(ComponentMenuRoot)) {
+                var firstSlash = item.IndexOf('/');
+                var lastSlash  = item.LastIndexOf('/');
+                if (lastSlash <= firstSlash) continue; // a command right under Component, like "Add..."
+
+                var typeName = item.Substring(lastSlash + 1).Replace(" ", string.Empty);
+                folders.TryAdd(typeName, item.Substring(firstSlash + 1, lastSlash - firstSlash - 1));
             }
-            return false;
+
+            return folders;
         }
 
-        // Helper class to manage sorting before constructing the final read-only SearchTreeNodes
+        /// <summary>Classes that have a script asset of their own, the ones Add Component lists.</summary>
+        private static HashSet<Type> GetScriptTypes() {
+            var types = new HashSet<Type>();
+            foreach (var script in MonoImporter.GetAllRuntimeMonoScripts()) {
+                var type = script.GetClass();
+                if (type != null) types.Add(type);
+            }
+
+            return types;
+        }
+
+        /// <summary>An AddComponentMenu path ends with the item's own name, so the folder is everything before it.</summary>
+        private static string GetFolder(string menuPath) {
+            var lastSlash = menuPath.LastIndexOf('/');
+            return lastSlash < 0 ? string.Empty : menuPath.Substring(0, lastSlash);
+        }
+
+        /// <summary>Scripts without AddComponentMenu are grouped by namespace.</summary>
+        private static string GetScriptFolder(Type type) {
+            return string.IsNullOrEmpty(type.Namespace) ? ScriptsFolder : $"{ScriptsFolder}/{type.Namespace.Replace('.', '/')}";
+        }
+
         private class FolderBuilder {
-            // SortedDictionary automatically keeps subfolders sorted alphabetically
-            public readonly SortedDictionary<string, FolderBuilder> SubFolders = new SortedDictionary<string, FolderBuilder>();
-            public readonly List<SearchNode> Items = new List<SearchNode>();
+            // SortedDictionary keeps subfolders in alphabetical order.
+            public readonly SortedDictionary<string, FolderBuilder> SubFolders = new();
+            public readonly List<SearchNode>                        Items      = new();
         }
 
-        private void AddNodeToFolderBuilder(FolderBuilder rootFolder, string path, SearchNode leafNode) {
+        private static void AddNodeToFolderBuilder(FolderBuilder rootFolder, string path, SearchNode leafNode) {
             if (string.IsNullOrEmpty(path)) {
                 rootFolder.Items.Add(leafNode);
                 return;
             }
 
-            var parts = path.Split('/');
             var currentFolder = rootFolder;
-
-            for (int i = 0; i < parts.Length; i++) {
-                var part = parts[i].Trim();
+            foreach (var rawPart in path.Split('/')) {
+                var part = rawPart.Trim();
                 if (string.IsNullOrEmpty(part)) continue;
 
-                // Create intermediate folders if they don't exist
                 if (!currentFolder.SubFolders.TryGetValue(part, out var childFolder)) {
-                    childFolder = new FolderBuilder();
+                    childFolder                    = new FolderBuilder();
                     currentFolder.SubFolders[part] = childFolder;
                 }
 
@@ -95,80 +136,16 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             currentFolder.Items.Add(leafNode);
         }
 
-        private void BuildNodeHierarchy(FolderBuilder folder, SearchNode targetNode, Texture2D folderIcon) {
-            // Traverse and add subfolders first (guaranteed alphabetical by SortedDictionary)
-            foreach (var kvp in folder.SubFolders) {
-                var folderNode = new SearchNode {
-                    Label = kvp.Key,
-                    Icon = folderIcon
-                };
-                
-                BuildNodeHierarchy(kvp.Value, folderNode, folderIcon);
+        private static void BuildNodeHierarchy(FolderBuilder folder, SearchNode targetNode, Texture2D folderIcon) {
+            foreach (var subFolder in folder.SubFolders) {
+                var folderNode = new SearchNode { Label = subFolder.Key, Icon = folderIcon };
+                BuildNodeHierarchy(subFolder.Value, folderNode, folderIcon);
                 targetNode.AddChild(folderNode);
             }
 
-            // Sort individual components alphabetically before adding them below the folders
+            // Components come after the folders, in alphabetical order.
             folder.Items.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
-            foreach (var item in folder.Items) {
-                targetNode.AddChild(item);
-            }
-        }
-
-        private string GetMenuPath(Type type) {
-            var attrs = type.GetCustomAttributes(typeof(AddComponentMenu), false);
-            
-            if (attrs.Length > 0) {
-                var attr = attrs[0] as AddComponentMenu;
-                
-                // Directly access the public property instead of using Reflection
-                if (!string.IsNullOrEmpty(attr.componentMenu)) {
-                    return attr.componentMenu;
-                }
-            }
-
-            // Group built-in Unity components cleanly
-            if (type.Namespace != null && type.Namespace.StartsWith("UnityEngine")) {
-                return GetUnityComponentCategory(type);
-            }
-
-            // Fallback for custom scripts without the AddComponentMenu attribute
-            if (!string.IsNullOrEmpty(type.Namespace)) {
-                var ns = type.Namespace;
-                if (ns.StartsWith("UnityEngine.")) {
-                    ns = ns.Substring("UnityEngine.".Length);
-                }
-                return "Scripts/" + ns.Replace('.', '/');
-            }
-
-            return "Scripts";
-        }
-
-        private string GetUnityComponentCategory(Type type) {
-            var typeName = type.Name;
-            
-            if (type.Namespace != null && type.Namespace.Contains("Physics") || typeName.Contains("Rigidbody") || typeName.Contains("Collider") || typeName.Contains("Joint")) {
-                return "Physics";
-            }
-            if (type.Namespace != null && type.Namespace.Contains("Audio") || typeName.Contains("Audio")) {
-                return "Audio";
-            }
-            if (type.Namespace != null && type.Namespace.Contains("UI")) {
-                return "UI";
-            }
-            if (typeName.Contains("Renderer") || typeName.Contains("Light") || typeName.Contains("Camera")) {
-                return "Rendering";
-            }
-            if (typeName.Contains("ParticleSystem") || typeName.Contains("Trail") || typeName.Contains("Line")) {
-                return "Effects";
-            }
-            if (typeName.Contains("Mesh")) {
-                return "Mesh";
-            }
-            if (type.Namespace != null && type.Namespace.Contains("Animation") || typeName.Contains("Animator") || typeName.Contains("Animation")) {
-                return "Animation";
-            }
-
-            return "Miscellaneous";
+            foreach (var item in folder.Items) targetNode.AddChild(item);
         }
     }
 }
