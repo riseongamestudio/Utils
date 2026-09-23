@@ -43,5 +43,7 @@ logic game, không dùng để đồng bộ chính xác.
 
 ## Nền tảng
 
-Chạy trên Editor, Android, iOS và desktop. WebGL không hỗ trợ: gọi vào nhận về
-task lỗi `PlatformNotSupportedException`.
+Chạy trên Editor, Android, iOS, desktop và WebGL. Trình duyệt không có UDP nên
+WebGL bỏ NTP, đọc giờ từ `ts=` trong `cdn-cgi/trace` của Cloudflare
+(`www.cloudflare.com`, `1.1.1.1`), dự phòng bằng `dateTime` của `timeapi.io`, rồi
+cộng thêm nửa thời gian đi về. Trên WebGL phải gọi từ main thread.

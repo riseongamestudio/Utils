@@ -4,7 +4,7 @@ Tiện ích mạng: lấy giờ hiện tại từ mạng, không phụ thuộc �
 kiểm tra máy có vào được internet thật hay không.
 
 Package `com.riseon.utils.network`, namespace `RiseOn.Utils.Network`. Không phụ
-thuộc package nào khác.
+thuộc package nào khác, chỉ dùng module có sẵn của Unity.
 
 ## Mục lục
 
@@ -20,11 +20,13 @@ thuộc package nào khác.
 | Phụ thuộc | Cách có | Dùng cho |
 |---|---|---|
 | Unity 6000.3 | | Bản đang dùng để phát triển |
+| `com.unity.modules.unitywebrequest` | Tự cài theo `package.json`, có sẵn trong Unity | Gửi request qua trình duyệt trên WebGL |
 
 Không cần Odin hay package RiseOn nào khác.
 
-Không hỗ trợ WebGL: trình duyệt chặn UDP (NTP) và không cho đọc response của
-domain khác. Gọi trên WebGL nhận về task lỗi `PlatformNotSupportedException`.
+Trên WebGL, trình duyệt không có UDP (NTP) và chỉ cho đọc response của domain
+cho phép (CORS), nên cả hai hàm đi qua HTTPS tới các endpoint cho phép đọc. Trên
+WebGL phải gọi từ main thread.
 
 Android cần quyền `INTERNET`. Project có SDK quảng cáo hay Firebase thì đã có
 sẵn; nếu không, đặt *Internet Access* = *Require* trong Player Settings.
@@ -44,7 +46,7 @@ sẵn; nếu không, đặt *Internet Access* = *Require* trong Player Settings.
     }
   ],
   "dependencies": {
-    "com.riseon.utils.network": "1.0.0"
+    "com.riseon.utils.network": "1.0.1"
   }
 }
 ```
@@ -52,7 +54,7 @@ sẵn; nếu không, đặt *Internet Access* = *Require* trong Player Settings.
 **Git URL**:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Network#com.riseon.utils.network/1.0.0
+https://github.com/riseongamestudio/Utils.git?path=/Network#com.riseon.utils.network/1.0.1
 ```
 
 **Thư mục local**: `"com.riseon.utils.network": "file:D:/path/to/Utils/Network"`.
@@ -75,11 +77,11 @@ try {
 **Kiểm tra internet**:
 
 ```csharp
-if (!Connectivity.HasNetwork) {
+if (!Connectivity.IsNetworkReachable) {
     // Máy không có kết nối nào, khỏi gửi request
 }
 
-bool online = await Connectivity.HasInternetAsync();
+bool online = await Connectivity.HasNetworkAsync();
 ```
 
 ## Thành phần

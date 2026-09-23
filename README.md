@@ -17,7 +17,7 @@ UPM riêng, cài và đánh version độc lập.
 | `com.riseon.utils` | `com.unity.modules.uielements` | [Odin Inspector](https://odininspector.com) |
 | `com.riseon.utils.ui` | `com.riseon.utils`, `com.unity.ugui`, `com.cysharp.unitask` | Odin Inspector |
 | `com.riseon.utils.renderers` | `com.riseon.utils` | Odin Inspector |
-| `com.riseon.utils.network` | | |
+| `com.riseon.utils.network` | `com.unity.modules.unitywebrequest` | |
 
 Odin là gói Asset Store nên không khai được trong `package.json`; cài nó vào project
 trước khi cài các package cần nó. UniTask (`com.cysharp.unitask`) có trên OpenUPM:

@@ -4,6 +4,20 @@ Mọi thay đổi đáng kể của `com.riseon.utils.network` được ghi ở 
 theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.1] - 2026-09-23
+
+### Thêm
+
+- Hỗ trợ WebGL cho `NetworkTime.NowAsync` và `Connectivity.HasNetworkAsync`: đi qua
+  `UnityWebRequest` tới các endpoint cho phép trình duyệt đọc (`cdn-cgi/trace` của
+  Cloudflare, `timeapi.io`). Phụ thuộc thêm module `com.unity.modules.unitywebrequest`.
+
+### Thay đổi
+
+- Đổi tên `Connectivity.HasNetwork` thành `IsNetworkReachable`, `HasInternetAsync`
+  thành `HasNetworkAsync`.
+- Kiểm nền tảng lúc chạy thay cho `#if UNITY_WEBGL`, để Editor biên dịch mọi nhánh.
+
 ## [1.0.0] - 2026-09-23
 
 ### Thêm
