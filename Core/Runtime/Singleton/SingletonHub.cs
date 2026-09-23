@@ -6,6 +6,12 @@ using Object = UnityEngine.Object;
 
 namespace RiseOn.Utils {
     internal static class SingletonHub {
+        public enum RegisterResult {
+            Registered
+          , AlreadyRegistered
+          , Duplicate
+        }
+
         private static readonly Dictionary<Type, Singleton>   insDict  = new();
         private static readonly Dictionary<Singleton, Type[]> typeDict = new();
         
@@ -66,8 +72,8 @@ namespace RiseOn.Utils {
             return Ins<T>() != null;
         }
 
-        public static SingletonRegisterResult Register(Singleton ins) {
-            if (typeDict.ContainsKey(ins)) return SingletonRegisterResult.AlreadyRegistered;
+        public static RegisterResult Register(Singleton ins) {
+            if (typeDict.ContainsKey(ins)) return RegisterResult.AlreadyRegistered;
 
             var insTypes = ListPool<Type>.Get();
             try {
@@ -82,7 +88,7 @@ namespace RiseOn.Utils {
                     ThrowIfInsNotAssignableToInsType(ins, insType);
 
                     if (insDict.TryGetValue(insType, out var oldIns)) {
-                        if (oldIns != null) return SingletonRegisterResult.Duplicate;
+                        if (oldIns != null) return RegisterResult.Duplicate;
 
                         Unregister(oldIns);
                     }
@@ -93,7 +99,7 @@ namespace RiseOn.Utils {
                 typeDict.Add(ins, insTypes.ToArray());
                 foreach (var type in insTypes) insDict.Add(type, ins);
 
-                return SingletonRegisterResult.Success;
+                return RegisterResult.Registered;
             } finally {
                 ListPool<Type>.Release(insTypes);
             }
