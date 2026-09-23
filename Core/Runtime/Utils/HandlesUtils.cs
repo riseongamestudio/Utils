@@ -5,6 +5,9 @@ namespace RiseOn.Utils {
     public static class HandlesUtils {
         private static Vector3[] rectCorners;
 
+        // Reused by every DrawRect call, so drawing gizmos allocates nothing.
+        private static Vector3[] RectCorners => rectCorners ??= new Vector3[4];
+
         /// <inheritdoc cref="UnityEditor.Handles.matrix"/>
         public static Matrix4x4 GetMatrix() {
             #if UNITY_EDITOR
@@ -45,20 +48,19 @@ namespace RiseOn.Utils {
           , Vector3 corner_2
           , Vector3 corner_3) {
             #if UNITY_EDITOR
-            rectCorners = new Vector3[4];
+            var corners = RectCorners;
+            corners[0] = corner_0;
+            corners[1] = corner_1;
+            corners[2] = corner_2;
+            corners[3] = corner_3;
 
-            rectCorners[0] = corner_0;
-            rectCorners[1] = corner_1;
-            rectCorners[2] = corner_2;
-            rectCorners[3] = corner_3;
-
-            UnityEditor.Handles.DrawSolidRectangleWithOutline(rectCorners, faceColor, outlineColor);
+            UnityEditor.Handles.DrawSolidRectangleWithOutline(corners, faceColor, outlineColor);
             #endif
         }
 
         /// <summary>
         /// Like <see cref="UnityEditor.Handles.Label(Vector3, string)"/>, except the text is centred on
-        /// <see cref="position"/> instead of hanging off it by its top-left corner.
+        /// <paramref name="position"/> instead of hanging off it by its top-left corner.
         /// </summary>
         [Conditional("UNITY_EDITOR")]
         public static void Label(Vector3 position, string text, Color color) {
