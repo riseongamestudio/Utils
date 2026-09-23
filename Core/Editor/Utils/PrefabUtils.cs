@@ -3,7 +3,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace RiseOn.Utils.Editor {
-    public static class PrefabExtensions {
+    public static class PrefabUtils {
         public static GameObject GetRootPrefab(this Object obj) {
             if (obj is not GameObject go) {
                 if (obj is not Component cpn) return null;

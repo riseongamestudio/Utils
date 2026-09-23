@@ -5,9 +5,9 @@ using UnityEngine.Rendering;
 
 namespace RiseOn.Utils.Renderers {
     /// <summary>
-    /// Replaces Physics2DRaycaster (remove the built-in one when attaching this, or hits get duplicated).
-    /// Sorts hits by actual render order via the same core as <see cref="Compare"/>. Where the engine
-    /// leaves render order undefined, the comparison returns 0 — the data (SortingOrder) must disambiguate.
+    /// Replaces Physics2DRaycaster (remove the built-in one when attaching this, or hits get duplicated).<br/>
+    /// Sorts hits by actual render order via the same core as <see cref="Compare"/>.<br/>
+    /// Where the engine leaves render order undefined, the comparison returns 0 — the data (SortingOrder) must disambiguate.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class RenderOrder2DRaycaster : BaseRaycaster {
@@ -27,9 +27,8 @@ namespace RiseOn.Utils.Renderers {
         public override Camera eventCamera => cam != null ? cam : cam = GetComponent<Camera>();
 
         /// <summary>
-        /// Render-order comparison: negative if a is drawn AFTER b, i.e. a shows on top and should
-        /// receive interaction first. Walks the SortingGroup chains from the root and compares keys
-        /// at the first diverging level.
+        /// Render-order comparison: negative if a is drawn AFTER b, i.e. a shows on top and should receive interaction first.<br/>
+        /// Walks the SortingGroup chains from the root and compares keys at the first diverging level.
         /// </summary>
         public static int Compare(Transform a, Transform b) {
             chainBuffer.Clear();

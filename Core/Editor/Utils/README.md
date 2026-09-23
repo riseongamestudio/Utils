@@ -2,6 +2,21 @@
 
 [← RiseOn.Utils](../../README.md)
 
+Namespace `RiseOn.Utils.Editor`.
+
+- [PrefabUtils](#prefabutils)
+- [InlineEditorImitator](#inlineeditorimitator)
+
+## PrefabUtils
+
+```csharp
+var root = component.GetRootPrefab();             // null nếu không thuộc prefab
+if (component.TryGetRootPrefab(out var prefabRoot)) { /* ... */ }
+```
+
+Trả GameObject gốc của prefab chứa object: prefab đang mở trong prefab stage,
+hoặc prefab asset. Object nằm trong scene thì trả `null`.
+
 ## InlineEditorImitator
 
 Dành cho người viết drawer Odin: vẽ editor lồng giống `[InlineEditor]` cho một

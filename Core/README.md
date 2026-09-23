@@ -1,8 +1,8 @@
 # RiseOn.Utils
 
 Bộ tiện ích nền cho game Unity: `Singleton`, `Bounds2D`, extension và lớp utils cho
-những việc lặp đi lặp lại (vector, transform, collection, coroutine, DOTween, Undo,
-UnityEvent), hai attribute cho Odin và vài tool Editor.
+những việc lặp đi lặp lại (vector, transform, collection, Undo, UnityEvent), hai
+attribute cho Odin và vài tool Editor.
 
 Package `com.riseon.utils`. Code runtime nằm trong namespace `RiseOn.Utils`,
 code Editor trong `RiseOn.Utils.Editor`.
@@ -14,7 +14,7 @@ code Editor trong `RiseOn.Utils.Editor`.
 - [Tổng quan](#tổng-quan)
 - [Hướng dẫn nhanh](#hướng-dẫn-nhanh)
   - [Singleton](#singleton)
-  - [Extension và utils](#extension-và-utils)
+  - [Utils](#utils)
   - [Sửa dữ liệu trong Editor](#sửa-dữ-liệu-trong-editor)
   - [Tool Editor](#tool-editor)
 - [Thành phần](#thành-phần)
@@ -27,12 +27,11 @@ code Editor trong `RiseOn.Utils.Editor`.
 |---|---|---|
 | Unity 6000.3 | | Bản đang dùng để phát triển |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute Inspector ở nhiều lớp, `EnumLabel`, `ForwardAttributesTo`, drawer và tool Editor |
-| [DOTween](https://dotween.demigiant.com) | Cài tay từ Asset Store, rồi chạy *Tools → Demigiant → DOTween Utility Panel → Setup DOTween* | `DOTweenExtensions` |
 | `com.unity.modules.uielements` (UI Toolkit) | Tự cài theo `package.json`, có sẵn trong Unity | Cửa sổ tìm kiếm |
 
-UI Toolkit là module có sẵn của Unity, bật mặc định. Odin và DOTween không có trên
-UPM nên không khai được trong `package.json`, phải cài vào project trước; thiếu
-một trong hai thì assembly `RiseOn.Utils` không biên dịch được.
+UI Toolkit là module có sẵn của Unity, bật mặc định. Odin không có trên UPM nên
+không khai được trong `package.json`, phải cài vào project trước; thiếu Odin thì
+assembly `RiseOn.Utils` không biên dịch được.
 
 ## Cài đặt
 
@@ -115,20 +114,20 @@ Singleton còn truy cập được qua interface (`IAudio.Ins`), có tùy chọn
 `DontDestroyOnLoad` và cách xử lý bản trùng. Chi tiết:
 [Singleton](Runtime/Singleton/README.md).
 
-### Extension và utils
+### Utils
 
-Extension gọi thẳng trên đối tượng, lớp utils gọi theo tên lớp:
+Lớp tĩnh đuôi `Utils`. Phần lớn là extension, gọi thẳng trên đối tượng; phần còn lại
+gọi theo tên lớp:
 
 ```csharp
 var clip  = clips.RandomInside();                   // phần tử ngẫu nhiên
-var flat  = transform.position.With(VecAxis.Z, 0);  // đổi một trục
-this.DelayedCall_Second(1f, ShowResult);            // gọi sau 1 giây
-transform.DOJump_BetterHeight(target, 1f, 0.5f);    // nhảy với đỉnh và nhịp tự nhiên hơn DOJump
-float k = MathUtils.Evaluate(t, 3);                 // ease-out bậc 3
+var flat  = transform.position.With(2, 0);          // bản sao đổi z
+var last  = queue.PopBack();                        // bỏ và trả phần tử cuối
+transform.SetPositionXY(target);                    // đặt x, y, giữ nguyên z
+float k = MathUtils.EaseOutPower(t, 3);             // ease-out lũy thừa bậc 3 (OutCubic)
 ```
 
-Danh sách đầy đủ: [Extension](Runtime/Extensions/README.md),
-[Utils](Runtime/Utils/README.md).
+Danh sách đầy đủ: [Utils](Runtime/Utils/README.md).
 
 ### Sửa dữ liệu trong Editor
 
@@ -136,14 +135,14 @@ Code sửa object trong Edit mode (nút Odin, `OnValidate`, tool) nên ghi Undo 
 và đánh dấu dirty sau, để `Ctrl+Z` hoạt động và scene / prefab được lưu:
 
 ```csharp
-UndoUtils.RecordForUndo(target);
+target.RecordForUndo();
 target.name = "Renamed";
-UndoUtils.MarkDirty(target);
+target.MarkDirty();
 ```
 
 Tạo object, đổi cha, thêm component, gắn persistent listener cho UnityEvent cũng
-có bản kèm Undo: xem [Utils](Runtime/Utils/README.md#undoutils) và
-[Extension](Runtime/Extensions/README.md#undo).
+có bản kèm Undo: xem [Utils](Runtime/Utils/README.md#undo) và
+[UnityEvent](Runtime/Utils/README.md#unityevent).
 
 ### Tool Editor
 
@@ -161,14 +160,12 @@ Cách dùng từng tool: [Tool trong Editor](Editor/Tools/README.md).
 |---|---|---|
 | Singleton | `Singleton<T>`, `ISingleton<T>` | [Runtime/Singleton](Runtime/Singleton/README.md) |
 | Bounds2D | `Bounds` bản 2D, serialize được | [Runtime/Bounds2D](Runtime/Bounds2D/README.md) |
-| Extension | Vector, Transform, Collection, Random, Coroutine, DOTween, Undo, UnityEvent... | [Runtime/Extensions](Runtime/Extensions/README.md) |
-| Utils | `UndoUtils`, `HandlesUtils`, `MathUtils`, `WaitForSecondCache` | [Runtime/Utils](Runtime/Utils/README.md) |
+| Utils | Vector, Transform, Collection, Random, Undo, UnityEvent, Handles, Math, Rich text... | [Runtime/Utils](Runtime/Utils/README.md) |
 | EnumLabel | Đặt nhãn phần tử mảng theo enum (Odin) | [Runtime/EnumLabel](Runtime/EnumLabel/README.md) |
 | ForwardAttributesTo | Chuyển attribute Odin từ field wrapper xuống field bên trong | [Runtime/ForwardAttributes](Runtime/ForwardAttributes/README.md) |
 | Tool Editor | Capture Game View, Find References, Replace Component | [Editor/Tools](Editor/Tools/README.md) |
 | Cửa sổ tìm kiếm | `ComponentSearchWindow`, `ObjectSearchWindow` cho drawer riêng | [Editor/SearchWindow](Editor/SearchWindow/README.md) |
-| Extension Editor | `PrefabExtensions` | [Editor/Extensions](Editor/Extensions/README.md) |
-| Utils Editor | `InlineEditorImitator` cho người viết drawer | [Editor/Utils](Editor/Utils/README.md) |
+| Utils Editor | `PrefabUtils`, `InlineEditorImitator` cho người viết drawer | [Editor/Utils](Editor/Utils/README.md) |
 
 ## Lịch sử thay đổi
 

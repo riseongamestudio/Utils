@@ -20,20 +20,21 @@ namespace RiseOn.Utils.Renderers {
         }
 
         private void SetParentRdrThenUpdate(bool resetScale) {
-            UndoUtils.RecordForUndo(Rdr.transform);
+            Rdr.transform.RecordForUndo();
 
             Rdr.transform.SetParentUndo(transform);
             if (resetScale) Rdr.transform.localScale = Vector3.one;
 
-            UndoUtils.MarkDirty(Rdr.transform);
+            Rdr.transform.MarkDirty();
 
             UpdateRdrPosFromPivot();
         }
 
-        private bool IsNeedApplyRdrLocScaleToThis() =>
-            Rdr != null
-         && Rdr.transform.parent == transform
-         && Rdr.transform.localScale != RdrNomLocScale;
+        private bool IsNeedApplyRdrLocScaleToThis() {
+            return Rdr != null
+                && Rdr.transform.parent == transform
+                && Rdr.transform.localScale != RdrNomLocScale;
+        }
 
         protected void TryApplyRdrLocScaleToThis() {
             if (IsNeedApplyRdrLocScaleToThis()) {
@@ -83,9 +84,9 @@ namespace RiseOn.Utils.Renderers {
         protected void SetThisPropThenUpdate<T>(ref T orgVal, T newVal) {
             if (EqualityComparer<T>.Default.Equals(orgVal, newVal)) return;
 
-            UndoUtils.RecordForUndo(this);
+            this.RecordForUndo();
             orgVal = newVal;
-            UndoUtils.MarkDirty(this);
+            this.MarkDirty();
 
             UpdateRdrPosFromPivot();
         }
@@ -109,9 +110,9 @@ namespace RiseOn.Utils.Renderers {
         protected void SetRdrPropThenUpdate<T>(Func<T> getter, Action<T> setter, T newVal) {
             if (EqualityComparer<T>.Default.Equals(getter(), newVal)) return;
 
-            UndoUtils.RecordForUndo(Rdr);
+            Rdr.RecordForUndo();
             setter(newVal);
-            UndoUtils.MarkDirty(Rdr);
+            Rdr.MarkDirty();
 
             UpdateRdrPosFromPivot();
         }
@@ -170,9 +171,9 @@ namespace RiseOn.Utils.Renderers {
             if (Rdr == null) return;
             
             if (Rdr.transform.localRotation != Quaternion.identity) {
-                UndoUtils.RecordForUndo(Rdr.transform);
+                Rdr.transform.RecordForUndo();
                 Rdr.transform.localRotation = Quaternion.identity;
-                UndoUtils.MarkDirty(Rdr.transform);
+                Rdr.transform.MarkDirty();
             }
 
             TryApplyRdrLocScaleToThis();
@@ -207,9 +208,9 @@ namespace RiseOn.Utils.Renderers {
             void SetRdrLocPos(Vector3 rdrLocPos) {
                 if (Rdr.transform.localPosition == rdrLocPos) return;
 
-                UndoUtils.RecordForUndo(Rdr.transform);
+                Rdr.transform.RecordForUndo();
                 Rdr.transform.localPosition = rdrLocPos;
-                UndoUtils.MarkDirty(Rdr.transform);
+                Rdr.transform.MarkDirty();
             }
         }
 

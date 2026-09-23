@@ -2,13 +2,14 @@
   "name": "com.riseon.utils.ui",
   "version": "1.0.0",
   "displayName": "Utils UI",
-  "description": "UGUI utilities: AspectRatioFitterElement, RebuildLayoutFixer and Image extensions",
+  "description": "UGUI utilities: AspectRatioFitterElement, RebuildLayoutFixer and Image color utilities",
   "documentationUrl": "https://github.com/riseongamestudio/Utils/blob/com.riseon.utils.ui/1.0.0/UI/README.md",
   "author": {
     "name": "RiseOn"
   },
   "dependencies": {
     "com.riseon.utils": "1.0.0",
+    "com.cysharp.unitask": "2.5.11",
     "com.unity.ugui": "2.0.0"
   }
 }

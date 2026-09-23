@@ -59,14 +59,13 @@ namespace RiseOn.Utils {
         }
 
         /// <summary>
-        /// Like <see cref="UnityEditor.Handles.Label(Vector3, string)"/>, except the text is centred on
-        /// <paramref name="position"/> instead of hanging off it by its top-left corner.
+        /// Like <see cref="UnityEditor.Handles.Label(Vector3, string)"/>, except the text is centered on <paramref name="position"/> instead of hanging off it by its top-left corner.
         /// </summary>
         [Conditional("UNITY_EDITOR")]
         public static void Label(Vector3 position, string text, Color color) {
             #if UNITY_EDITOR
             // Drawn by hand inside the GUI pass rather than through Handles.Label: that one pins the text box's
-            // top-left to the point, and no style setting moves it, since the box is cut to fit the text. Centring
+            // top-left to the point, and no style setting moves it, since the box is cut to fit the text. Centering
             // means knowing how wide the text comes out, and CalcSize only answers once the skin is up.
             UnityEditor.Handles.BeginGUI();
 

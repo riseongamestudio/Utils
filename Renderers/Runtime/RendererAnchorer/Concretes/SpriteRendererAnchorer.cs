@@ -11,7 +11,7 @@ namespace RiseOn.Utils.Renderers {
                     Target.flipX ? -1f : 1f,
                     Target.flipY ? -1f : 1f,
                     1f))
-              * Matrix4x4.Translate(Target.localBounds.min.With(VecAxis.Z, 0));
+              * Matrix4x4.Translate(Target.localBounds.min.With(2, 0));
         }
 
         protected override Vector2 GetTargetSize() {

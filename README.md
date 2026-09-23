@@ -14,13 +14,15 @@ UPM riêng, cài và đánh version độc lập.
 
 | Package | Tự cài theo `package.json` | Phải cài tay (không có trên UPM) |
 |---|---|---|
-| `com.riseon.utils` | `com.unity.modules.uielements` | [Odin Inspector](https://odininspector.com), [DOTween](https://dotween.demigiant.com) |
-| `com.riseon.utils.ui` | `com.riseon.utils`, `com.unity.ugui` | Odin Inspector, DOTween |
-| `com.riseon.utils.renderers` | `com.riseon.utils` | Odin Inspector, DOTween |
+| `com.riseon.utils` | `com.unity.modules.uielements` | [Odin Inspector](https://odininspector.com) |
+| `com.riseon.utils.ui` | `com.riseon.utils`, `com.unity.ugui`, `com.cysharp.unitask` | Odin Inspector |
+| `com.riseon.utils.renderers` | `com.riseon.utils` | Odin Inspector |
 | `com.riseon.utils.network` | | |
 
-Odin và DOTween là gói Asset Store nên không khai được trong `package.json`; cài
-chúng vào project trước khi cài các package cần chúng.
+Odin là gói Asset Store nên không khai được trong `package.json`; cài nó vào project
+trước khi cài các package cần nó. UniTask (`com.cysharp.unitask`) có trên OpenUPM:
+thêm scope `com.cysharp` cạnh `com.riseon` thì nó được kéo về cùng
+`com.riseon.utils.ui`.
 
 ## Cài đặt
 

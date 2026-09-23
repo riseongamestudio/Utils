@@ -22,17 +22,18 @@ Package `com.riseon.utils.ui`, namespace `RiseOn.Utils.UI`. Xây trên
 | Unity 6000.3 | | Bản đang dùng để phát triển |
 | [`com.riseon.utils`](../Core/README.md) 1.0.0 | Tự cài theo `package.json` | Undo, extension |
 | `com.unity.ugui` 2.0.0 | Tự cài theo `package.json` | UGUI |
+| [UniTask](https://github.com/Cysharp/UniTask) (`com.cysharp.unitask`) 2.5.11 | Tự cài theo `package.json`, cần scope `com.cysharp` | Chờ frame trong `AspectRatioFitterElement` |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute Inspector của các component |
-| [DOTween](https://dotween.demigiant.com) | Cài tay từ Asset Store | `com.riseon.utils` cần |
 
 "Tự cài" là khi cài qua OpenUPM; cài bằng git URL thì phải cài `com.riseon.utils`
-trước. Odin và DOTween không có trên UPM nên phải cài vào project trước.
+trước. Project đã cài UniTask bằng git URL thì bản đó được dùng luôn, không cần scope
+`com.cysharp`. Odin không có trên UPM nên phải cài vào project trước.
 
 ## Cài đặt
 
-**OpenUPM** (khuyên dùng): thêm registry OpenUPM với scope `com.riseon` vào
-`Packages/manifest.json`, rồi thêm package. `com.riseon.utils` được kéo về tự
-động:
+**OpenUPM** (khuyên dùng): thêm registry OpenUPM với scope `com.riseon` và
+`com.cysharp` vào `Packages/manifest.json`, rồi thêm package. `com.riseon.utils` và
+UniTask được kéo về tự động:
 
 ```json
 {
@@ -40,7 +41,7 @@ trước. Odin và DOTween không có trên UPM nên phải cài vào project tr
     {
       "name": "package.openupm.com",
       "url": "https://package.openupm.com",
-      "scopes": ["com.riseon"]
+      "scopes": ["com.riseon", "com.cysharp"]
     }
   ],
   "dependencies": {
@@ -49,8 +50,8 @@ trước. Odin và DOTween không có trên UPM nên phải cài vào project tr
 }
 ```
 
-**Git URL**: cài `com.riseon.utils` trước (Package Manager không tự kéo phụ thuộc
-qua git), rồi:
+**Git URL**: cài `com.riseon.utils` và UniTask trước (Package Manager không tự kéo
+phụ thuộc qua git), rồi:
 
 ```
 https://github.com/riseongamestudio/Utils.git?path=/UI#com.riseon.utils.ui/1.0.0
@@ -74,7 +75,7 @@ tắt.
 ```csharp
 using RiseOn.Utils.UI;
 
-icon.SetAlpha(0.5f);
+icon.SetColorA(0.5f);
 ```
 
 ## Thành phần
@@ -83,7 +84,7 @@ icon.SetAlpha(0.5f);
 |---|---|---|
 | `AspectRatioFitterElement` | Layout element giữ tỉ lệ khung | [Runtime/AspectRatioFitterElement](Runtime/AspectRatioFitterElement/README.md) |
 | `RebuildLayoutFixer` | Ép layout dựng lại khi bật | [Runtime/RebuildLayoutFixer](Runtime/RebuildLayoutFixer/README.md) |
-| `ImageExtensions` | `SetAlpha` cho `Image` | [Runtime/Extensions](Runtime/Extensions/README.md) |
+| `ImageUtils` | Đổi một kênh màu của `Image` | [Runtime/Utils](Runtime/Utils/README.md) |
 
 ## Lịch sử thay đổi
 

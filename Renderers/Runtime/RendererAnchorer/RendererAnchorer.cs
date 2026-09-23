@@ -33,9 +33,9 @@ namespace RiseOn.Utils.Renderers {
         private void SetPropThenUpdate<T>(ref T orgVal, T newVal) {
             if (EqualityComparer<T>.Default.Equals(orgVal, newVal)) return;
 
-            UndoUtils.RecordForUndo(this);
+            this.RecordForUndo();
             orgVal = newVal;
-            UndoUtils.MarkDirty(this);
+            this.MarkDirty();
 
             UpdatePosFromAnchor();
         }
@@ -113,9 +113,9 @@ namespace RiseOn.Utils.Renderers {
 
             if (transform.position == newPos) return;
             
-            UndoUtils.RecordForUndo(transform);
+            transform.RecordForUndo();
             transform.position = newPos;
-            UndoUtils.MarkDirty(transform);
+            transform.MarkDirty();
         }
     }
 }

@@ -113,7 +113,7 @@ namespace RiseOn.Utils.Editor {
                     so.ApplyModifiedProperties();
                 }
 
-                UndoUtils.MarkDirty(go);
+                go.MarkDirty();
             }
 
             Undo.CollapseUndoOperations(Undo.GetCurrentGroup());

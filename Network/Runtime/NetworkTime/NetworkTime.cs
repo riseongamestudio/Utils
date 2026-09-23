@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 
 namespace RiseOn.Utils.Network {
     /// <summary>
-    /// Current time from the network, independent of the device clock. Asks NTP servers first, then falls back to the
-    /// Date header of a few HTTPS endpoints, and retries until the time budget runs out.
+    /// Current time from the network, independent of the device clock.<br/>
+    /// Asks NTP servers first, then falls back to the Date header of a few HTTPS endpoints, and retries until the time budget runs out.
     /// </summary>
     public static class NetworkTime {
         private const float DefaultTimeoutSeconds          = 2f;
@@ -37,8 +37,8 @@ namespace RiseOn.Utils.Network {
         };
 
         /// <summary>
-        /// Current time from the network, as <see cref="DateTimeKind.Utc"/>. Throws <see cref="TimeoutException"/>,
-        /// listing every failed attempt, when nothing answers within <paramref name="timeoutSeconds"/>.
+        /// Current time from the network, as <see cref="DateTimeKind.Utc"/>.<br/>
+        /// Throws <see cref="TimeoutException"/>, listing every failed attempt, when nothing answers within <paramref name="timeoutSeconds"/>.<br/>
         /// Not supported on WebGL.
         /// </summary>
         public static Task<DateTime> NowAsync(
@@ -281,8 +281,8 @@ namespace RiseOn.Utils.Network {
         }
 
         /// <summary>
-        /// A socket call left behind by a timeout fails once the socket is disposed. Reading its exception keeps it from
-        /// being reported as an unobserved task exception.
+        /// A socket call left behind by a timeout fails once the socket is disposed.<br/>
+        /// Reading its exception keeps it from being reported as an unobserved task exception.
         /// </summary>
         private static void ObserveLateFault(Task task) {
             task.ContinueWith(

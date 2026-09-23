@@ -1,9 +1,10 @@
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.Pool;
 using Object = UnityEngine.Object;
 
 namespace RiseOn.Utils {
-    public static class ObjectExtensions {
+    public static class ObjectUtils {
         /// <returns>True if <see cref="go"/> is actually in playing mode.<br/>(some case like: open prefab stage when in playing mode)</returns>
         public static bool IsPlaying(this GameObject go) {
             #if UNITY_EDITOR
@@ -52,12 +53,22 @@ namespace RiseOn.Utils {
             }
         }
 
+        /// <summary>
+        /// Names from the root down to <paramref name="tf"/>, joined once at the end.<br/>
+        /// Prepending one name at a time would build a new string for every level.
+        /// </summary>
         private static string GetPathTF(Transform tf) {
             if (tf == null) return string.Empty;
-            var result = tf.name;
-            while ((tf = tf.parent) != null)
-                result = $"{tf.name}/{result}";
-            return result;
+
+            var names = ListPool<string>.Get();
+            try {
+                for (var current = tf; current != null; current = current.parent) names.Add(current.name);
+
+                names.Reverse();
+                return string.Join("/", names);
+            } finally {
+                ListPool<string>.Release(names);
+            }
         }
     }
 }

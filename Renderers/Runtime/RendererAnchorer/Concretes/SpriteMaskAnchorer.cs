@@ -7,7 +7,7 @@ namespace RiseOn.Utils.Renderers {
 
             return
                 Target.transform.localToWorldMatrix
-              * Matrix4x4.Translate(Target.localBounds.min.With(VecAxis.Z, 0));
+              * Matrix4x4.Translate(Target.localBounds.min.With(2, 0));
         }
 
         protected override Vector2 GetTargetSize() {

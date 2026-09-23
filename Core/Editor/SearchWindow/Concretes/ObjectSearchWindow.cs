@@ -84,8 +84,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// Unity can look the filter up by itself (FindObjectsByType, GetComponents) only for a component class or an
-        /// interface. An open generic type has no instances, so it goes through <see cref="TypeMatches"/>.
+        /// Unity can look the filter up by itself (FindObjectsByType, GetComponents) only for a component class or an interface.<br/>
+        /// An open generic type has no instances, so it goes through <see cref="TypeMatches"/>.
         /// </summary>
         private bool CanQueryComponentsDirectly => !filterType.IsGenericTypeDefinition
                                                 && (filterType.IsInterface || typeof(Component).IsAssignableFrom(filterType));
@@ -163,8 +163,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// One row per GameObject, in the order found. An object with several matches (itself, its components) becomes a
-        /// folder named by its path.
+        /// One row per GameObject, in the order found.<br/>
+        /// An object with several matches (itself, its components) becomes a folder named by its path.
         /// </summary>
         private static void BuildSceneTree(SearchNode root, List<GameObject> gameObjects, List<Component> components) {
             var groups = new Dictionary<GameObject, SceneGroup>();
@@ -238,8 +238,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// One child per component, labelled with the object it sits on. Repeated types on the same object get an index,
-        /// like "Collider (1)".
+        /// One child per component, labelled with the object it sits on.<br/>
+        /// Repeated types on the same object get an index, like "Collider (1)".
         /// </summary>
         private static void AddComponentNodes(SearchNode groupNode, List<Component> components, Func<Component, string> nameOf, string path) {
             var indices = new Dictionary<(GameObject, Type), int>();
@@ -356,9 +356,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// Loads every prefab and keeps the components that match, on the root or any child, active or not. Filtering
-        /// prefabs first through AssetDatabase.GetDependencies was measured slower than just loading them (about 0.6 ms
-        /// per prefab either way), so there is no pre-filter.
+        /// Loads every prefab and keeps the components that match, on the root or any child, active or not.<br/>
+        /// Filtering prefabs first through AssetDatabase.GetDependencies was measured slower than just loading them (about 0.6 ms per prefab either way), so there is no pre-filter.
         /// </summary>
         private async Task ScanPrefabsAsync(List<string> paths, List<AssetMatch> results, SectionBuildContext ctx) {
             var stopwatch = Stopwatch.StartNew();

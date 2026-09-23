@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -48,9 +49,9 @@ namespace RiseOn.Utils.UI {
         protected void SetThisPropThenDirty<T>(ref T orgVal, T newVal) {
             if (EqualityComparer<T>.Default.Equals(orgVal, newVal)) return;
 
-            UndoUtils.RecordForUndo(this);
+            this.RecordForUndo();
             orgVal = newVal;
-            UndoUtils.MarkDirty(this);
+            this.MarkDirty();
 
             SetDirty();
         }
@@ -58,7 +59,16 @@ namespace RiseOn.Utils.UI {
         protected override void Start() {
             base.Start();
 
-            this.DelayedCall_Frame(1, SetDirty);
+            SetDirtyNextFrame().Forget();
+        }
+
+        /// <summary>
+        /// The parent layout is not settled on the first frame, so the size is worked out once more on the next one.<br/>
+        /// Canceled when the object is destroyed first; a canceled UniTaskVoid logs nothing.
+        /// </summary>
+        private async UniTaskVoid SetDirtyNextFrame() {
+            await UniTask.DelayFrame(1, cancellationToken: destroyCancellationToken);
+            SetDirty();
         }
 
         #if UNITY_EDITOR

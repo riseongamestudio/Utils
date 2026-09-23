@@ -366,7 +366,9 @@ namespace RiseOn.Utils.Editor {
             currentEditorTarget = null;
         }
 
-        public void Dispose() => DestroyEditors();
+        public void Dispose() {
+            DestroyEditors();
+        }
 
         private static void SaveLayoutSettings() {
             LayoutSettingsStack.Push(new LayoutSettings {

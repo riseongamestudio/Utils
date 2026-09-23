@@ -21,7 +21,7 @@ thuộc package nào khác.
 |---|---|---|
 | Unity 6000.3 | | Bản đang dùng để phát triển |
 
-Không cần Odin, DOTween hay package RiseOn nào khác.
+Không cần Odin hay package RiseOn nào khác.
 
 Không hỗ trợ WebGL: trình duyệt chặn UDP (NTP) và không cho đọc response của
 domain khác. Gọi trên WebGL nhận về task lỗi `PlatformNotSupportedException`.

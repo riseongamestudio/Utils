@@ -9,9 +9,9 @@ using UnityEngine.UIElements;
 
 namespace RiseOn.Utils.Editor.SearchWindow {
     /// <summary>
-    /// Window that browses and searches trees of <see cref="SearchNode"/>, one tab per section. Built with UI Toolkit:
-    /// the list only creates rows for what is on screen, so long lists stay fast. Opens as an aux window, like Unity's
-    /// own object picker: it moves by its title bar, resizes by its edges, and remembers its size per window type.
+    /// Window that browses and searches trees of <see cref="SearchNode"/>, one tab per section.<br/>
+    /// Built with UI Toolkit: the list only creates rows for what is on screen, so long lists stay fast.<br/>
+    /// Opens as an aux window, like Unity's own object picker: it moves by its title bar, resizes by its edges, and remembers its size per window type.<br/>
     /// Subclasses add sections in <see cref="RegisterSections"/> and open the window with <see cref="Show"/>.
     /// </summary>
     public abstract class SearchWindow : EditorWindow {
@@ -66,9 +66,9 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         protected abstract void RegisterSections();
 
         /// <summary>
-        /// Highlights the node whose <see cref="SearchNode.Data"/> equals <paramref name="data"/> once its section is
-        /// built, opening the folders above it and switching to its tab. Null highlights the None row. Call before
-        /// <see cref="Show"/>.
+        /// Highlights the node whose <see cref="SearchNode.Data"/> equals <paramref name="data"/> once its section is built, opening the folders above it and switching to its tab.<br/>
+        /// Null highlights the None row.<br/>
+        /// Call before <see cref="Show"/>.
         /// </summary>
         protected void PreselectOnOpen(object data) {
             initialData          = data;
@@ -132,7 +132,9 @@ namespace RiseOn.Utils.Editor.SearchWindow {
 
         // Clicking anywhere else closes it, so a pick never lands on an object the Inspector has stopped showing.
         // Moving and resizing through the title bar and edges keep the focus.
-        private void OnLostFocus() => Close();
+        private void OnLostFocus() {
+            Close();
+        }
 
         private void OnDestroy() {
             SaveSize();
@@ -145,8 +147,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         #region Placement
 
         /// <summary>
-        /// Under the button, or above it when there is no room below. Kept inside the main editor window only when the
-        /// button is in it: Unity exposes no bounds for a floating window on another display.
+        /// Under the button, or above it when there is no room below.<br/>
+        /// Kept inside the main editor window only when the button is in it: Unity exposes no bounds for a floating window on another display.
         /// </summary>
         private static Rect PlaceUnderButton(Rect button, Vector2 size) {
             var rect   = new Rect(button.x, button.yMax, size.x, size.y);
@@ -474,8 +476,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// The stylesheet sits next to this script. It is found through this assembly's asmdef rather than a fixed
-        /// "Packages/..." path, so it still loads when the package is renamed or embedded under Assets.
+        /// The stylesheet sits next to this script.<br/>
+        /// It is found through this assembly's asmdef rather than a fixed "Packages/..." path, so it still loads when the package is renamed or embedded under Assets.
         /// </summary>
         private static StyleSheet LoadStyleSheet() {
             if (cachedStyleSheet != null) return cachedStyleSheet;
@@ -531,8 +533,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <param name="restoreScroll">
-        /// True when the list shows another level or tab, so it goes back to where that one was scrolled. Typing keeps
-        /// the current scroll and only brings the selected row into view.
+        /// True when the list shows another level or tab, so it goes back to where that one was scrolled.<br/>
+        /// Typing keeps the current scroll and only brings the selected row into view.
         /// </param>
         private void RefreshView(bool restoreScroll = false) {
             if (content == null) return;
@@ -738,7 +740,9 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>Keeps arrow keys and Enter from moving focus out of the search field.</summary>
-        private void IgnoreNavigation(EventBase evt) => Consume(evt);
+        private void IgnoreNavigation(EventBase evt) {
+            Consume(evt);
+        }
 
         private void FocusSearchField() {
             rootVisualElement.schedule.Execute(() => searchField?.Q<TextField>()?.Focus());

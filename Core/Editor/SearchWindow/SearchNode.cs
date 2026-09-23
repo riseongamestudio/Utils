@@ -25,8 +25,9 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         public string LabelSearch;
 
         /// <summary>
-        /// What search ranks first, usually the object's name and type. A match only in the rest of the label (a path, a
-        /// namespace) ranks below it. Plain text; defaults to the label without rich text.
+        /// What search ranks first, usually the object's name and type.<br/>
+        /// A match only in the rest of the label (a path, a namespace) ranks below it.<br/>
+        /// Plain text; defaults to the label without rich text.
         /// </summary>
         public string SearchName;
 
@@ -66,9 +67,9 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         internal int RankLength => searchName?.Length ?? 0;
 
         /// <summary>
-        /// Scores the node with Unity Search's fuzzy matcher: the letters of each term in order, not necessarily
-        /// together, with bonuses for consecutive letters, word starts and capitals, so "pb" finds PickableBehaviour.
-        /// Every term must match. Folders never match, so a search lists only what can be picked.
+        /// Scores the node with Unity Search's fuzzy matcher: the letters of each term in order, not necessarily together, with bonuses for consecutive letters, word starts and capitals, so "pb" finds PickableBehaviour.<br/>
+        /// Every term must match.<br/>
+        /// Folders never match, so a search lists only what can be picked.
         /// </summary>
         internal bool TryScore(string[] terms, out long score) {
             score = 0;
@@ -114,8 +115,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         private static readonly string[] tagNames = { "b", "i", "u", "s", "color", "size", "alpha", "mark", "noparse" };
 
         /// <summary>
-        /// Drops the formatting tags a label may use and keeps everything else, so <c>&lt;Transform&gt;</c> in a label
-        /// stays searchable.
+        /// Drops the formatting tags a label may use and keeps everything else, so <c>&lt;Transform&gt;</c> in a label stays searchable.
         /// </summary>
         internal static string Strip(string text) {
             if (string.IsNullOrEmpty(text)) return string.Empty;

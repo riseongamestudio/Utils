@@ -4,19 +4,20 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
-## [1.0.0] - Chưa phát hành
+## [1.0.0] - 2026-09-23
 
 ### Thêm
 
 - `Singleton<T>` / `ISingleton<T>`, truy cập được qua lớp hoặc qua interface.
-- `Bounds2D`, `VecAxis`, `WaitForSecondCache`.
-- Extension cho Vector, Transform, Color, Collection, Random, Object, Coroutine,
-  String, Enum, DOTween, Undo và UnityEvent.
-- Lớp tiện ích `UndoUtils`, `HandlesUtils`, `MathUtils`.
+- `Bounds2D`.
+- Lớp tiện ích đuôi `Utils`, phần lớn là extension: Vector, Transform, Color,
+  Collection (có push / pop / peek hai đầu cho `IList<T>`), Random, Object, String
+  (có các hàm `TagXX()` bọc thẻ rich text), Undo, UnityEvent, Handles, Math, Polygon,
+  Value (`Swap`, `RaiseTo`, `LowerTo`).
 - Attribute `EnumLabel` và `ForwardAttributesTo` (cần Odin Inspector).
 - Tool Editor: Capture Game View, Find References In Scene BETTER, Replace
   Component, cửa sổ tìm kiếm component / object, `InlineEditorImitator`,
-  `PrefabExtensions`.
+  `PrefabUtils`.
 - Cửa sổ tìm kiếm viết bằng UI Toolkit: danh sách chỉ dựng các dòng đang hiện,
   icon chỉ nạp khi dòng hiện ra (`SearchNode.IconLoader`), cây component dựng một
   lần mỗi lần domain reload, kết quả tab Assets giữ lại tới khi có asset thay đổi.

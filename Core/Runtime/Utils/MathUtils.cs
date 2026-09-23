@@ -1,43 +1,32 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace RiseOn.Utils {
     public static class MathUtils {
-        public static float Pow(float a, uint x) {
-            float result = 1f;
-
-            while (x > 0) {
-                if ((x & 1) != 0) {
-                    result *= a;
-                }
-
-                a *=  a;
-                x >>= 1;
-            }
-
-            return result;
+        /// <summary>
+        /// Power ease-in: t^power, slow at first and speeding up into 1.<br/>
+        /// 1 is linear, 2 is InQuad, 3 InCubic, 4 InQuart, 5 InQuint.
+        /// </summary>
+        public static float EaseInPower(float t, uint power) {
+            return Mathf.Pow(t, power);
         }
 
         /// <summary>
-        /// Format: 1 + (-1)^(<see cref="power"/> + 1) * (<see cref="time"/> - 1)^<see cref="power"/> <br/>
-        /// ______/ <br/>
-        /// _____/  <br/>
-        /// ____/   <br/>
-        /// ___/    <br/>
-        /// __/     <br/>
-        /// _/      <br/>
-        /// 0----->1<br/>
+        /// Power ease-out: 1 - (1 - t)^power, fast at first and slowing into 1.<br/>
+        /// 1 is linear, 2 is OutQuad, 3 OutCubic, 4 OutQuart, 5 OutQuint.
         /// </summary>
-        public static float Evaluate(float time, uint power) {
-            return 1 + Pow(-1, power + 1) * Pow(time - 1, power);
+        public static float EaseOutPower(float t, uint power) {
+            return 1 - Mathf.Pow(1 - t, power);
         }
 
-        public static void Swap<T>(ref T left, ref T right) => (left, right) = (right, left);
-
-        public static IEnumerable<Vector2Int> IEIndex2D(int xStart, int xLen, int yStart, int yLen) {
-            for (int x = xStart; x < xStart + xLen; ++x)
-            for (int y = yStart; y < yStart + yLen; ++y)
-                yield return new(x, y);
+        /// <summary>
+        /// Power ease-in-out: slow at both ends and fastest through the middle, reaching 0.5 at t = 0.5.<br/>
+        /// The first half is <see cref="EaseInPower"/> squeezed into [0, 0.5], the second <see cref="EaseOutPower"/> into [0.5, 1].<br/>
+        /// 2 is InOutQuad, 3 InOutCubic, 4 InOutQuart, 5 InOutQuint.
+        /// </summary>
+        public static float EaseInOutPower(float t, uint power) {
+            return t < 0.5f
+                ? Mathf.Pow(2 * t, power) / 2
+                : 1 - Mathf.Pow(2 * (1 - t), power) / 2;
         }
     }
 }

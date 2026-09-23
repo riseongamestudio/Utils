@@ -5,8 +5,7 @@ using UnityEngine;
 
 namespace RiseOn.Utils.Editor.SearchWindow {
     /// <summary>
-    /// Picks a component type from the same set Unity's Add Component offers, in the same folders: native components as
-    /// the Component menu files them, scripts by their AddComponentMenu path or else by namespace.
+    /// Picks a component type from the same set Unity's Add Component offers, in the same folders: native components as the Component menu files them, scripts by their AddComponentMenu path or else by namespace.
     /// </summary>
     public class ComponentSearchWindow : SearchWindow {
         private const string ComponentsLabel   = "Components";
@@ -69,8 +68,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// The folder of every native component in Unity's Component menu, keyed by type name: "Component/Physics/Box
-        /// Collider" gives BoxCollider → "Physics". The menu already leaves out what cannot be added by hand.
+        /// The folder of every native component in Unity's Component menu, keyed by type name: "Component/Physics/Box Collider" gives BoxCollider → "Physics".<br/>
+        /// The menu already leaves out what cannot be added by hand.
         /// </summary>
         private static Dictionary<string, string> GetNativeMenuFolders() {
             var folders = new Dictionary<string, string>();

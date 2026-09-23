@@ -2,7 +2,7 @@
 
 Tiện ích cho SpriteRenderer, SpriteMask và thứ tự vẽ 2D: bám theo điểm neo của
 renderer khác, đổi pivot sprite ngay trên object, raycaster cho EventSystem
-sắp theo thứ tự vẽ thật, và extension cho `SpriteRenderer` / `ParticleSystem`.
+sắp theo thứ tự vẽ thật, và hàm đổi từng kênh màu của `SpriteRenderer`.
 
 Package `com.riseon.utils.renderers`, namespace `RiseOn.Utils.Renderers`. Xây
 trên [RiseOn.Utils](../Core/README.md).
@@ -23,10 +23,9 @@ trên [RiseOn.Utils](../Core/README.md).
 | Unity 6000.3 | | Bản đang dùng để phát triển |
 | [`com.riseon.utils`](../Core/README.md) 1.0.0 | Tự cài theo `package.json` | Undo, extension |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute và Inspector của các component |
-| [DOTween](https://dotween.demigiant.com) | Cài tay từ Asset Store | `com.riseon.utils` cần |
 
 "Tự cài" là khi cài qua OpenUPM; cài bằng git URL thì phải cài `com.riseon.utils`
-trước. Odin và DOTween không có trên UPM nên phải cài vào project trước.
+trước. Odin không có trên UPM nên phải cài vào project trước.
 
 ## Cài đặt
 
@@ -71,14 +70,6 @@ component rồi chọn *Pivot* (9 điểm hoặc tùy chỉnh).
 `RenderOrder2DRaycaster`. Sự kiện đi tới Collider2D được vẽ trên cùng, xét cả
 SortingGroup, sorting layer và *Order in Layer*.
 
-**Hiệu ứng tại điểm va chạm**:
-
-```csharp
-using RiseOn.Utils.Renderers;
-
-vfx.EmitAt(hitPoint, amount: 10);
-```
-
 ## Thành phần
 
 | Thành phần | Việc | Chi tiết |
@@ -86,7 +77,7 @@ vfx.EmitAt(hitPoint, amount: 10);
 | `SpriteRendererAnchorer`, `SpriteMaskAnchorer` | Bám điểm neo trên khung renderer khác | [Runtime/RendererAnchorer](Runtime/RendererAnchorer/README.md) |
 | `SpriteRendererExt`, `SpriteMaskExt` | Pivot ghi đè, chỉnh renderer con từ object cha | [Runtime/RendererExt](Runtime/RendererExt/README.md) |
 | `RenderOrder2DRaycaster` | Raycaster 2D theo thứ tự vẽ | [Runtime/RenderOrder2DRaycaster](Runtime/RenderOrder2DRaycaster/README.md) |
-| `SpriteRendererExtensions`, `ParticleSystemExtensions` | `SetAlpha`, phát hạt tại một điểm | [Runtime/Extensions](Runtime/Extensions/README.md) |
+| `SpriteRendererUtils` | Đổi một kênh màu | [Runtime/Utils](Runtime/Utils/README.md) |
 
 ## Lịch sử thay đổi
 

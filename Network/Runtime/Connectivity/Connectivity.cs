@@ -22,14 +22,15 @@ namespace RiseOn.Utils.Network {
         };
 
         /// <summary>
-        /// Instant hint without any request. False means the device has no network interface up at all; true does not
-        /// mean the internet is reachable. Main thread only.
+        /// Instant hint without any request.<br/>
+        /// False means the device has no network interface up at all; true does not mean the internet is reachable.<br/>
+        /// Main thread only.
         /// </summary>
         public static bool HasNetwork => Application.internetReachability is not NetworkReachability.NotReachable;
 
         /// <summary>
-        /// Probes a few endpoints in parallel and returns true as soon as one answers 204, false when none does within
-        /// <paramref name="timeoutSeconds"/>. Only a cancelled <paramref name="cancellationToken"/> throws.
+        /// Probes a few endpoints in parallel and returns true as soon as one answers 204, false when none does within <paramref name="timeoutSeconds"/>.<br/>
+        /// Only a canceled <paramref name="cancellationToken"/> throws.<br/>
         /// Not supported on WebGL.
         /// </summary>
         public static Task<bool> HasInternetAsync(
