@@ -20,7 +20,7 @@ Package `com.riseon.utils.ui`, namespace `RiseOn.Utils.UI`. Xây trên
 | Phụ thuộc | Cách có | Dùng cho |
 |---|---|---|
 | Unity 6000.3 | | Bản đang dùng để phát triển |
-| [`com.riseon.utils`](../Core/README.md) 1.0.0 | Tự cài theo `package.json` | Undo, extension |
+| [`com.riseon.utils`](../Core/README.md) 1.0.1 | Tự cài theo `package.json` | Undo, extension |
 | `com.unity.ugui` 2.0.0 | Tự cài theo `package.json` | UGUI |
 | [UniTask](https://github.com/Cysharp/UniTask) (`com.cysharp.unitask`) 2.5.11 | Tự cài theo `package.json`, cần scope `com.cysharp` | Chờ frame trong `AspectRatioFitterElement` |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute Inspector của các component |
@@ -45,7 +45,7 @@ UniTask được kéo về tự động:
     }
   ],
   "dependencies": {
-    "com.riseon.utils.ui": "1.0.0"
+    "com.riseon.utils.ui": "1.0.1"
   }
 }
 ```
@@ -54,7 +54,7 @@ UniTask được kéo về tự động:
 phụ thuộc qua git), rồi:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/UI#com.riseon.utils.ui/1.0.0
+https://github.com/riseongamestudio/Utils.git?path=/UI#com.riseon.utils.ui/1.0.1
 ```
 
 **Thư mục local**: `"com.riseon.utils.ui": "file:D:/path/to/Utils/UI"`.

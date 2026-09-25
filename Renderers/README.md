@@ -21,7 +21,7 @@ trên [RiseOn.Utils](../Core/README.md).
 | Phụ thuộc | Cách có | Dùng cho |
 |---|---|---|
 | Unity 6000.3 | | Bản đang dùng để phát triển |
-| [`com.riseon.utils`](../Core/README.md) 1.0.0 | Tự cài theo `package.json` | Undo, extension |
+| [`com.riseon.utils`](../Core/README.md) 1.0.1 | Tự cài theo `package.json` | Undo, extension |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute và Inspector của các component |
 
 "Tự cài" là khi cài qua OpenUPM; cài bằng git URL thì phải cài `com.riseon.utils`
@@ -43,7 +43,7 @@ trước. Odin không có trên UPM nên phải cài vào project trước.
     }
   ],
   "dependencies": {
-    "com.riseon.utils.renderers": "1.0.0"
+    "com.riseon.utils.renderers": "1.0.1"
   }
 }
 ```
@@ -52,7 +52,7 @@ trước. Odin không có trên UPM nên phải cài vào project trước.
 qua git), rồi:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Renderers#com.riseon.utils.renderers/1.0.0
+https://github.com/riseongamestudio/Utils.git?path=/Renderers#com.riseon.utils.renderers/1.0.1
 ```
 
 **Thư mục local**: `"com.riseon.utils.renderers": "file:D:/path/to/Utils/Renderers"`.

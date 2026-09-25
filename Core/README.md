@@ -31,7 +31,7 @@ code Editor trong `RiseOn.Utils.Editor`.
 
 UI Toolkit là module có sẵn của Unity, bật mặc định. Odin không có trên UPM nên
 không khai được trong `package.json`, phải cài vào project trước; thiếu Odin thì
-assembly `RiseOn.Utils` không biên dịch được.
+project báo đúng một lỗi từ `RiseOn.Utils.Requirements`.
 
 ## Cài đặt
 
@@ -48,7 +48,7 @@ assembly `RiseOn.Utils` không biên dịch được.
     }
   ],
   "dependencies": {
-    "com.riseon.utils": "1.0.0"
+    "com.riseon.utils": "1.0.1"
   }
 }
 ```
@@ -59,7 +59,7 @@ Hoặc chạy `openupm add com.riseon.utils` bằng
 **Git URL**: *Package Manager → + → Add package from git URL*:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Core#com.riseon.utils/1.0.0
+https://github.com/riseongamestudio/Utils.git?path=/Core#com.riseon.utils/1.0.1
 ```
 
 Repo chứa nhiều package nên tag có tiền tố tên package
