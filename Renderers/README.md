@@ -26,6 +26,7 @@ trên [RiseOn.Utils](../Core/README.md).
 
 "Tự cài" là khi cài qua OpenUPM; cài bằng git URL thì phải cài `com.riseon.utils`
 trước. Odin không có trên UPM nên phải cài vào project trước.
+Thiếu Odin thì project báo một lỗi từ `RiseOn.Utils.Renderers.Requirements`.
 
 ## Cài đặt
 
@@ -43,7 +44,7 @@ trước. Odin không có trên UPM nên phải cài vào project trước.
     }
   ],
   "dependencies": {
-    "com.riseon.utils.renderers": "1.0.1"
+    "com.riseon.utils.renderers": "1.0.2"
   }
 }
 ```
@@ -52,7 +53,7 @@ trước. Odin không có trên UPM nên phải cài vào project trước.
 qua git), rồi:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Renderers#com.riseon.utils.renderers/1.0.1
+https://github.com/riseongamestudio/Utils.git?path=/Renderers#com.riseon.utils.renderers/1.0.2
 ```
 
 **Thư mục local**: `"com.riseon.utils.renderers": "file:D:/path/to/Utils/Renderers"`.

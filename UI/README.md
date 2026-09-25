@@ -28,6 +28,7 @@ Package `com.riseon.utils.ui`, namespace `RiseOn.Utils.UI`. Xây trên
 "Tự cài" là khi cài qua OpenUPM; cài bằng git URL thì phải cài `com.riseon.utils`
 trước. Project đã cài UniTask bằng git URL thì bản đó được dùng luôn, không cần scope
 `com.cysharp`. Odin không có trên UPM nên phải cài vào project trước.
+Thiếu Odin thì project báo một lỗi từ `RiseOn.Utils.UI.Requirements`.
 
 ## Cài đặt
 
@@ -45,7 +46,7 @@ UniTask được kéo về tự động:
     }
   ],
   "dependencies": {
-    "com.riseon.utils.ui": "1.0.1"
+    "com.riseon.utils.ui": "1.0.2"
   }
 }
 ```
@@ -54,7 +55,7 @@ UniTask được kéo về tự động:
 phụ thuộc qua git), rồi:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/UI#com.riseon.utils.ui/1.0.1
+https://github.com/riseongamestudio/Utils.git?path=/UI#com.riseon.utils.ui/1.0.2
 ```
 
 **Thư mục local**: `"com.riseon.utils.ui": "file:D:/path/to/Utils/UI"`.

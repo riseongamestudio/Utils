@@ -1,0 +1,16 @@
+{
+    "name": "RiseOn.Utils.UI.Requirements",
+    "rootNamespace": "RiseOn.Utils.UI.Requirements",
+    "references": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
