@@ -24,8 +24,8 @@ namespace RiseOn.Utils {
         [SerializeField, FoldoutGroup("Singleton")]
         private bool isPersistent = true;
 
-        [SerializeField, FoldoutGroup("Singleton"), FormerlySerializedAs("destroyDuplicateTarget")]
-        private DuplicateAction onDuplicate = DuplicateAction.DestroyGameObject;
+        [SerializeField, FoldoutGroup("Singleton"), FormerlySerializedAs("onDuplicate"), FormerlySerializedAs("destroyDuplicateTarget")]
+        private DuplicateAction duplicateAction = DuplicateAction.DestroyGameObject;
 
         private protected Singleton() { }
 
@@ -35,7 +35,7 @@ namespace RiseOn.Utils {
         protected internal void Awake() {
             switch (SingletonHub.Register(this)) {
                 case SingletonHub.RegisterResult.Duplicate:
-                    Destroy(onDuplicate switch {
+                    Destroy(duplicateAction switch {
                         DuplicateAction.DestroyGameObject => gameObject
                       , DuplicateAction.DestroyComponent  => this
 

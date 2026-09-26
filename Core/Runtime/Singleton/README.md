@@ -51,7 +51,7 @@ Foldout *Singleton*:
 | Trường | Ý nghĩa |
 |---|---|
 | *Is Persistent* | Mặc định bật: gọi `DontDestroyOnLoad`. Chỉ có tác dụng với GameObject gốc, Inspector cảnh báo khi object có cha |
-| *On Duplicate* | Bản trùng xuất hiện sau tự hủy cả `GameObject` (*Destroy Game Object*) hay chỉ component (*Destroy Component*) |
+| *Duplicate Action* | Bản trùng xuất hiện sau tự hủy cả `GameObject` (*Destroy Game Object*) hay chỉ component (*Destroy Component*) |
 
 ## Lưu ý
 

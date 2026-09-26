@@ -48,7 +48,7 @@ project báo đúng một lỗi từ `RiseOn.Utils.Requirements`.
     }
   ],
   "dependencies": {
-    "com.riseon.utils": "1.0.1"
+    "com.riseon.utils": "1.0.2"
   }
 }
 ```
@@ -59,7 +59,7 @@ Hoặc chạy `openupm add com.riseon.utils` bằng
 **Git URL**: *Package Manager → + → Add package from git URL*:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Core#com.riseon.utils/1.0.1
+https://github.com/riseongamestudio/Utils.git?path=/Core#com.riseon.utils/1.0.2
 ```
 
 Repo chứa nhiều package nên tag có tiền tố tên package
