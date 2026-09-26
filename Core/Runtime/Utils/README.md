@@ -231,7 +231,7 @@ theo văn hoá bất biến, nên `1.5em` không thành `1,5em` trên máy đặ
 | Hàm | Lớp | Việc |
 |---|---|---|
 | `color.WithA(a)`, `WithR`, `WithG`, `WithB`, `With(index, value)` | `ColorUtils` | Bản sao đổi một kênh; có cho cả `Color` và `Color32` |
-| `text.ToUpperFirst()` | `StringUtils` | Viết hoa chữ đầu |
+| `text.UpcaseFirst()`, `DowncaseFirst`, `UpcaseLast`, `DowncaseLast` | `StringUtils` | Viết hoa / viết thường ký tự đầu hoặc cuối, theo văn hoá bất biến |
 | `obj.IsPlaying()` | `ObjectUtils` | Đang Play thật sự: trả `false` với object trong prefab stage hay asset, kể cả khi Editor đang Play |
 | `obj.PingObject()` | `ObjectUtils` | Nháy object trong Hierarchy / Project (chỉ Editor) |
 | `obj.GetPath(withSceneName)` | `ObjectUtils` | Đường dẫn dễ đọc: `Scene/Parent/Child<Component>`, hoặc đường dẫn asset |

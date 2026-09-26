@@ -3,8 +3,20 @@ using UnityEngine;
 
 namespace RiseOn.Utils {
     public static class StringUtils {
-        public static string ToUpperFirst(this string value) {
+        public static string UpcaseFirst(this string value) {
             return string.IsNullOrEmpty(value) ? value : char.ToUpperInvariant(value[0]) + value[1..];
+        }
+
+        public static string DowncaseFirst(this string value) {
+            return string.IsNullOrEmpty(value) ? value : char.ToLowerInvariant(value[0]) + value[1..];
+        }
+
+        public static string UpcaseLast(this string value) {
+            return string.IsNullOrEmpty(value) ? value : value[..^1] + char.ToUpperInvariant(value[^1]);
+        }
+
+        public static string DowncaseLast(this string value) {
+            return string.IsNullOrEmpty(value) ? value : value[..^1] + char.ToLowerInvariant(value[^1]);
         }
 
         #region Rich text tags

@@ -4,6 +4,17 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.4] - 2026-09-26
+
+### Đổi
+
+- `ToUpperFirst` đổi tên thành `UpcaseFirst`; code gọi tên cũ phải đổi theo.
+
+### Thêm
+
+- `DowncaseFirst`, `UpcaseLast`, `DowncaseLast`: cùng họ với `UpcaseFirst`, đổi hoa / thường ở ký
+  tự đầu hoặc cuối theo văn hoá bất biến.
+
 ## [1.0.3] - 2026-09-26
 
 ### Đổi
