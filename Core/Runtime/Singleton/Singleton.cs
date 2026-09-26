@@ -1,7 +1,6 @@
 ﻿using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace RiseOn.Utils {
     public abstract class Singleton<T> : Singleton, ISingleton<T> where T : class, ISingleton<T> {
@@ -24,7 +23,7 @@ namespace RiseOn.Utils {
         [SerializeField, FoldoutGroup("Singleton")]
         private bool isPersistent = true;
 
-        [SerializeField, FoldoutGroup("Singleton"), FormerlySerializedAs("onDuplicate"), FormerlySerializedAs("destroyDuplicateTarget")]
+        [SerializeField, FoldoutGroup("Singleton")]
         private DuplicateAction duplicateAction = DuplicateAction.DestroyGameObject;
 
         private protected Singleton() { }

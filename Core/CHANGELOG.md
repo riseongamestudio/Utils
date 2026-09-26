@@ -4,6 +4,14 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.3] - 2026-09-26
+
+### Đổi
+
+- `Singleton.duplicateAction` bỏ `FormerlySerializedAs`: scene và prefab còn lưu tên cũ `onDuplicate`
+  hoặc `destroyDuplicateTarget` phải đổi key thành `duplicateAction`, không thì giá trị về mặc định
+  (*Destroy Game Object*).
+
 ## [1.0.2] - 2026-09-26
 
 ### Đổi
