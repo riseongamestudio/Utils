@@ -115,6 +115,7 @@ namespace RiseOn.Utils {
             // around corners instead of breaking at them; on an open path it also runs a pixel past each end, where
             // the cap joins the two sides.
             static void DrawSide(Camera camera, Vector3[] screen, int vertices, bool closed, float side) {
+                var started = false;
                 var first = Vector3.zero;
                 var previous = Vector3.zero;
 
@@ -124,32 +125,44 @@ namespace RiseOn.Utils {
                     var directionIn = hasIn ? Direction(screen[(i - 1 + vertices) % vertices], screen[i]) : Vector2.zero;
                     var directionOut = hasOut ? Direction(screen[i], screen[(i + 1) % vertices]) : Vector2.zero;
 
-                    Vector2 offset;
-
                     if (hasIn && hasOut) {
                         var normalIn = Vector2.Perpendicular(directionIn);
                         var normalOut = Vector2.Perpendicular(directionOut);
                         var miter = normalIn + normalOut;
+                        var uTurn = miter.sqrMagnitude < 1e-6f;
+                        var cos = uTurn ? 0 : Vector2.Dot(miter.normalized, normalOut);
 
-                        // A U-turn has no bisector; a very sharp corner is clamped to twice the width instead of
-                        // spiking out.
-                        miter = miter.sqrMagnitude < 1e-6f ? normalIn : miter.normalized;
-                        offset = miter * (side / Mathf.Max(Vector2.Dot(miter, normalOut), .5f));
+                        // Past a 120° turn the miter would spike far off the stroke. The outer side is beveled
+                        // instead, a pixel past the vertex and back across, which on a U-turn is an end's cap; the
+                        // inner side stays clamped, the core covers it there.
+                        if (cos >= .5f) {
+                            Emit(camera, screen[i], miter.normalized * (side / cos), ref started, ref first, ref previous);
+                        } else if (uTurn || Cross(directionIn, directionOut) * side < 0) {
+                            Emit(camera, screen[i], normalIn * side + directionIn, ref started, ref first, ref previous);
+                            Emit(camera, screen[i], normalOut * side - directionOut, ref started, ref first, ref previous);
+                        } else {
+                            Emit(camera, screen[i], miter.normalized * (side * 2), ref started, ref first, ref previous);
+                        }
                     } else if (hasOut) {
-                        offset = Vector2.Perpendicular(directionOut) * side - directionOut;
+                        Emit(camera, screen[i], Vector2.Perpendicular(directionOut) * side - directionOut, ref started, ref first, ref previous);
                     } else {
-                        offset = Vector2.Perpendicular(directionIn) * side + directionIn;
+                        Emit(camera, screen[i], Vector2.Perpendicular(directionIn) * side + directionIn, ref started, ref first, ref previous);
                     }
-
-                    var point = camera.ScreenToWorldPoint(screen[i] + (Vector3)offset);
-
-                    if (i == 0) first = point;
-                    else Gizmos.DrawLine(previous, point);
-
-                    previous = point;
                 }
 
                 if (closed) Gizmos.DrawLine(previous, first);
+
+                static void Emit(Camera camera, Vector3 vertex, Vector2 offset, ref bool started, ref Vector3 first, ref Vector3 previous) {
+                    var point = camera.ScreenToWorldPoint(vertex + (Vector3)offset);
+
+                    if (started) Gizmos.DrawLine(previous, point);
+                    else first = point;
+
+                    started = true;
+                    previous = point;
+                }
+
+                static float Cross(Vector2 a, Vector2 b) => a.x * b.y - a.y * b.x;
             }
 
             // Across the end at `tip`, a pixel beyond it, joining the two sides where they stop.

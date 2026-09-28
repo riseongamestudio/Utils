@@ -4,6 +4,23 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.6] - 2026-09-28
+
+### Đổi
+
+- `HandleUtils.GetMatrix` / `SetMatrix` gộp thành property `HandleUtils.matrix`, như `Handles.matrix`.
+- `HandleUtils.DrawRect` đưa hai màu ra sau bốn góc: `DrawRect(c0, c1, c2, c3, faceColor, outlineColor)`.
+- Độ dày mặc định của các đường `HandleUtils` (`width`, `outlineWidth`) từ `1` lên `3`.
+- Đường `HandleUtils` bù lại phần alpha mà `Handles.DrawAAPolyLine` tự giảm (còn 75%), nên màu ra
+  đúng màu truyền vào.
+- `GizmoUtils`: khớp gắt hơn 120° thì viền mặt ngoài vát thay vì kéo mũi nhọn ra xa nét.
+
+### Thêm
+
+- `HandleUtils.DrawLine`, `DrawPath`, `DrawWireCircle`, `DrawWireCapsule`: đường khử răng cưa không
+  viền, dày theo pixel màn hình; hình tròn và capsule có tùy chọn `cross` vẽ thêm đường chữ thập.
+- `HandleUtils.DrawRect` nhận `Vector3[]` bốn góc hoặc `Rect`.
+
 ## [1.0.5] - 2026-09-28
 
 ### Đổi

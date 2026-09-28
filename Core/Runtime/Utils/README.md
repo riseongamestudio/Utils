@@ -176,30 +176,52 @@ private void OnDrawGizmos() {
     var size = HandleUtils.GetSize(transform.position); // kích thước handle theo mức zoom
     HandleUtils.Label(transform.position + Vector3.up * size, name, Color.yellow); // chữ canh giữa điểm
 
-    var old = HandleUtils.GetMatrix();
-    HandleUtils.SetMatrix(transform.localToWorldMatrix);
-    HandleUtils.DrawRect(new Color(1, 0, 0, .25f), Color.red,
-        new(0, 0), new(1, 0), new(1, 1), new(0, 1));
-    HandleUtils.SetMatrix(old);
+    var old = HandleUtils.matrix;
+    HandleUtils.matrix = transform.localToWorldMatrix;
+    HandleUtils.DrawRect(new(0, 0), new(1, 0), new(1, 1), new(0, 1),
+        new Color(1, 0, 0, .25f), Color.red);
+    HandleUtils.matrix = old;
 }
 ```
 
-Ngoài Editor, `GetSize` trả `1`, `GetMatrix` trả `identity`, các hàm vẽ không
+Ngoài Editor, `GetSize` trả `1`, `matrix` trả `identity`, các hàm vẽ không
 làm gì.
+
+`DrawRect` còn nhận `Vector3[]` bốn góc hoặc một `Rect` trong mặt phẳng XY.
+
+### Đường
+
+Đường khử răng cưa, dày theo pixel màn hình:
+
+```csharp
+HandleUtils.DrawLine(a, b, Color.white);                           // dày 3
+HandleUtils.DrawPath(points, Color.cyan, 2, closed: true);         // khép về điểm đầu
+HandleUtils.DrawWireCircle(center, radius, Color.yellow, cross: true); // kèm hai đường kính ngang, dọc
+HandleUtils.DrawWireCapsule(from, to, radius, Color.green);        // hai nửa tròn nối hai cạnh thẳng
+```
+
+- `width` mặc định `3`, tính bằng pixel màn hình.
+- Hình tròn và capsule nằm trong mặt phẳng XY; capsule có đoạn dài 0 thì vẽ thành hình tròn.
+- `cross` của capsule vẽ một đường dọc từ đầu này tới đầu kia và một đường ngang ở mỗi đầu đoạn.
+- `DrawAAPolyLine` của Unity tự giảm alpha còn 75%; các hàm ở đây đã bù lại nên màu ra đúng
+  màu truyền vào.
 
 ### Đường có viền
 
 Đường vẽ đè lên một đường rộng hơn màu viền, nhìn rõ trên mọi nền:
 
 ```csharp
-HandleUtils.DrawOutlinedLine(a, b, Color.white, Color.black);                    // dày 1, viền 1 mỗi bên
-HandleUtils.DrawOutlinedPath(points, Color.cyan, Color.black, 3, 1, closed: true); // khép về điểm đầu
+HandleUtils.DrawOutlinedLine(a, b, Color.white, Color.black);                    // dày 3, viền 3 mỗi bên
+HandleUtils.DrawOutlinedPath(points, Color.cyan, Color.black, 2, 1, closed: true); // khép về điểm đầu
 HandleUtils.DrawOutlinedWireCircle(center, radius, Color.yellow, Color.black);   // trong mặt phẳng XY
 ```
 
-- `width` và `outlineWidth` tính bằng pixel màn hình; viền cộng thêm ở mỗi bên.
-- Đi theo `HandleUtils.SetMatrix`, không theo `Gizmos.matrix`.
+- `width` và `outlineWidth` mặc định `3`, tính bằng pixel màn hình; viền cộng thêm ở mỗi bên.
 - Đường hở có viền bọc qua cả hai đầu.
+
+Mọi hàm vẽ đường:
+
+- Đi theo `HandleUtils.matrix`, không theo `Gizmos.matrix`.
 - `points` nhận mọi `IReadOnlyList<Vector3>`, dưới hai điểm thì không vẽ.
 - Không cấp phát: bộ đệm mượn từ `ArrayPool`.
 
@@ -218,6 +240,8 @@ private void OnDrawGizmos() {
 
 - Đường gizmo luôn dày 1 pixel, nên không có tham số độ dày: viền là hai đường 1 pixel
   hai bên, gấp theo góc ở mỗi khớp.
+- Khớp gắt hơn 120° thì mặt ngoài vát (quay đầu thì thành nắp), mặt trong giữ góc, không
+  đâm nhọn ra xa nét.
 - Cần đường dày hơn thì dùng `HandleUtils`.
 - Bản build bỏ qua lời gọi.
 
