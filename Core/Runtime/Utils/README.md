@@ -10,7 +10,8 @@ extension method, gọi thẳng trên đối tượng; phần còn lại gọi t
 - [Collection và Random](#collection-và-random)
 - [Undo](#undo)
 - [UnityEvent](#unityevent)
-- [HandlesUtils](#handlesutils)
+- [HandleUtils](#handleutils)
+- [GizmoUtils](#gizmoutils)
 - [MathUtils và ValueUtils](#mathutils-và-valueutils)
 - [Rich text](#rich-text)
 - [Khác](#khác)
@@ -166,25 +167,59 @@ private void Wire() {
 - Hàm đích phải thuộc một `UnityEngine.Object`, như mọi persistent listener.
 - Chỉ chạy trong Editor; bản build bỏ qua lời gọi.
 
-## HandlesUtils
+## HandleUtils
 
 Vẽ gizmo bằng `Handles` ngay trong code runtime, không cần `#if UNITY_EDITOR`:
 
 ```csharp
 private void OnDrawGizmos() {
-    var size = HandlesUtils.GetSize(transform.position); // kích thước handle theo mức zoom
-    HandlesUtils.Label(transform.position + Vector3.up * size, name, Color.yellow); // chữ canh giữa điểm
+    var size = HandleUtils.GetSize(transform.position); // kích thước handle theo mức zoom
+    HandleUtils.Label(transform.position + Vector3.up * size, name, Color.yellow); // chữ canh giữa điểm
 
-    var old = HandlesUtils.GetMatrix();
-    HandlesUtils.SetMatrix(transform.localToWorldMatrix);
-    HandlesUtils.DrawRect(new Color(1, 0, 0, .25f), Color.red,
+    var old = HandleUtils.GetMatrix();
+    HandleUtils.SetMatrix(transform.localToWorldMatrix);
+    HandleUtils.DrawRect(new Color(1, 0, 0, .25f), Color.red,
         new(0, 0), new(1, 0), new(1, 1), new(0, 1));
-    HandlesUtils.SetMatrix(old);
+    HandleUtils.SetMatrix(old);
 }
 ```
 
 Ngoài Editor, `GetSize` trả `1`, `GetMatrix` trả `identity`, các hàm vẽ không
 làm gì.
+
+### Đường có viền
+
+Đường vẽ đè lên một đường rộng hơn màu viền, nhìn rõ trên mọi nền:
+
+```csharp
+HandleUtils.DrawOutlinedLine(a, b, Color.white, Color.black);                    // dày 1, viền 1 mỗi bên
+HandleUtils.DrawOutlinedPath(points, Color.cyan, Color.black, 3, 1, closed: true); // khép về điểm đầu
+HandleUtils.DrawOutlinedWireCircle(center, radius, Color.yellow, Color.black);   // trong mặt phẳng XY
+```
+
+- `width` và `outlineWidth` tính bằng pixel màn hình; viền cộng thêm ở mỗi bên.
+- Đi theo `HandleUtils.SetMatrix`, không theo `Gizmos.matrix`.
+- Đường hở có viền bọc qua cả hai đầu.
+- `points` nhận mọi `IReadOnlyList<Vector3>`, dưới hai điểm thì không vẽ.
+- Không cấp phát: bộ đệm mượn từ `ArrayPool`.
+
+## GizmoUtils
+
+Cùng bộ hàm đường có viền nhưng vẽ bằng `Gizmos`, nên theo `Gizmos.matrix` và nút
+bật/tắt Gizmos của Scene view:
+
+```csharp
+private void OnDrawGizmos() {
+    Gizmos.matrix = transform.localToWorldMatrix;
+    GizmoUtils.DrawOutlinedPath(localPoints, Color.green, Color.black, closed: true);
+    GizmoUtils.DrawOutlinedWireCircle(Vector3.zero, 0.5f, Color.yellow, Color.black);
+}
+```
+
+- Đường gizmo luôn dày 1 pixel, nên không có tham số độ dày: viền là hai đường 1 pixel
+  hai bên, gấp theo góc ở mỗi khớp.
+- Cần đường dày hơn thì dùng `HandleUtils`.
+- Bản build bỏ qua lời gọi.
 
 ## MathUtils và ValueUtils
 

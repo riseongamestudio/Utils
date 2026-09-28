@@ -4,6 +4,19 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.5] - 2026-09-28
+
+### Đổi
+
+- `HandlesUtils` đổi tên thành `HandleUtils` (GUID file giữ nguyên); code gọi tên cũ phải đổi theo.
+
+### Thêm
+
+- `HandleUtils.DrawOutlinedLine`, `DrawOutlinedPath`, `DrawOutlinedWireCircle`: đường vẽ đè lên một
+  đường rộng hơn màu viền, độ dày và viền tính bằng pixel màn hình, không cấp phát.
+- `GizmoUtils` với cùng ba hàm, vẽ bằng `Gizmos` nên theo `Gizmos.matrix` và nút bật/tắt Gizmos;
+  viền 1 pixel mỗi bên, gấp theo góc ở mỗi khớp.
+
 ## [1.0.4] - 2026-09-26
 
 ### Đổi

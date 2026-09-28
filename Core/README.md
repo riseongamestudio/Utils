@@ -48,7 +48,7 @@ project báo đúng một lỗi từ `RiseOn.Utils.Requirements`.
     }
   ],
   "dependencies": {
-    "com.riseon.utils": "1.0.4"
+    "com.riseon.utils": "1.0.5"
   }
 }
 ```
@@ -59,7 +59,7 @@ Hoặc chạy `openupm add com.riseon.utils` bằng
 **Git URL**: *Package Manager → + → Add package from git URL*:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Core#com.riseon.utils/1.0.4
+https://github.com/riseongamestudio/Utils.git?path=/Core#com.riseon.utils/1.0.5
 ```
 
 Repo chứa nhiều package nên tag có tiền tố tên package
@@ -160,7 +160,7 @@ Cách dùng từng tool: [Tool trong Editor](Editor/Tools/README.md).
 |---|---|---|
 | Singleton | `Singleton<T>`, `ISingleton<T>` | [Runtime/Singleton](Runtime/Singleton/README.md) |
 | Bounds2D | `Bounds` bản 2D, serialize được | [Runtime/Bounds2D](Runtime/Bounds2D/README.md) |
-| Utils | Vector, Transform, Collection, Random, Undo, UnityEvent, Handles, Math, Rich text... | [Runtime/Utils](Runtime/Utils/README.md) |
+| Utils | Vector, Transform, Collection, Random, Undo, UnityEvent, Handles, Gizmos, Math, Rich text... | [Runtime/Utils](Runtime/Utils/README.md) |
 | EnumLabel | Đặt nhãn phần tử mảng theo enum (Odin) | [Runtime/EnumLabel](Runtime/EnumLabel/README.md) |
 | ForwardAttributesTo | Chuyển attribute Odin từ field wrapper xuống field bên trong | [Runtime/ForwardAttributes](Runtime/ForwardAttributes/README.md) |
 | Tool Editor | Capture Game View, Find References, Replace Component | [Editor/Tools](Editor/Tools/README.md) |
