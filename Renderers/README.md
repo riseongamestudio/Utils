@@ -44,7 +44,7 @@ Thiếu Odin thì project báo một lỗi từ `RiseOn.Utils.Renderers.Requirem
     }
   ],
   "dependencies": {
-    "com.riseon.utils.renderers": "1.0.2"
+    "com.riseon.utils.renderers": "1.0.3"
   }
 }
 ```
@@ -53,7 +53,7 @@ Thiếu Odin thì project báo một lỗi từ `RiseOn.Utils.Renderers.Requirem
 qua git), rồi:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Renderers#com.riseon.utils.renderers/1.0.2
+https://github.com/riseongamestudio/Utils.git?path=/Renderers#com.riseon.utils.renderers/1.0.3
 ```
 
 **Thư mục local**: `"com.riseon.utils.renderers": "file:D:/path/to/Utils/Renderers"`.

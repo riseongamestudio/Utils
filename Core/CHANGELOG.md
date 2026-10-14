@@ -4,6 +4,12 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.7] - 2026-10-14
+
+### Đổi
+
+- Tên hiển thị trong Package Manager thành `RiseOn Utils`, để khỏi lẫn với package khác cũng tên `Utils`.
+
 ## [1.0.6] - 2026-09-28
 
 ### Đổi

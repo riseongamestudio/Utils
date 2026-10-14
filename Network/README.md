@@ -46,7 +46,7 @@ sẵn; nếu không, đặt *Internet Access* = *Require* trong Player Settings.
     }
   ],
   "dependencies": {
-    "com.riseon.utils.network": "1.0.1"
+    "com.riseon.utils.network": "1.0.2"
   }
 }
 ```
@@ -54,7 +54,7 @@ sẵn; nếu không, đặt *Internet Access* = *Require* trong Player Settings.
 **Git URL**:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Network#com.riseon.utils.network/1.0.1
+https://github.com/riseongamestudio/Utils.git?path=/Network#com.riseon.utils.network/1.0.2
 ```
 
 **Thư mục local**: `"com.riseon.utils.network": "file:D:/path/to/Utils/Network"`.
