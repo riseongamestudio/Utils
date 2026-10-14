@@ -46,7 +46,7 @@ UniTask được kéo về tự động:
     }
   ],
   "dependencies": {
-    "com.riseon.utils.ui": "1.0.2"
+    "com.riseon.utils.ui": "1.0.3"
   }
 }
 ```
@@ -55,7 +55,7 @@ UniTask được kéo về tự động:
 phụ thuộc qua git), rồi:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/UI#com.riseon.utils.ui/1.0.2
+https://github.com/riseongamestudio/Utils.git?path=/UI#com.riseon.utils.ui/1.0.3
 ```
 
 **Thư mục local**: `"com.riseon.utils.ui": "file:D:/path/to/Utils/UI"`.
@@ -71,6 +71,9 @@ layout group.
 RectTransform gốc của cụm layout; nó dựng lại layout một lần ở frame đầu rồi tự
 tắt.
 
+**Chặn cú bấm xuống phần tử phía sau**: thêm `RaycastBlocker` vào một RectTransform
+phủ vùng cần chặn. Nó nhận raycast nhưng không vẽ gì.
+
 **Đổi alpha của Image**:
 
 ```csharp
@@ -85,6 +88,7 @@ icon.SetColorA(0.5f);
 |---|---|---|
 | `AspectRatioFitterElement` | Layout element giữ tỉ lệ khung | [Runtime/AspectRatioFitterElement](Runtime/AspectRatioFitterElement/README.md) |
 | `RebuildLayoutFixer` | Ép layout dựng lại khi bật | [Runtime/RebuildLayoutFixer](Runtime/RebuildLayoutFixer/README.md) |
+| `RaycastBlocker` | Vùng trong suốt chặn raycast | [Runtime/RaycastBlocker](Runtime/RaycastBlocker/README.md) |
 | `ImageUtils` | Đổi một kênh màu của `Image` | [Runtime/Utils](Runtime/Utils/README.md) |
 
 ## Lịch sử thay đổi

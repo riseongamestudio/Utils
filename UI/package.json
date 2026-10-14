@@ -1,7 +1,7 @@
 {
   "name": "com.riseon.utils.ui",
-  "version": "1.0.2",
-  "displayName": "Utils UI",
+  "version": "1.0.3",
+  "displayName": "RiseOn Utils UI",
   "description": "UGUI utilities: AspectRatioFitterElement, RebuildLayoutFixer and Image color utilities",
   "documentationUrl": "https://github.com/riseongamestudio/Utils/blob/com.riseon.utils.ui/1.0.2/UI/README.md",
   "author": {

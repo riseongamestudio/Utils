@@ -4,6 +4,16 @@ Mọi thay đổi đáng kể của `com.riseon.utils.ui` được ghi ở đây
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.3] - 2026-10-14
+
+### Thêm
+
+- `RaycastBlocker`: vùng trong suốt nhận raycast nhưng không vẽ gì, để chặn cú bấm xuống các phần tử phía sau.
+
+### Đổi
+
+- Tên hiển thị trong Package Manager thành `RiseOn Utils UI`.
+
 ## [1.0.2] - 2026-09-25
 
 ### Sửa
