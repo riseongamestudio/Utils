@@ -9,12 +9,13 @@ namespace RiseOn.Utils {
         }
 
         /// <summary>
-        /// Sets <paramref name="target"/> to <paramref name="value"/> and hands back what it held before, like C++ std::exchange.<br/>
+        /// Sets <paramref name="target"/> to <paramref name="value"/> and returns what it held before, like C++ std::exchange.<br/>
         /// Takes any field or local of any type; a property cannot be passed by ref.
         /// </summary>
-        public static void Exchange<T>(ref T target, T value, out T previous) {
-            previous = target;
-            target   = value;
+        public static T Exchange<T>(ref T target, T value) {
+            var previous = target;
+            target = value;
+            return previous;
         }
     }
 }

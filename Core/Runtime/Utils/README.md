@@ -260,8 +260,8 @@ nhận `ref` trên kiểu tham chiếu.
 
 ```csharp
 ValueUtils.Swap(ref a, ref b);
-ValueUtils.Exchange(ref currentPanel, next, out var previous);   // mọi kiểu: currentPanel = next, previous giữ giá trị cũ
-state.Exchange(State.Hidden, out var oldState);                  // struct, enum: như trên, gọi trên biến
+var previous = ValueUtils.Exchange(ref currentPanel, next);   // mọi kiểu: currentPanel = next, trả giá trị cũ
+var oldState = state.Exchange(State.Hidden);                  // struct, enum: như trên, gọi trên biến
 
 if (bestScore.RaiseTo(score)) SaveRecord();   // bestScore = max(bestScore, score), true nếu có đổi
 cooldown.LowerTo(0.5f);                        // cooldown = min(cooldown, 0.5f)

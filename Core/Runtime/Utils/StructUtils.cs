@@ -7,12 +7,13 @@ namespace RiseOn.Utils {
     /// </summary>
     public static class StructUtils {
         /// <summary>
-        /// Sets <paramref name="target"/> to <paramref name="value"/> and hands back what it held before, like C++ std::exchange.<br/>
+        /// Sets <paramref name="target"/> to <paramref name="value"/> and returns what it held before, like C++ std::exchange.<br/>
         /// For a reference type, use <see cref="ValueUtils.Exchange{T}"/>.
         /// </summary>
-        public static void Exchange<T>(this ref T target, T value, out T previous) where T : struct {
-            previous = target;
-            target   = value;
+        public static T Exchange<T>(this ref T target, T value) where T : struct {
+            var previous = target;
+            target = value;
+            return previous;
         }
 
         /// <summary>

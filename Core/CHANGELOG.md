@@ -4,6 +4,13 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.9] - 2026-10-20
+
+### Đổi
+
+- `ValueUtils.Exchange` và `StructUtils.Exchange` trả giá trị cũ thay vì đưa ra qua `out`, như
+  `std::exchange` của C++, nên dùng được trong biểu thức: `current.Exchange(next).Dispose()`.
+
 ## [1.0.8] - 2026-10-20
 
 ### Thêm
