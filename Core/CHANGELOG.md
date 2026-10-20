@@ -4,6 +4,25 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.8] - 2026-10-20
+
+### Thêm
+
+- `LogUtils`: bộ hàm `Debug.Log` (`Log`, `LogWarning`, `LogError`, `LogAssertion`, `LogException`
+  và các bản `Format`) viết thành extension trên giá trị cần trả về. Mỗi hàm log như hàm cùng tên
+  của `Debug` rồi trả lại chính giá trị đó, để câu thoát sớm gọn trong một dòng:
+  `return false.LogError("Config is not loaded.");`.
+- `ValueUtils.Exchange(ref target, value, out previous)`: gán giá trị mới và trả giá trị cũ qua
+  `out`, dùng cho mọi kiểu.
+- `StructUtils`: extension sửa thẳng biến struct, có `Exchange` gọi trên biến
+  (`state.Exchange(next, out var previous)`).
+
+### Đổi
+
+- `RaiseTo` / `LowerTo` chuyển từ `ValueUtils` sang `StructUtils`. Lời gọi dạng extension
+  (`score.RaiseTo(next)`) không phải sửa; lời gọi dạng tĩnh `ValueUtils.RaiseTo(ref x, y)` đổi thành
+  `StructUtils.RaiseTo(ref x, y)`.
+
 ## [1.0.7] - 2026-10-14
 
 ### Đổi

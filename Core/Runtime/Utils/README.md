@@ -12,8 +12,9 @@ extension method, gọi thẳng trên đối tượng; phần còn lại gọi t
 - [UnityEvent](#unityevent)
 - [HandleUtils](#handleutils)
 - [GizmoUtils](#gizmoutils)
-- [MathUtils và ValueUtils](#mathutils-và-valueutils)
+- [MathUtils, ValueUtils và StructUtils](#mathutils-valueutils-và-structutils)
 - [Rich text](#rich-text)
+- [Log](#log)
 - [Khác](#khác)
 
 ## Vector và Transform
@@ -245,21 +246,30 @@ private void OnDrawGizmos() {
 - Cần đường dày hơn thì dùng `HandleUtils`.
 - Bản build bỏ qua lời gọi.
 
-## MathUtils và ValueUtils
+## MathUtils, ValueUtils và StructUtils
 
 ```csharp
 float a = MathUtils.EaseInPower(t, 3);    // t^3: chậm rồi nhanh dần (InCubic), t từ 0 tới 1
 float b = MathUtils.EaseOutPower(t, 3);   // 1 - (1 - t)^3: nhanh rồi chậm dần (OutCubic)
 float c = MathUtils.EaseInOutPower(t, 3); // chậm hai đầu, nhanh ở giữa (InOutCubic)
+```
+
+`ValueUtils` gồm hàm tĩnh nhận biến qua `ref`, dùng cho mọi kiểu. `StructUtils` gồm
+extension gọi thẳng trên biến struct; chỉ struct mới làm được, vì C# không cho extension
+nhận `ref` trên kiểu tham chiếu.
+
+```csharp
 ValueUtils.Swap(ref a, ref b);
+ValueUtils.Exchange(ref currentPanel, next, out var previous);   // mọi kiểu: currentPanel = next, previous giữ giá trị cũ
+state.Exchange(State.Hidden, out var oldState);                  // struct, enum: như trên, gọi trên biến
 
 if (bestScore.RaiseTo(score)) SaveRecord();   // bestScore = max(bestScore, score), true nếu có đổi
 cooldown.LowerTo(0.5f);                        // cooldown = min(cooldown, 0.5f)
 unlocked.RaiseTo(Stage.Forest);               // enum cũng được
 ```
 
-`RaiseTo` / `LowerTo` sửa thẳng biến (extension `ref`), nên chỉ gọi được trên biến,
-không gọi trên property. Dùng được với số, enum và struct cài `IComparable`.
+Các hàm trên sửa thẳng biến, nên chỉ truyền được biến (field, biến cục bộ), không truyền
+được property. `RaiseTo` / `LowerTo` dùng được với số, enum và struct cài `IComparable`.
 
 ## Rich text
 
@@ -284,6 +294,43 @@ title.text = name.TagNoParse();              // tên người chơi có dấu < 
 
 Console và uGUI Text in các thẻ của riêng TextMeshPro ra như chữ thường. Số được ghi
 theo văn hoá bất biến, nên `1.5em` không thành `1,5em` trên máy đặt locale tiếng Việt.
+
+## Log
+
+`LogUtils`. Bộ hàm `Debug.Log` viết thành extension trên giá trị cần trả về: log rồi trả
+lại chính giá trị đó, để câu thoát sớm của hàm có giá trị trả về gọn trong một dòng:
+
+```csharp
+if (panel.IsOpen) return UniTask.CompletedTask.LogWarning($"{name} is already open.", this);
+if (!loaded) return false.LogError("Config is not loaded.");
+if (count < 0) return 0.LogAssertionFormat(this, "Count is {0}.", count);
+catch (Exception e) { return default(Reward).LogException(e, this); }
+```
+
+Tên và tham số giống hệt hàm cùng tên của `Debug`, chỉ thêm giá trị trả về đứng trước dấu chấm:
+
+| Hàm | Tương ứng |
+|---|---|
+| `result.Log(message, context)` | `Debug.Log` |
+| `result.LogWarning(message, context)` | `Debug.LogWarning` |
+| `result.LogError(message, context)` | `Debug.LogError` |
+| `result.LogAssertion(message, context)` | `Debug.LogAssertion` |
+| `result.LogException(exception, context)` | `Debug.LogException` |
+| `result.LogFormat([context,] format, args)` | `Debug.LogFormat` |
+| `result.LogWarningFormat`, `LogErrorFormat`, `LogAssertionFormat` | như trên |
+
+- `context` không bắt buộc. Viết `this.Log("...")` trong một `MonoBehaviour` thì giá trị
+  trả về là `this`, **không** phải context: muốn bấm log nhảy tới object thì truyền `this`
+  làm `context`.
+- `result` là `null` thì phải ghi kiểu: `((GameObject)null).LogWarning(...)`.
+- `LogAssertion` và `LogAssertionFormat` gọi thẳng hàm của `Debug`, nên cũng bị bỏ khỏi bản
+  build không có `UNITY_ASSERTIONS`. Giá trị vẫn được trả về.
+- Extension trên mọi kiểu, nên mọi biến đều thấy các hàm này trong gợi ý code khi có
+  `using RiseOn.Utils`.
+- Hàm `void` không dùng được: C# không cho `return` kèm biểu thức trong hàm `void`.
+  Viết `if (cond) { Debug.LogWarning(...); return; }`.
+- Các hàm được đánh dấu `[HideInCallstack]`: bật **Strip logging callstack** trong menu
+  của Console thì call stack không hiện `LogUtils` nữa.
 
 ## Khác
 
