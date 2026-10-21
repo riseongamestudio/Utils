@@ -46,7 +46,7 @@ UniTask được kéo về tự động:
     }
   ],
   "dependencies": {
-    "com.riseon.utils.ui": "1.0.3"
+    "com.riseon.utils.ui": "1.0.4"
   }
 }
 ```
@@ -55,7 +55,7 @@ UniTask được kéo về tự động:
 phụ thuộc qua git), rồi:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/UI#com.riseon.utils.ui/1.0.3
+https://github.com/riseongamestudio/Utils.git?path=/UI#com.riseon.utils.ui/1.0.4
 ```
 
 **Thư mục local**: `"com.riseon.utils.ui": "file:D:/path/to/Utils/UI"`.

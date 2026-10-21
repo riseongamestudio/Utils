@@ -4,6 +4,18 @@ Mọi thay đổi đáng kể của `com.riseon.utils.ui` được ghi ở đây
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.4] - 2026-10-21
+
+### Sửa
+
+- `RaycastBlocker` bắt buộc có `CanvasRenderer`. UGUI 2.0 chỉ thêm component này lúc Graphic cần tới,
+  nên blocker đang tắt nằm trong prefab không có nó, và Prefab Mode không coi prefab đó là UI.
+
+### Thêm
+
+- Inspector của `RaycastBlocker` chỉ hiện *Raycast Target* và *Raycast Padding*, bỏ Color và Material
+  vì blocker không vẽ gì. Nằm trong assembly mới `RiseOn.Utils.UI.Editor`.
+
 ## [1.0.3] - 2026-10-14
 
 ### Thêm
