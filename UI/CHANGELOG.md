@@ -4,6 +4,12 @@ Mọi thay đổi đáng kể của `com.riseon.utils.ui` được ghi ở đây
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.5] - 2026-10-21
+
+### Đổi
+
+- Inspector của `RaycastBlocker` bỏ luôn ô Script, chỉ còn *Raycast Target* và *Raycast Padding*.
+
 ## [1.0.4] - 2026-10-21
 
 ### Sửa

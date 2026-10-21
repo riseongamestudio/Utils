@@ -10,7 +10,6 @@ namespace RiseOn.Utils.UI.Editor {
     public class RaycastBlockerEditor : GraphicEditor {
         public override void OnInspectorGUI() {
             serializedObject.Update();
-            EditorGUILayout.PropertyField(m_Script);
             RaycastControlsGUI();
             serializedObject.ApplyModifiedProperties();
         }
