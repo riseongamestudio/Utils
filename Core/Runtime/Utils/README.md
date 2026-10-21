@@ -301,29 +301,30 @@ theo văn hoá bất biến, nên `1.5em` không thành `1,5em` trên máy đặ
 lại chính giá trị đó, để câu thoát sớm của hàm có giá trị trả về gọn trong một dòng:
 
 ```csharp
-if (panel.IsOpen) return UniTask.CompletedTask.LogWarning($"{name} is already open.", this);
-if (!loaded) return false.LogError("Config is not loaded.");
-if (count < 0) return 0.LogAssertionFormat(this, "Count is {0}.", count);
-catch (Exception e) { return default(Reward).LogException(e, this); }
+if (panel.IsOpen) return UniTask.CompletedTask.WithLogWarning($"{name} is already open.", this);
+if (!loaded) return false.WithLogError("Config is not loaded.");
+if (count < 0) return 0.WithLogAssertionFormat(this, "Count is {0}.", count);
+catch (Exception e) { return default(Reward).WithLogException(e, this); }
 ```
 
-Tên và tham số giống hệt hàm cùng tên của `Debug`, chỉ thêm giá trị trả về đứng trước dấu chấm:
+Tên là tên hàm của `Debug` thêm tiền tố `With`, tham số giống hệt, và giá trị trả về đứng trước
+dấu chấm. Đọc thành câu: trả `false` kèm một log lỗi.
 
 | Hàm | Tương ứng |
 |---|---|
-| `result.Log(message, context)` | `Debug.Log` |
-| `result.LogWarning(message, context)` | `Debug.LogWarning` |
-| `result.LogError(message, context)` | `Debug.LogError` |
-| `result.LogAssertion(message, context)` | `Debug.LogAssertion` |
-| `result.LogException(exception, context)` | `Debug.LogException` |
-| `result.LogFormat([context,] format, args)` | `Debug.LogFormat` |
-| `result.LogWarningFormat`, `LogErrorFormat`, `LogAssertionFormat` | như trên |
+| `result.WithLog(message, context)` | `Debug.Log` |
+| `result.WithLogWarning(message, context)` | `Debug.LogWarning` |
+| `result.WithLogError(message, context)` | `Debug.LogError` |
+| `result.WithLogAssertion(message, context)` | `Debug.LogAssertion` |
+| `result.WithLogException(exception, context)` | `Debug.LogException` |
+| `result.WithLogFormat([context,] format, args)` | `Debug.LogFormat` |
+| `result.WithLogWarningFormat`, `WithLogErrorFormat`, `WithLogAssertionFormat` | như trên |
 
-- `context` không bắt buộc. Viết `this.Log("...")` trong một `MonoBehaviour` thì giá trị
+- `context` không bắt buộc. Viết `this.WithLog("...")` trong một `MonoBehaviour` thì giá trị
   trả về là `this`, **không** phải context: muốn bấm log nhảy tới object thì truyền `this`
   làm `context`.
-- `result` là `null` thì phải ghi kiểu: `((GameObject)null).LogWarning(...)`.
-- `LogAssertion` và `LogAssertionFormat` gọi thẳng hàm của `Debug`, nên cũng bị bỏ khỏi bản
+- `result` là `null` thì phải ghi kiểu: `((GameObject)null).WithLogWarning(...)`.
+- `WithLogAssertion` và `WithLogAssertionFormat` gọi thẳng hàm của `Debug`, nên cũng bị bỏ khỏi bản
   build không có `UNITY_ASSERTIONS`. Giá trị vẫn được trả về.
 - Extension trên mọi kiểu, nên mọi biến đều thấy các hàm này trong gợi ý code khi có
   `using RiseOn.Utils`.

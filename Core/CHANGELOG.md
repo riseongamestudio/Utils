@@ -4,6 +4,15 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.10] - 2026-10-21
+
+### Đổi
+
+- Các hàm của `LogUtils` thêm tiền tố `With`: `WithLog`, `WithLogWarning`, `WithLogError`,
+  `WithLogAssertion`, `WithLogException` và các bản `With…Format`, đọc thành câu:
+  `return false.WithLogError("...")`.
+- `Singleton` chỉ ném exception khi kiểu đăng ký không khớp, không log thêm lỗi trùng.
+
 ## [1.0.9] - 2026-10-20
 
 ### Đổi

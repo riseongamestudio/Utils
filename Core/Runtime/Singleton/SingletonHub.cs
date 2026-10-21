@@ -26,11 +26,8 @@ namespace RiseOn.Utils {
         /// where A is registered as B but is not assignable to B.
         /// </summary>
         private static void ThrowIfInsNotAssignableToInsType(Singleton ins, Type insType) {
-            if (!insType.IsInstanceOfType(ins)) {
-                var errMes = $"{ins.GetType().FullName} implements {typeof(ISingleton<>).Name[..^2]}<{insType.FullName}> but is not assignable to {insType.FullName}.";
-                Debug.LogError(errMes);
-                throw new InvalidOperationException(errMes);
-            }
+            if (insType.IsInstanceOfType(ins)) return;
+            throw new InvalidOperationException($"{ins.GetType().FullName} implements {typeof(ISingleton<>).Name[..^2]}<{insType.FullName}> but is not assignable to {insType.FullName}.");
         }
 
         private static bool TryGetCachedIns<T>(out T result) where T : class, ISingleton<T> {
