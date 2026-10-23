@@ -90,6 +90,7 @@ var point = center.RandomInCircle(2f);                // điểm ngẫu nhiên t
 var speed = 3f.RandomSign();                          // 3 hoặc -3
 
 if (items.IsEmpty()) { /* ... */ }                    // mọi tập hợp, kể cả biến kiểu IList / ICollection
+if (items.TryIndexOf(item, out var index)) { /* ... */ } // IndexOf dạng Try: không thấy thì false thay vì -1
 
 foreach (var cell in grid.IEIndex2D())                // duyệt mọi ô của mảng 2 chiều, không cấp phát
     grid.ElementAt(cell) = null;                      // ElementAt trả ref, gán thẳng được

@@ -4,6 +4,13 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.11] - 2026-10-23
+
+### Thêm
+
+- `CollectionUtils.TryIndexOf`: `IndexOf` theo dạng `Try`, không tìm thấy thì trả `false`
+  thay vì `-1`: `if (list.TryIndexOf(item, out var index))`.
+
 ## [1.0.10] - 2026-10-21
 
 ### Đổi

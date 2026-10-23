@@ -125,6 +125,14 @@ namespace RiseOn.Utils {
 
         #endregion
 
+        /// <summary>
+        /// IndexOf in the Try form, so finding nothing reads as false instead of as -1.
+        /// </summary>
+        public static bool TryIndexOf<T>(this IList<T> list, T item, out int index) {
+            index = list.IndexOf(item);
+            return index >= 0;
+        }
+
         public static ref T ElementAt<T>(this T[,] list, Vector2Int id) {
             return ref list[id.x, id.y];
         }
