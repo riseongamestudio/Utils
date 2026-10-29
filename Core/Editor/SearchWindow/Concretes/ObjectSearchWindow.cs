@@ -32,7 +32,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             Type filterType,
             GameObject rootPrefab = null,
             bool allowSceneObjects = true,
-            Object current = null) {
+            Object current = null,
+            SearchWindowMode mode = SearchWindowMode.Window) {
 
             var window = CreateInstance<ObjectSearchWindow>();
             window.filterType        = filterType ?? typeof(Object);
@@ -41,7 +42,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
 
             // Unity's == on purpose: a destroyed or missing object counts as empty.
             window.PreselectOnOpen(current == null ? null : current);
-            window.Show(btnRect, title, onSelected, defaultSize: new Vector2(777, 555));
+            window.Show(btnRect, title, onSelected, defaultSize: new Vector2(777, 555), mode: mode);
         }
 
         /// <summary>The last tab is remembered per filter type, since a material and a component live in different tabs.</summary>

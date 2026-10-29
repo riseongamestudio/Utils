@@ -1,7 +1,7 @@
 # RiseOn.Utils
 
 Bộ tiện ích nền cho game Unity: `Singleton`, `Bounds2D`, extension và lớp utils cho
-những việc lặp đi lặp lại (vector, transform, collection, Undo, UnityEvent), hai
+những việc lặp đi lặp lại (vector, transform, collection, Undo, UnityEvent), ba
 attribute cho Odin và vài tool Editor.
 
 Package `com.riseon.utils`. Code runtime nằm trong namespace `RiseOn.Utils`,
@@ -48,7 +48,7 @@ project báo đúng một lỗi từ `RiseOn.Utils.Requirements`.
     }
   ],
   "dependencies": {
-    "com.riseon.utils": "1.0.10"
+    "com.riseon.utils": "1.0.12"
   }
 }
 ```
@@ -59,7 +59,7 @@ Hoặc chạy `openupm add com.riseon.utils` bằng
 **Git URL**: *Package Manager → + → Add package from git URL*:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Core#com.riseon.utils/1.0.10
+https://github.com/riseongamestudio/Utils.git?path=/Core#com.riseon.utils/1.0.12
 ```
 
 Repo chứa nhiều package nên tag có tiền tố tên package
@@ -151,6 +151,7 @@ có bản kèm Undo: xem [Utils](Runtime/Utils/README.md#undo) và
 | *Tools → RiseOn → Capture Game View* (`Alt+Shift+C`) | Chụp Game view ra PNG (Windows) |
 | *Find References In Scene BETTER* (chuột phải component hoặc GameObject) | Tìm mọi component đang tham chiếu tới đối tượng |
 | *Replace Component* (chuột phải component) | Đổi component sang kiểu khác, giữ dữ liệu và tham chiếu |
+| *Replace Type* (chuột phải field `[SerializeReference]`) | Đổi giá trị sang kiểu khác, kể cả lớp generic, giữ phần dữ liệu chung |
 
 Cách dùng từng tool: [Tool trong Editor](Editor/Tools/README.md).
 
@@ -160,12 +161,15 @@ Cách dùng từng tool: [Tool trong Editor](Editor/Tools/README.md).
 |---|---|---|
 | Singleton | `Singleton<T>`, `ISingleton<T>` | [Runtime/Singleton](Runtime/Singleton/README.md) |
 | Bounds2D | `Bounds` bản 2D, serialize được | [Runtime/Bounds2D](Runtime/Bounds2D/README.md) |
+| DirectionExt | Một hướng có sẵn hoặc một góc tự chọn, xoay bằng mũi tên trong Inspector (Odin) | [Runtime/DirectionExt](Runtime/DirectionExt/README.md) |
 | Utils | Vector, Transform, Collection, Random, Undo, UnityEvent, Handles, Gizmos, Math, Rich text... | [Runtime/Utils](Runtime/Utils/README.md) |
 | EnumLabel | Đặt nhãn phần tử mảng theo enum (Odin) | [Runtime/EnumLabel](Runtime/EnumLabel/README.md) |
 | ForwardAttributesTo | Chuyển attribute Odin từ field wrapper xuống field bên trong | [Runtime/ForwardAttributes](Runtime/ForwardAttributes/README.md) |
-| Tool Editor | Capture Game View, Find References, Replace Component | [Editor/Tools](Editor/Tools/README.md) |
-| Cửa sổ tìm kiếm | `ComponentSearchWindow`, `ObjectSearchWindow` cho drawer riêng | [Editor/SearchWindow](Editor/SearchWindow/README.md) |
-| Utils Editor | `PrefabUtils`, `InlineEditorImitator` cho người viết drawer | [Editor/Utils](Editor/Utils/README.md) |
+| AllowGenerics | Cho field `[SerializeReference]` chọn được lớp generic, hỏi từng tham số | [Runtime/AllowGenerics](Runtime/AllowGenerics/README.md) |
+| Tool Editor | Capture Game View, Find References, Replace Component, Replace Type | [Editor/Tools](Editor/Tools/README.md) |
+| Foldout đệ quy | Alt+click foldout bất kỳ trong Inspector của Odin mở hay gập cả nhánh bên dưới | [Editor/Utils](Editor/Utils/README.md#foldout-đệ-quy) |
+| Cửa sổ tìm kiếm | `ComponentSearchWindow`, `ObjectSearchWindow`, `ChoiceSearchWindow` cho drawer riêng, dạng cửa sổ hoặc drop-down | [Editor/SearchWindow](Editor/SearchWindow/README.md) |
+| Utils Editor | `PrefabUtils`, `InspectorPropertyUtils`, `RectFieldUtils`, `InlineEditorImitator` cho người viết drawer | [Editor/Utils](Editor/Utils/README.md) |
 
 ## Lịch sử thay đổi
 

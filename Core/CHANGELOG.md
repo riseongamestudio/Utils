@@ -4,6 +4,55 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.12] - 2026-10-29
+
+### Thêm
+
+- `RectFieldUtils` (Editor): vẽ giá trị một `InspectorProperty` trong rect cho sẵn, có dấu
+  override của prefab và Undo; enum mở drop-down tìm kiếm, `[Flags]` bật tắt từng cờ; `Split`
+  chia cột giá trị làm hai nửa thẳng hàng.
+- `DirectionExt`: một hướng (`Left`, `Right`, `Up`, `Down`) hoặc `Custom` với một góc tính
+  bằng độ; `ToVector2()` trả về vector độ dài 1. Inspector của Odin vẽ trên một dòng, góc
+  `Custom` xoay bằng cách kéo một mũi tên, cạnh ô nhập số độ.
+- `[AllowGenerics]`: cho ô chọn kiểu của field `[SerializeReference]` có cả lớp generic
+  mà Odin không suy ra được tham số, và dựng kiểu bằng cách chọn từng tham số, lồng sâu
+  bao nhiêu cũng được. Gắn ở field, hoặc ở class/interface để áp cho mọi field kiểu đó.
+  Kế thừa và viết `Accepts` để lọc tham số, `GetDisabledReason` để làm xám kiểu không
+  dùng được kèm lý do. Tham số mà kiểu của field quyết định được suy sẵn, theo đúng vị trí
+  trong khai báo và qua variance (`in`, `out`), nên chỉ hỏi phần còn thiếu.
+  Mọi bước chọn nằm trong một `ChoiceSearchWindow` dạng drop-down, chuyển bước không đóng
+  cửa sổ; kiểu xếp thư mục theo `[TypeRegistryItem]` như Odin, còn lại theo namespace.
+- Cửa sổ tìm kiếm: `ChoiceSearchWindow` chọn một trong các `SearchChoice<T>` dựng bằng code,
+  thư mục theo dấu `/` trong đường dẫn; `SearchNode.AddInFolder` và `SortFoldersFirst` dựng và
+  xếp cây theo đường dẫn; mọi cửa sổ cụ thể nhận `mode`; `SearchWindowMode.DropDown` mở cửa sổ dạng drop-down gắn dưới
+  nút, rộng bằng nút, cao vừa số dòng, có dòng tiêu đề; `SearchNode.DisabledReason` làm mờ một
+  dòng kèm lý do và chặn chọn nó; lớp con gọi `ShowNext` để sang bước sau trong cùng cửa sổ.
+  Tìm kiếm khớp cả tên thư mục bên trên, hiện đường dẫn và tô đậm chữ khớp trong kết quả, có cả
+  thư mục để trượt vào; drop-down đổi chiều cao mượt và hiện danh sách mờ dần; đổi tab có hiệu ứng
+  trượt; màn chờ chỉ hiện khi dựng danh sách quá 250 ms; `onCanceled` khi đóng mà chưa chọn.
+  Drop-down cuộn xuống từ dưới nút khi mở và cuộn lên khi đóng; `SearchChoice.FolderIcon` cho thư
+  mục chứa choice một icon riêng (như icon GameObject), `AddInFolder` trả về thư mục đã thêm vào.
+  Bấm lại đúng nút đã mở drop-down thì chỉ đóng nó, không mở lại và không tính là hủy.
+  `GenericTypePicker.Pick` nhận tiêu đề cửa sổ, như tên field; `ChoiceSearchWindow.Open` nhận giá trị
+  đang chọn để làm nổi và cuộn tới khi mở; `ChoiceSearchWindow.OpenToggles` chọn nhiều, mỗi lần chọn bật
+  tắt một lựa chọn có dấu tích, cửa sổ vẫn mở.
+  Drop-down là hai cửa sổ ghép liền: dòng điều khiển (tiêu đề, ô tìm, tab) và danh sách. Cạnh
+  dòng điều khiển bám vào lúc mở đứng yên suốt chuỗi bước, chỉ cạnh đối diện co giãn, hết chỗ
+  mới dời; không đủ chỗ dưới nút thì mở lên trên và đảo cả khối (ô tìm ở dưới, danh sách xếp
+  ngược), không bên nào đủ thì đè lên field. Cao vừa số dòng tới hết màn hình, gõ tìm thì co
+  giãn theo số kết quả; thanh cuộn chỉ hiện khi danh sách đã dừng mà vẫn còn dòng. Mở thì dòng
+  điều khiển rồi danh sách phóng ra, đóng thì ngược lại; nhấn chuột ra ngoài hay editor mất focus
+  thì đóng ngay lúc nhấn. `title` rỗng thì không có dòng tiêu đề; cột icon chỉ có khi có dòng
+  mang icon (`SearchNode.HasIcon`). `SearchChoice<T>.None()` thêm dòng chọn giá trị trống, tên
+  "Null" khi kiểu nhận null, "Default" khi không.
+- Alt+click foldout bất kỳ trong Inspector của Odin mở hay gập cả nhánh bên dưới
+  (`RecursiveFoldoutDrawer`); `InspectorPropertyUtils.SetExpandedRecursively` cho drawer tự làm.
+- *Replace Type* (chuột phải field `[SerializeReference]`, giá trị `SerRef` hay phần tử
+  `ListSerRef`): đổi giá trị sang kiểu khác, giữ field cùng tên và giá trị con
+  `[SerializeReference]`, trỏ các field dùng chung sang giá trị mới. Danh sách kiểu như ô chọn
+  của Odin, có thêm lớp generic khi field có `AllowGenerics`. `[HideReplaceType]` bỏ mục này ở
+  field hay kiểu không đổi được bằng cách chép field.
+
 ## [1.0.11] - 2026-10-23
 
 ### Thêm

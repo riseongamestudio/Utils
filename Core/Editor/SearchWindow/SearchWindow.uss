@@ -26,6 +26,52 @@
     background-color: rgb(77, 179, 255);
 }
 
+/* The controls: the title, the search field and the tabs. A drop-down hangs them from the top of its own window, so the old and the new
+   ones of a pick made in steps can fade past each other. */
+
+.search-window .search-window__controls {
+    flex-shrink: 0;
+}
+
+.search-window--drop-down .search-window__controls {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+}
+
+/* A drop-down's list, a window of its own against the controls': no edge of its own on that side, the controls' edge between them.
+   Its content hangs from its top, as tall as its rows. */
+
+.search-window.search-window--drop-down.search-window--list-frame {
+    border-top-width: 0;
+}
+
+.search-window.search-window--drop-down.search-window--list-frame.search-window--above {
+    border-top-width: 1px;
+    border-bottom-width: 0;
+}
+
+.search-window--list-frame .search-window__content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    flex-grow: 0;
+}
+
+/* Above its button, a drop-down turns over: the search field and the tabs next to the button, the breadcrumb and the first row next to them. */
+
+.search-window--above .search-window__controls,
+.search-window--above .search-window__page {
+    flex-direction: column-reverse;
+}
+
+.search-window--above .search-window__header {
+    border-bottom-width: 0;
+    border-top-width: 1px;
+}
+
 /* Body: the progress bar while building, otherwise the current page. */
 
 .search-window .search-window__content {
@@ -86,16 +132,44 @@
     flex-grow: 1;
 }
 
+/* A drop-down has no window frame of its own, so it draws its edge, square as Unity's and Odin's drop-downs. */
+
+.search-window.search-window--drop-down {
+    border-width: 1px;
+    border-color: var(--unity-colors-default-border);
+    overflow: hidden;
+}
+
+/* The title of a drop-down, which has no title bar to carry it. */
+
+.search-window .search-window__header {
+    -unity-font-style: bold;
+    flex-shrink: 0;
+    white-space: normal;
+    padding: 3px 6px;
+    background-color: var(--unity-colors-toolbar-background);
+    border-bottom-width: 1px;
+    border-color: var(--unity-colors-toolbar-border);
+}
+
 /* Rows: icon, label, and an arrow when the row opens a deeper level. */
 
+/* As far in from the left as the breadcrumb, with or without an icon. */
 .search-window .search-window__row {
     flex-direction: row;
     align-items: center;
     height: 20px;
+    padding-left: 4px;
 }
 
 .search-window .search-window__row--selected {
     background-color: var(--unity-colors-highlight-background);
+}
+
+/* A row that cannot be picked, its reason beside its label. */
+.search-window .search-window__row--disabled .search-window__row-icon,
+.search-window .search-window__row--disabled .search-window__row-label {
+    opacity: 0.45;
 }
 
 .search-window .search-window__row-icon {

@@ -15,9 +15,9 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         // Component types only change with a domain reload, which also clears this.
         private static SearchNode cachedRoot;
 
-        public static void Open(Rect btnRect, Action<Type> onSelected, string searchText = "") {
+        public static void Open(Rect btnRect, Action<Type> onSelected, string searchText = "", SearchWindowMode mode = SearchWindowMode.Window) {
             var window = CreateInstance<ComponentSearchWindow>();
-            window.Show(btnRect, ComponentsLabel, node => onSelected?.Invoke(node.Data as Type), new Vector2(333, 333), searchText);
+            window.Show(btnRect, ComponentsLabel, node => onSelected?.Invoke(node.Data as Type), new Vector2(333, 333), searchText, mode);
         }
 
         protected override void RegisterSections() {
@@ -27,8 +27,6 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         private static SearchNode BuildTree() {
             var root              = new SearchNode { Label = ComponentsLabel };
             var defaultScriptIcon = EditorGUIUtility.IconContent("cs Script Icon").image as Texture2D;
-            var folderIcon        = EditorGUIUtility.IconContent("Folder Icon").image as Texture2D;
-            var rootFolder        = new FolderBuilder();
             var nativeFolders     = GetNativeMenuFolders();
             var scriptTypes       = GetScriptTypes();
 
@@ -60,10 +58,10 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                     Data        = type
                 };
 
-                AddNodeToFolderBuilder(rootFolder, folder, componentNode);
+                root.AddInFolder(folder, componentNode);
             }
 
-            BuildNodeHierarchy(rootFolder, root, folderIcon);
+            root.SortFoldersFirst();
             return root;
         }
 
@@ -105,46 +103,6 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         /// <summary>Scripts without AddComponentMenu are grouped by namespace.</summary>
         private static string GetScriptFolder(Type type) {
             return string.IsNullOrEmpty(type.Namespace) ? ScriptsFolder : $"{ScriptsFolder}/{type.Namespace.Replace('.', '/')}";
-        }
-
-        private class FolderBuilder {
-            // SortedDictionary keeps subfolders in alphabetical order.
-            public readonly SortedDictionary<string, FolderBuilder> SubFolders = new();
-            public readonly List<SearchNode>                        Items      = new();
-        }
-
-        private static void AddNodeToFolderBuilder(FolderBuilder rootFolder, string path, SearchNode leafNode) {
-            if (string.IsNullOrEmpty(path)) {
-                rootFolder.Items.Add(leafNode);
-                return;
-            }
-
-            var currentFolder = rootFolder;
-            foreach (var rawPart in path.Split('/')) {
-                var part = rawPart.Trim();
-                if (string.IsNullOrEmpty(part)) continue;
-
-                if (!currentFolder.SubFolders.TryGetValue(part, out var childFolder)) {
-                    childFolder                    = new FolderBuilder();
-                    currentFolder.SubFolders[part] = childFolder;
-                }
-
-                currentFolder = childFolder;
-            }
-
-            currentFolder.Items.Add(leafNode);
-        }
-
-        private static void BuildNodeHierarchy(FolderBuilder folder, SearchNode targetNode, Texture2D folderIcon) {
-            foreach (var subFolder in folder.SubFolders) {
-                var folderNode = new SearchNode { Label = subFolder.Key, Icon = folderIcon };
-                BuildNodeHierarchy(subFolder.Value, folderNode, folderIcon);
-                targetNode.AddChild(folderNode);
-            }
-
-            // Components come after the folders, in alphabetical order.
-            folder.Items.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
-            foreach (var item in folder.Items) targetNode.AddChild(item);
         }
     }
 }
