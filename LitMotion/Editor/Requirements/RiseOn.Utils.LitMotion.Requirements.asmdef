@@ -1,0 +1,16 @@
+{
+    "name": "RiseOn.Utils.LitMotion.Requirements",
+    "rootNamespace": "RiseOn.Utils.LitMotion.Requirements",
+    "references": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

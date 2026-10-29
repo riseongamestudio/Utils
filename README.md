@@ -9,6 +9,7 @@ UPM riêng, cài và đánh version độc lập.
 | [UI](UI/README.md) | `com.riseon.utils.ui` | Tiện ích UGUI |
 | [Renderers](Renderers/README.md) | `com.riseon.utils.renderers` | Tiện ích SpriteRenderer, SpriteMask, thứ tự vẽ 2D |
 | [Network](Network/README.md) | `com.riseon.utils.network` | Giờ từ mạng, kiểm tra có internet thật không |
+| [LitMotion](LitMotion/README.md) | `com.riseon.utils.litmotion` | Tiện ích LitMotion: `EaseExt` |
 
 ## Phụ thuộc
 
@@ -18,6 +19,7 @@ UPM riêng, cài và đánh version độc lập.
 | `com.riseon.utils.ui` | `com.riseon.utils`, `com.unity.ugui`, `com.cysharp.unitask` | Odin Inspector |
 | `com.riseon.utils.renderers` | `com.riseon.utils` | Odin Inspector |
 | `com.riseon.utils.network` | `com.unity.modules.unitywebrequest` | |
+| `com.riseon.utils.litmotion` | `com.riseon.utils`, `com.annulusgames.lit-motion` | Odin Inspector |
 
 Odin là gói Asset Store nên không khai được trong `package.json`; cài nó vào project
 trước khi cài các package cần nó. UniTask (`com.cysharp.unitask`) có trên OpenUPM:
@@ -33,7 +35,8 @@ chi tiết nằm trong README của từng package.
 
 Mỗi package có version riêng trong `package.json`. Tag có tiền tố tên package để
 phân biệt trong cùng repo: `com.riseon.utils/1.0.0`, `com.riseon.utils.ui/1.0.0`,
-`com.riseon.utils.renderers/1.0.0`, `com.riseon.utils.network/1.0.0`.
+`com.riseon.utils.renderers/1.0.0`, `com.riseon.utils.network/1.0.0`,
+`com.riseon.utils.litmotion/1.0.0`.
 
 ## Giấy phép
 

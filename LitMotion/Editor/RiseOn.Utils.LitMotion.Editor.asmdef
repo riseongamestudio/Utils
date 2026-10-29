@@ -1,0 +1,22 @@
+{
+    "name": "RiseOn.Utils.LitMotion.Editor",
+    "rootNamespace": "RiseOn.Utils.LitMotion.Editor",
+    "references": [
+        "RiseOn.Utils.LitMotion",
+        "RiseOn.Utils.Editor",
+        "LitMotion"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "ODIN_INSPECTOR"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
