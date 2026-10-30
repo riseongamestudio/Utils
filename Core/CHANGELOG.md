@@ -4,6 +4,18 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.13] - 2026-10-30
+
+### Sửa
+
+- Drop-down chọn nhiều bước: bấm chuột vào một mục mở bước sau (`Present`, `ShowNext`) không còn
+  đóng cửa sổ. Cửa sổ trả focus về ô tìm khi sang bước sau, và danh sách mất focus lúc đó không
+  còn bị hiểu là bấm ra ngoài.
+- Drop-down đang mở ra hay thu lại: vẽ lại cả hai cửa sổ ở mọi bước, thêm một lần sau bước cuối,
+  nên lúc dừng không còn khe hở giữa hai cửa sổ hay ô tìm bị cắt. Cửa sổ chỉ hiện đúng cỡ mới từ
+  lần vẽ sau khi đổi cỡ.
+- Drop-down mở lên trên: bỏ đường kẻ thừa dưới dòng tiêu đề.
+
 ## [1.0.12] - 2026-10-29
 
 ### Thêm

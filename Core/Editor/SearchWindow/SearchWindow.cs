@@ -633,7 +633,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         /// Eases a drop-down to <paramref name="toControls"/> of controls and <paramref name="toList"/> of list shown, both window heights,<br/>
         /// its anchor to <paramref name="toAnchor"/>, from wherever they are, even midway through an earlier move, then runs <paramref name="onDone"/>.<br/>
         /// Unfolding and folding run as one block: the controls come out of the anchor and, once whole, the list out of them; folding, the other way round.<br/>
-        /// Each step moves the windows and draws them in the same tick.
+        /// Each step moves the windows and draws them; the move ends a tick after its last step, drawn again at its final frames.
         /// </summary>
         private void MoveTo(float toAnchor, float toControls, float toList, double duration = ResizeDuration, Action onDone = null) {
             StopMoving();
@@ -649,10 +649,21 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                 return;
             }
 
+            // A window's new frame reaches the screen only after the tick that sets it, so a window drawn in that tick is drawn at its old size:
+            // both are drawn every tick, at the frame the tick before set, and once more after the last step, so the last frame is drawn whole.
             var start = EditorApplication.timeSinceStartup;
+            var isSettling = false;
             moving = () => {
                 if (this == null) {
                     StopMoving();
+                    return;
+                }
+
+                if (isSettling) {
+                    if (listWindow != null) repaintNow(listWindow);
+                    repaintNow(this);
+                    StopMoving();
+                    onDone?.Invoke();
                     return;
                 }
 
@@ -668,20 +679,17 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                     shownList     = Mathf.Lerp(fromList, toList, eased);
                 }
 
-                var isControlsMoved = SetFrames(Mathf.Lerp(fromAnchor, toAnchor, eased), shownControls, shownList);
+                SetFrames(Mathf.Lerp(fromAnchor, toAnchor, eased), shownControls, shownList);
                 if (listWindow != null) repaintNow(listWindow);
-                if (isControlsMoved) repaintNow(this);
+                repaintNow(this);
 
-                if (progress < 1f) return;
-
-                StopMoving();
-                onDone?.Invoke();
+                isSettling = progress >= 1f;
             };
             EditorApplication.update += moving;
         }
 
-        // Puts the controls against the anchor and the list against them, on the far side; true when the controls' window moved or changed size.
-        private bool SetFrames(float anchorAt, float shownControls, float shownList) {
+        // Puts the controls against the anchor and the list against them, on the far side; the controls' window is only framed again when it moved or changed size.
+        private void SetFrames(float anchorAt, float shownControls, float shownList) {
             var isControlsMoved = !isFramed || Mathf.Abs(anchorAt - anchor) >= .01f || Mathf.Abs(shownControls - controlsShown) >= .01f;
             anchor        = anchorAt;
             controlsShown = shownControls;
@@ -692,7 +700,6 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             if (isControlsMoved) Frame(this, frames.Controls);
             if (listWindow != null) Frame(listWindow, frames.List);
             UpdateScroller();
-            return isControlsMoved;
         }
 
         // The controls' window against the anchor and the list's against it, on the far side, each at least a line, its edge.
@@ -1191,8 +1198,10 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             content.AddToClassList(Uss.Content);
             if (mode is SearchWindowMode.DropDown) {
                 // The list's window shows after this one, so this one takes the focus back for the keys to reach the search field.
+                // On a next step picked with a click, the list holds the focus: it leaves the list for this window, not for elsewhere.
                 OpenListWindow();
                 listWindow.rootVisualElement.Add(content);
+                isTakingFocusBack = true;
                 Focus();
             } else {
                 root.Add(content);

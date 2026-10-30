@@ -67,7 +67,8 @@
     flex-direction: column-reverse;
 }
 
-.search-window--above .search-window__header {
+/* As specific as the header's own rule below plus one class, so it wins over it wherever the two sit in the file. */
+.search-window.search-window--above .search-window__header {
     border-bottom-width: 0;
     border-top-width: 1px;
 }
