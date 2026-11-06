@@ -43,6 +43,11 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         public string DisabledReason;
 
         /// <summary>
+        /// Whether picking the row leads to another list in the same window, as a folder does: it shows the same arrow, and the right arrow key picks it.
+        /// </summary>
+        public bool HasNextStep;
+
+        /// <summary>
         /// Loads <see cref="Icon"/> the first time the row is shown, so a long list does not load every icon up front.
         /// </summary>
         public Func<Texture2D> IconLoader;

@@ -1454,7 +1454,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             ((Image)row[0]).image = item.Icon;
             ((Label)row[1]).text = (owner.IsInSearchMode ? item.GetSearchLabel() : item.Label ?? string.Empty)
                                  + (item.DisabledReason == null ? string.Empty : $"   ({item.DisabledReason})");
-            row[2].style.display = item.HasChildren ? DisplayStyle.Flex : DisplayStyle.None;
+            row[2].style.display = item.HasChildren || item.HasNextStep ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         private void OnKeyDown(KeyDownEvent evt) {
@@ -1494,10 +1494,16 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                     NavigateBack();
                     break;
                 case KeyCode.RightArrow:
-                    if (!string.IsNullOrEmpty(searchText) || !TryGetSelected(out var folder) || !folder.HasChildren) break;
+                    if (!string.IsNullOrEmpty(searchText) || !TryGetSelected(out var folder)) break;
 
-                    Consume(evt);
-                    NavigateInto(folder);
+                    if (folder.HasChildren) {
+                        Consume(evt);
+                        NavigateInto(folder);
+                    } else if (folder.HasNextStep) {
+                        Consume(evt);
+                        SelectItem(folder);
+                    }
+
                     break;
             }
         }

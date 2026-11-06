@@ -4,6 +4,13 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.14] - 2026-11-06
+
+### Thêm
+
+- `SearchChoice.HasNextStep`, `SearchNode.HasNextStep`: dòng dẫn tới một danh sách tiếp theo
+  (`Present`, `ShowNext`) hiện mũi tên như thư mục, phím mũi tên phải chọn nó.
+
 ## [1.0.13] - 2026-10-30
 
 ### Sửa

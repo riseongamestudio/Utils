@@ -48,7 +48,7 @@ project báo đúng một lỗi từ `RiseOn.Utils.Requirements`.
     }
   ],
   "dependencies": {
-    "com.riseon.utils": "1.0.13"
+    "com.riseon.utils": "1.0.14"
   }
 }
 ```
@@ -56,7 +56,7 @@ project báo đúng một lỗi từ `RiseOn.Utils.Requirements`.
 **Git URL**: *Package Manager → + → Add package from git URL*:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Core#com.riseon.utils/1.0.13
+https://github.com/riseongamestudio/Utils.git?path=/Core#com.riseon.utils/1.0.14
 ```
 
 Repo chứa nhiều package nên tag có tiền tố tên package

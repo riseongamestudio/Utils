@@ -33,13 +33,17 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         /// </summary>
         public readonly Func<Texture2D> FolderIcon;
 
-        public SearchChoice(string path, T value, string disabledReason = null, Func<Texture2D> icon = null, string labelSearch = null, Func<Texture2D> folderIcon = null) {
+        /// <summary>Whether picking it lists more choices with <see cref="ChoiceSearchWindow.Present{T}"/>: its row shows the arrow of a folder.</summary>
+        public readonly bool HasNextStep;
+
+        public SearchChoice(string path, T value, string disabledReason = null, Func<Texture2D> icon = null, string labelSearch = null, Func<Texture2D> folderIcon = null, bool hasNextStep = false) {
             Path           = path;
             Value          = value;
             DisabledReason = disabledReason;
             Icon           = icon;
             LabelSearch    = labelSearch;
             FolderIcon     = folderIcon;
+            HasNextStep    = hasNextStep;
             IsNone         = false;
         }
 

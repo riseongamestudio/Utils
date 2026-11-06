@@ -147,6 +147,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                     ? ConstructNoneNode(name)
                     : new SearchNode { Label = name, LabelSearch = choice.LabelSearch, Data = choice.Value, IconLoader = choice.Icon };
                 node.DisabledReason = choice.DisabledReason;
+                node.HasNextStep    = choice.HasNextStep;
 
                 var folder = root.AddInFolder(slash < 0 ? string.Empty : choice.Path[..slash], node);
                 if (choice.FolderIcon == null || folder == root || !iconned.Add(folder)) continue;
