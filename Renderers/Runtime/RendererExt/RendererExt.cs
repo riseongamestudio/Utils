@@ -180,7 +180,7 @@ namespace RiseOn.Utils.Renderers {
 
             if (Sprite == null) return;
 
-            if (Pivot == PivotOverrideMode.Unchanged) {
+            if (Pivot is PivotOverrideMode.Unchanged) {
                 SetRdrLocPos(Vector3.zero);
                 return;
             }

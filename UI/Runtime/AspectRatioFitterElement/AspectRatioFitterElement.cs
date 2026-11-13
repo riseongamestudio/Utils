@@ -39,11 +39,11 @@ namespace RiseOn.Utils.UI {
         int ILayoutElement.layoutPriority => 0;
 
         void ILayoutElement.CalculateLayoutInputHorizontal() {
-            minWidth = AspectMode == AspectModeId.WidthControlsHeight ? 0 : RectTF.rect.height * AspectRatio;
+            minWidth = AspectMode is AspectModeId.WidthControlsHeight ? 0 : RectTF.rect.height * AspectRatio;
         }
 
         void ILayoutElement.CalculateLayoutInputVertical() {
-            minHeight = AspectMode == AspectModeId.HeightControlsWidth ? 0 : RectTF.rect.width / AspectRatio;
+            minHeight = AspectMode is AspectModeId.HeightControlsWidth ? 0 : RectTF.rect.width / AspectRatio;
         }
 
         protected void SetThisPropThenDirty<T>(ref T orgVal, T newVal) {
@@ -114,7 +114,7 @@ namespace RiseOn.Utils.UI {
             if (!IsActive()) return;
 
             LayoutRebuilder.MarkLayoutForRebuild(transform as RectTransform);
-            tracker.Add(this, RectTF, AspectMode == AspectModeId.WidthControlsHeight
+            tracker.Add(this, RectTF, AspectMode is AspectModeId.WidthControlsHeight
                 ? DrivenTransformProperties.SizeDeltaY
                 : DrivenTransformProperties.SizeDeltaX);
         }
