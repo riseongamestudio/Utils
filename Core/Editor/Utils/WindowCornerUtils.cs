@@ -11,7 +11,7 @@ namespace RiseOn.Utils.Editor {
     /// Rounds chosen corners of a borderless editor window, a drop-down's, by <see cref="SettingsSection.Radius"/>, as the fields and boxes in it round.<br/>
     /// The window is cut to the shape, and its root's border and content follow the curve.<br/>
     /// Only the corners asked for round, so two windows that meet along an edge round as one, where Windows' own rounding (DWM) takes all four or none; Windows 10 rounds the same.<br/>
-    /// The cut keeps every pixel whose middle lies inside the curve, so the border shows whole and only the outermost pixels step.<br/>
+    /// The cut keeps the pixels the curve covers three quarters of or more, so the corner looks as round as a smoothed one of the same radius.<br/>
     /// On another editor platform the window stays square (<see cref="IsSupported"/>).
     /// </summary>
     /// <example><code>
@@ -69,11 +69,14 @@ namespace RiseOn.Utils.Editor {
             shape.Hidden  = hidden;
             shape.Size    = default;
 
-            var root = window.rootVisualElement;
-            root.style.borderTopLeftRadius     = (corners & Corners.TopLeft) != 0 ? SettingsSection.Radius : 0;
-            root.style.borderTopRightRadius    = (corners & Corners.TopRight) != 0 ? SettingsSection.Radius : 0;
-            root.style.borderBottomLeftRadius  = (corners & Corners.BottomLeft) != 0 ? SettingsSection.Radius : 0;
-            root.style.borderBottomRightRadius = (corners & Corners.BottomRight) != 0 ? SettingsSection.Radius : 0;
+            // UI Toolkit draws a rounded border about half a point inside the curve of its radius, where GUI.DrawTexture, which draws the
+            // page's boxes, puts it on the curve: half a point more lays the border on the boxes' curve, the one the cut follows.
+            var root   = window.rootVisualElement;
+            var radius = SettingsSection.Radius + .5f;
+            root.style.borderTopLeftRadius     = (corners & Corners.TopLeft) != 0 ? radius : 0;
+            root.style.borderTopRightRadius    = (corners & Corners.TopRight) != 0 ? radius : 0;
+            root.style.borderBottomLeftRadius  = (corners & Corners.BottomLeft) != 0 ? radius : 0;
+            root.style.borderBottomRightRadius = (corners & Corners.BottomRight) != 0 ? radius : 0;
             root.style.overflow                = Overflow.Hidden;
 
             Apply(shape);
@@ -111,19 +114,19 @@ namespace RiseOn.Utils.Editor {
             SetWindowRgn(shape.Handle, shape.Hidden ? CreateRectRgn(0, 0, 0, 0) : Region(shape.Handle, size, shape.Corners), true);
         }
 
-        // The window less the pixels whose middle lies outside the root's rounded corners: the border, a pixel inside the curve, shows whole,
-        // and no pixel stays that the curve covers less than half of, where what lies behind the window would show through its smoothing.
-        // In pixels at the window's own scale, as its monitor sets it.
+        // The window less the pixels the root's rounded corners cover less than three quarters of. A window keeps or drops a pixel
+        // whole, where smoothing shows a pixel the curve half covers half lit; kept whole, such a pixel squares the corner off, so a
+        // corner cut at the middle of its pixels looks smaller than a smoothed one of the same radius. In pixels at the window's own
+        // scale, as its monitor sets it.
         private static IntPtr Region(IntPtr handle, Vector2Int size, Corners corners) {
+            const float Kept = .75f;
             var scale  = GetDpiForWindow(handle) / 96f;
             var radius = SettingsSection.Radius * (scale > 0 ? scale : 1);
             var reach  = Mathf.CeilToInt(radius);
             var region = CreateRectRgn(0, 0, size.x, size.y);
             for (var i = 0; i < reach; i++) {
                 for (var j = 0; j < reach; j++) {
-                    var dx = radius - (i + .5f);
-                    var dy = radius - (j + .5f);
-                    if (dx <= 0 || dy <= 0 || Mathf.Sqrt(dx * dx + dy * dy) < radius) continue;
+                    if (Covered(radius, i, j) >= Kept) continue;
 
                     if ((corners & Corners.TopLeft) != 0) Cut(i, j);
                     if ((corners & Corners.TopRight) != 0) Cut(size.x - 1 - i, j);
@@ -139,6 +142,21 @@ namespace RiseOn.Utils.Editor {
                 CombineRgn(region, region, pixel, CombineDiff);
                 DeleteObject(pixel);
             }
+        }
+
+        // How much of the corner pixel at (i, j) lies inside a curve of the radius around (radius, radius), from 8 by 8 samples.
+        private static float Covered(float radius, int i, int j) {
+            const int Samples = 8;
+            var inside = 0;
+            for (var a = 0; a < Samples; a++) {
+                for (var b = 0; b < Samples; b++) {
+                    var dx = radius - (i + (a + .5f) / Samples);
+                    var dy = radius - (j + (b + .5f) / Samples);
+                    if (dx <= 0 || dy <= 0 || dx * dx + dy * dy <= radius * radius) inside++;
+                }
+            }
+
+            return inside / (float) (Samples * Samples);
         }
 
         private static HashSet<IntPtr> ThreadWindows() {

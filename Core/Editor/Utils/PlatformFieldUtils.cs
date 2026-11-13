@@ -55,10 +55,9 @@ namespace RiseOn.Utils.Editor {
         }
 
         /// <summary>The pair in one row of <paramref name="value"/>, whatever its width: for a row laid out by hand, such as a section's bar.</summary>
-        /// <param name="rightInset">How far <paramref name="value"/> ends short of the block it is in, as a section's bar value does, so its columns line up with the rows'.</param>
-        public static bool Draw(Rect value, ref string androidValue, ref string iosValue, float rightInset = 0) {
+        public static bool Draw(Rect value, ref string androidValue, ref string iosValue) {
             EditorGUI.BeginChangeCheck();
-            Split(value, out var left, out var right, rightInset);
+            Split(value, out var left, out var right);
             androidValue = Field(left, android, Width(android), androidValue);
             iosValue     = Field(right, ios, Width(ios), iosValue);
             return EditorGUI.EndChangeCheck();
@@ -75,13 +74,11 @@ namespace RiseOn.Utils.Editor {
             return left.width - Width(android) >= FieldMinWidth;
         }
 
-        // The value column as it is at the page's edge, so the iOS name starts in one line in and out of sections: there the two
-        // fields are as wide as each other, each after its name. The iOS field ends where this row's column does, inside a section
-        // short by its padding. Too narrow for the names, they share what there is, so neither covers the other.
-        private static void Split(Rect value, out Rect left, out Rect right, float rightInset = 0) {
-            var full  = value.width + SettingsSection.RightInset + rightInset;
+        // The row's value column in two, each field after its name and as wide as the other. Too narrow for the names, they share
+        // what there is, so neither covers the other.
+        private static void Split(Rect value, out Rect left, out Rect right) {
             var names = Width(android) + Width(ios) + Gap;
-            var width = full >= names ? Width(android) + (full - names) / 2 : Mathf.Max(0, full - Gap) * Width(android) / (names - Gap);
+            var width = value.width >= names ? Width(android) + (value.width - names) / 2 : Mathf.Max(0, value.width - Gap) * Width(android) / (names - Gap);
             left  = new Rect(value.x, value.y, width, value.height);
             right = Rect.MinMaxRect(Mathf.Min(left.xMax + Gap, value.xMax), value.y, value.xMax, value.yMax);
         }

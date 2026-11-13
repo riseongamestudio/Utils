@@ -133,9 +133,6 @@ namespace RiseOn.Utils.Editor {
         /// <summary>Where a field on the bar goes, in the page's value column: set for a section made with <c>barValue</c>.</summary>
         public Rect BarValue => barValue;
 
-        /// <summary>How far <see cref="BarValue"/> ends short of the section's edge, for a field split in columns measured from the page's edge.</summary>
-        public float BarValueInset => bar.xMax - barValue.xMax;
-
         /// <summary>
         /// A section the bar folds, whose fold is the property's own state, so an Alt+click folds what is under it.<br/>
         /// Call <see cref="Restore"/> from the drawer's Initialize so the section opens as it was left.
@@ -364,7 +361,6 @@ namespace RiseOn.Utils.Editor {
                 // whole as the rest of the layout. Padded content needs nothing more: its last control's own margin is the space between two fields.
                 GUILayout.Space(1);
                 GUILayout.EndVertical();
-                if (padded) PopRightInset(Inset);
             }
 
             if (folds) EndFade();
@@ -417,25 +413,7 @@ namespace RiseOn.Utils.Editor {
             if (!padded) return;
 
             GUILayout.Space(RowPadding);
-            PushRightInset(Inset);
         }
-
-        private static float rightInset;
-
-        /// <summary>
-        /// How far short of the page's right edge the content being drawn ends: the right padding of every section and indented block it is in.<br/>
-        /// A row split in columns measures them from the page's edge, so its columns line up with the page's at any depth.
-        /// </summary>
-        public static float RightInset => rightInset;
-
-        /// <summary>Adds a block's right padding to <see cref="RightInset"/>, for content padded by its own drawer; pair with <see cref="PopRightInset"/>.</summary>
-        public static void PushRightInset(float inset) => rightInset += inset;
-
-        /// <summary>Takes back what <see cref="PushRightInset"/> added.</summary>
-        public static void PopRightInset(float inset) => rightInset -= inset;
-
-        // A draw cut short, by GUIUtility.ExitGUI, leaves sections unclosed; each page starts from its edge.
-        internal static void ResetRightInset() => rightInset = 0;
 
         // A filled rect, or its outline when width is above 0, with the top and bottom corners rounded as asked.
         private static void Round(Rect rect, Color color, float width, float top, float bottom) {

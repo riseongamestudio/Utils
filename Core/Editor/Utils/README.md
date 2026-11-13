@@ -241,8 +241,6 @@ dòng thường của trang:
 | `LabelGap` (2) | Khoảng Unity để giữa cột nhãn và ô: ô tự đặt bắt đầu ở `row.x + Inset + labelWidth + LabelGap` |
 | `Indent` (15) | Nội dung gập dưới foldout của một dòng thụt chừng đó, cột nhãn hẹp đi chừng đó |
 | `ButtonRect(i)`, `RowButton(row, i)` | Ô của nút thứ `i` tính từ phải, trên thanh hay trên dòng, để đặt control khác cạnh nút |
-| `BarValueInset` | Khoảng `BarValue` kết thúc trước mép mục: ô trên thanh chia cột tính từ mép trang thì trừ đi khoảng này |
-| `RightInset`, `PushRightInset`, `PopRightInset` | Khoảng nội dung đang vẽ kết thúc trước mép phải trang. Drawer tự thêm lề phải cho nội dung của nó thì `Push` lề đó trước khi vẽ, `Pop` sau, để dòng chia cột bên trong vẫn thẳng cột với trang |
 | `BeginFade(key, open)`, `EndFade()` | Fade gập mở của Odin cho nội dung gập dưới một dòng, tự vẽ lại cửa sổ trong lúc fade. Gọi `EndFade` dù `BeginFade` trả gì |
 
 ### SettingsTabs
@@ -259,7 +257,7 @@ tabs.Draw(page => DrawPlatform(page));
 
 | Hàm | Vẽ gì |
 |---|---|
-| `PlatformFieldUtils.Draw(label, android, ios)` | Một giá trị Android và một giá trị iOS dưới một nhãn, trên một dòng, mỗi ô sau tên của nó: chữ "iOS" thẳng cột giữa các dòng ở mọi độ sâu, hai ô rộng bằng nhau ở mép trang, trong mục thì ô iOS ngắn đi đúng lề phải của mục. Cửa sổ hẹp tới mức mỗi ô dưới `FieldMinWidth` (250) thì mỗi ô một dòng |
+| `PlatformFieldUtils.Draw(label, android, ios)` | Một giá trị Android và một giá trị iOS dưới một nhãn, trên một dòng: mỗi ô sau tên của nó, hai ô rộng bằng nhau. Cửa sổ hẹp tới mức mỗi ô dưới `FieldMinWidth` (250) thì mỗi ô một dòng. Bản `Draw(rect, ...)` cho dòng tự đặt (như thanh của mục) luôn một dòng; hết chỗ cho tên thì hai tên chia nhau, không đè lên nhau |
 | `HelpBoxUtils.Draw(message, type, button)` | Hộp báo chữ cỡ nhãn của trang, icon cao một dòng, nút sửa (nếu có) nằm trong hộp ở đầu phải; trả `true` khi bấm nút |
 | `ScriptUtils.Field(label, type)` | File script của một kiểu C#, như ô Script của component: chỉ đọc, bấm thì ping, bấm đúp thì mở. Trong lớp dữ liệu dùng `[ScriptField]` |
 | `SpinnerUtils.LabelField(label, text)`, `SpinnerUtils.Content(text)` | Vòng quay chờ của Unity trước một dòng chữ, cho việc đang chạy (như trang Firebase lúc kiểm tra Firebase CLI). Cửa sổ tự vẽ lại khi vòng quay còn hiện; `Content` dùng được với mọi nhãn |
@@ -284,8 +282,9 @@ WindowCornerUtils.Round(window, WindowCornerUtils.Corners.All);
 WindowCornerUtils.Round(window, WindowCornerUtils.Corners.All, hidden: true);   // cắt bỏ cả cửa sổ khi chưa có gì để hiện
 ```
 
-Cắt giữ mọi pixel có tâm nằm trong đường cong, nên viền liền một nét, chỉ mép ngoài cùng hơi
-bậc thang. Cửa sổ đổi cỡ thì tự cắt lại. Chạy trên Editor Windows (10 và 11 như nhau);
+Cửa sổ chỉ giữ hoặc bỏ được nguyên pixel, nên cắt bỏ mọi pixel mà đường cong phủ dưới ba phần
+tư: góc trông tròn bằng góc của các mục trên trang, vốn vẽ khử răng cưa. Viền của root nằm đúng
+trên đường cong đó, liền một nét. Cửa sổ đổi cỡ thì tự cắt lại. Chạy trên Editor Windows (10 và 11 như nhau);
 `IsSupported` là `false` trên Editor khác, ở đó cửa sổ giữ góc vuông.
 
 ## Vẽ theo pixel: PixelUtils, HoverUtils

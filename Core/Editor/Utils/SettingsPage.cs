@@ -33,7 +33,6 @@ namespace RiseOn.Utils.Editor {
 
         /// <summary>Begins the page's margins and its label column; disposing the page ends them.</summary>
         public static SettingsPage Begin() {
-            SettingsSection.ResetRightInset();
             var page = EditorGUILayout.BeginVertical(margins);
             if (Event.current.type is EventType.Repaint && page.width > 1) width = page.width;
 
