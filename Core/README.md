@@ -163,10 +163,12 @@ Cách dùng từng tool: [Tool trong Editor](Editor/Tools/README.md).
 | EnumLabel | Đặt nhãn phần tử mảng theo enum (Odin) | [Runtime/EnumLabel](Runtime/EnumLabel/README.md) |
 | ForwardAttributesTo | Chuyển attribute Odin từ field wrapper xuống field bên trong | [Runtime/ForwardAttributes](Runtime/ForwardAttributes/README.md) |
 | AllowGenerics | Cho field `[SerializeReference]` chọn được lớp generic, hỏi từng tham số | [Runtime/AllowGenerics](Runtime/AllowGenerics/README.md) |
+| SectionGroup, ScriptField | `[SectionGroup]` gom member thành một mục của trang settings; `[ScriptField]` hiện một `Type` như ô Script của component | [Editor/Utils](Editor/Utils/README.md#trang-settings) |
 | Tool Editor | Capture Game View, Find References, Replace Component, Replace Type | [Editor/Tools](Editor/Tools/README.md) |
 | Foldout đệ quy | Alt+click foldout bất kỳ trong Inspector của Odin mở hay gập cả nhánh bên dưới | [Editor/Utils](Editor/Utils/README.md#foldout-đệ-quy) |
 | Cửa sổ tìm kiếm | `ComponentSearchWindow`, `ObjectSearchWindow`, `ChoiceSearchWindow` cho drawer riêng, dạng cửa sổ hoặc drop-down | [Editor/SearchWindow](Editor/SearchWindow/README.md) |
-| Utils Editor | `PrefabUtils`, `InspectorPropertyUtils`, `RectFieldUtils`, `InlineEditorImitator` cho người viết drawer | [Editor/Utils](Editor/Utils/README.md) |
+| Chọn enum | Mọi ô enum, của Odin lẫn Unity, mở drop-down `ChoiceSearchWindow`; `ChoiceFieldUtils` cho ô vẽ tay | [Editor/Utils](Editor/Utils/README.md#chọn-enum-choicefieldutils) |
+| Utils Editor | `PrefabUtils`, `InspectorPropertyUtils`, `RectFieldUtils`, `InlineEditorImitator` cho người viết drawer; `SettingsPage`, `SettingsSection`, `SettingsTabs`, các ô dùng chung (`PlatformFieldUtils`, `HelpBoxUtils`, `ScriptUtils`, `SpinnerUtils`), `DeferredSave`, `AssetFindUtils` cho trang settings; `WindowCornerUtils` bo góc cửa sổ; `PixelUtils`, `HoverUtils` cho control vẽ tay | [Editor/Utils](Editor/Utils/README.md) |
 
 ## Lịch sử thay đổi
 

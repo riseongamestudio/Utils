@@ -40,7 +40,7 @@ namespace RiseOn.Utils.Editor {
                 if (old != null && replacement != null) CopySharedFields(old, replacement);
 
                 property.managedReferenceValue = replacement;
-                if (oldId != ManagedReferenceUtility.RefIdNull) RepointShared(serializedObject, oldId, replacement);
+                if (oldId is not ManagedReferenceUtility.RefIdNull) RepointShared(serializedObject, oldId, replacement);
                 serializedObject.ApplyModifiedProperties();
             }
 

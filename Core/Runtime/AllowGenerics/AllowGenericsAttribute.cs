@@ -2,8 +2,7 @@ using System;
 
 namespace RiseOn.Utils {
     /// <summary>
-    /// Lets the type picker of a <c>[SerializeReference]</c> field also offer generic types whose type arguments cannot be inferred from the field,<br/>
-    /// and build one by picking each argument in turn, as deep as generic arguments nest.<br/>
+    /// Lets the type picker of a <c>[SerializeReference]</c> field also offer generic types whose type arguments cannot be inferred from the field, and build one by picking each argument in turn, as deep as generic arguments nest.<br/>
     /// The arguments the field does fix are inferred, through variance too, so only the rest are asked for.<br/>
     /// On a field it applies to that field; on a class or an interface, to every field declared as that type.<br/>
     /// Derive from it and override <see cref="Accepts"/> to narrow what the arguments may be, and <see cref="GetDisabledReason"/> to gray out a type.

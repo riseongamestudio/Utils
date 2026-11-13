@@ -53,6 +53,9 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         // Lowers the floor Unity holds a new window's frame to, 80 high whatever the window asks for, so a drop-down shows as the line it opens from.
         private static readonly Action<EditorWindow, Vector2> setFrameFloor = FindSetFrameFloor();
 
+        // Brings a window over the others without the focus: a click on another window raises that one over the drop-down, which then folds behind it.
+        private static readonly Action<EditorWindow> bringToFront = FindBringToFront();
+
         // How tall the controls of the last drop-down were, for the next one to know where it opens before its layout has run.
         private static float lastControlsHeight;
 
@@ -128,6 +131,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         private float?       openingAnchor;
         private float        frameX;
         private float        frameWidth;
+        private bool         showsSearch = true;
 
         private Label              header;
         private ToolbarSearchField searchField;
@@ -140,6 +144,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         private IVisualElementScheduledItem animation;
         // The move of a drop-down's list under way, run on each editor update: out of the panel's own scheduler, whose loop drawing the window at once would run again inside itself.
         private EditorApplication.CallbackFunction moving;
+        private Vector3                            movingTo;
 
         // The fit of a drop-down under way, waiting for the layout, and what runs once it has.
         private EditorApplication.CallbackFunction fitting;
@@ -172,6 +177,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         /// Runs when the window closes with nothing picked: Escape, a click elsewhere, or its close button; for a click, once it ends.<br/>
         /// A click on the button that opened a drop-down only closes it, as a toggle, and runs nothing.
         /// </param>
+        /// <param name="search">False for a short list that shows whole: no search field, the keys still move through it.</param>
         /// <param name="defaultSize">
         /// Size of the first open of a <see cref="SearchWindowMode.Window"/>; later opens reuse whatever size it was left at.<br/>
         /// A <see cref="SearchWindowMode.DropDown"/> takes its width from <paramref name="btnRect"/>, at least this one's, and fits its height to its rows.
@@ -183,7 +189,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
           , Vector2 defaultSize
           , string searchText = ""
           , SearchWindowMode mode = SearchWindowMode.Window
-          , Action onCanceled = null) {
+          , Action onCanceled = null
+          , bool search = true) {
             if (ClaimClosingClick(GUIUtility.GUIToScreenRect(btnRect)) || ToggleOpenDropDown(GUIUtility.GUIToScreenRect(btnRect))) {
                 DestroyImmediate(this);
                 return;
@@ -195,6 +202,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             this.mode           = mode;
             this.headerText     = headerText;
             button              = GUIUtility.GUIToScreenRect(btnRect);
+            showsSearch         = search;
 
             sections.Clear();
             RegisterSections();
@@ -216,9 +224,15 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                 // Sized again once shown, as showing it gives it a size of its own.
                 var folded = GetFrames(anchor, 0f, 0f).Controls;
                 Frame(this, folded);
-                ShowPopup();
+                WindowCornerUtils.Show(this, ShowPopup);
                 setFrameFloor(this, folded.size);
                 Frame(this, folded);
+                ShapeCorners();
+
+                // Unfolds at once to the height it is likely to take, with no pause while the layout runs; the fit then corrects the move
+                // where the layout says otherwise, which a list of plain rows never does.
+                var likely = Mathf.Min(GetLikelyRowsHeight(), GetMaxListHeight());
+                MoveTo(GetAnchor(openingAnchor ?? anchor, likely), GetControlsFrameHeight(), likely + ListBorder);
                 return;
             }
 
@@ -376,8 +390,22 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             Cancel(isByClick);
 
             loadingTimer?.Pause();
-            if (mode is SearchWindowMode.DropDown) MoveTo(anchor, 0f, 0f, CloseDuration, Close);
-            else Close();
+            if (mode is not SearchWindowMode.DropDown) {
+                Close();
+                return;
+            }
+
+            // Now and once the click has raised the window it landed on; the list under the controls, as it opened.
+            RaiseDropDown();
+            EditorApplication.delayCall += RaiseDropDown;
+            MoveTo(anchor, 0f, 0f, CloseDuration, Close);
+        }
+
+        private void RaiseDropDown() {
+            if (this == null) return;
+
+            if (listWindow != null) bringToFront(listWindow);
+            bringToFront(this);
         }
 
         private void OnDestroy() {
@@ -523,8 +551,9 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                 repaintNow(this);
                 if (listWindow != null) repaintNow(listWindow);
 
+                // Controls with nothing to show are rightly none tall; others wait for their layout.
                 var measured = controls.layout.height;
-                if (float.IsNaN(measured) || measured <= 0f) return;
+                if (float.IsNaN(measured) || measured <= 0f && !HasNoControls) return;
 
                 controlsHeight = lastControlsHeight = measured;
 
@@ -546,7 +575,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
 
                 var toAnchor = isTyping ? anchor : GetAnchor(openingAnchor ?? anchor, height);
                 openingAnchor = null;
-                MoveTo(toAnchor, GetControlsFrameHeight(), height + DropDownBorder);
+                MoveTo(toAnchor, GetControlsFrameHeight(), height + ListBorder);
             };
             EditorApplication.update += fitting;
         }
@@ -557,31 +586,35 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// Decides the side a drop-down opens to, before it shows, from the height it is likely to take: its controls as tall as the last drop-down's,<br/>
-        /// its list as tall as the rows of its tab, when built. Under its button when it fits there, else above it, turned over,<br/>
-        /// else over the field, as under it, centered on the field and unfolding from its middle.
+        /// Decides the side a drop-down opens to, before it shows, from the height it is likely to take: its controls as tall as the last drop-down's, its list as tall as the rows of its tab, when built.<br/>
+        /// Under its button when it fits there, else above it, turned over, else over the field, as under it, centered on the field and unfolding from its middle.
         /// </summary>
         private void Place() {
             controlsHeight = lastControlsHeight > 0f ? lastControlsHeight : 2f * ItemHeight;
 
-            var section = ActiveSection;
-            var rows    = section is { IsBuilding: false }
-                ? (section.NavigationStack.Count > 1 ? BreadcrumbHeight : 0f) + Mathf.Max(1, section.CurrentItems.Count) * ItemHeight
-                : DropDownLoadingHeight;
-
             var bounds = GetBounds(button);
-            var total  = GetControlsFrameHeight() + Mathf.Min(rows, GetMaxListHeight()) + DropDownBorder;
-            if (total <= bounds.yMax - button.yMax) {
+            var total  = GetControlsFrameHeight() + Mathf.Min(GetLikelyRowsHeight(), GetMaxListHeight()) + ListBorder;
+            // As far from the button as two fields are from each other.
+            var gap = EditorGUIUtility.standardVerticalSpacing;
+            if (total + gap <= bounds.yMax - button.yMax) {
                 side   = DropDownSide.Below;
-                anchor = button.yMax;
-            } else if (total <= button.y - bounds.y) {
+                anchor = button.yMax + gap;
+            } else if (total + gap <= button.y - bounds.y) {
                 side   = DropDownSide.Above;
-                anchor = button.y;
+                anchor = button.y - gap;
             } else {
                 side          = DropDownSide.Below;
                 anchor        = button.center.y;
                 openingAnchor = Mathf.Clamp(button.center.y - total / 2f, bounds.y, Mathf.Max(bounds.y, bounds.yMax - total));
             }
+        }
+
+        // As tall as the rows of the open tab, when built, are likely to be, before the layout knows.
+        private float GetLikelyRowsHeight() {
+            var section = ActiveSection;
+            return section is { IsBuilding: false }
+                ? (section.NavigationStack.Count > 1 ? BreadcrumbHeight : 0f) + Mathf.Max(1, section.CurrentItems.Count) * ItemHeight
+                : DropDownLoadingHeight;
         }
 
         private bool IsTyping => isInSearchMode && listShown > 0f;
@@ -595,30 +628,53 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         private void UpdateScroller() {
             if (mode is not SearchWindowMode.DropDown || page == null) return;
 
-            page.ShowsScroller = contentHeight > listHeight + .5f && listShown - DropDownBorder >= listHeight - .5f;
+            page.ShowsScroller = contentHeight > listHeight + .5f && listShown - ListBorder >= listHeight - .5f;
         }
 
+        // Without controls, their window is a line: cut away where windows can be cut, the list's window then drawing the edge all round;
+        // elsewhere the line is the drop-down's edge on that side.
         private float GetControlsFrameHeight() {
-            return controlsHeight + 2f * DropDownBorder;
+            return HasNoControls ? DropDownBorder : controlsHeight + 2f * DropDownBorder;
         }
+
+        private bool HidesControls => HasNoControls && WindowCornerUtils.IsSupported;
+
+        // The list's edges: the far one, and the near one too when the controls' window is cut away.
+        private float ListBorder => HidesControls ? 2f * DropDownBorder : DropDownBorder;
+
+        // The two windows round as one: the controls' window its outer corners and the list's its own, or, without controls, the list all four.
+        private void ShapeCorners() {
+            if (mode is not SearchWindowMode.DropDown) return;
+
+            var near = side is DropDownSide.Above ? WindowCornerUtils.Corners.Bottom : WindowCornerUtils.Corners.Top;
+            var far  = side is DropDownSide.Above ? WindowCornerUtils.Corners.Top : WindowCornerUtils.Corners.Bottom;
+            WindowCornerUtils.Round(this, near, hidden: HidesControls);
+            if (listWindow == null) return;
+
+            listWindow.rootVisualElement.EnableInClassList(Uss.NoControls, HidesControls);
+            WindowCornerUtils.Round(listWindow, HidesControls ? WindowCornerUtils.Corners.All : far);
+        }
+
+        // No title, search field or tabs: known before the controls are built, for the side the drop-down opens to.
+        private bool HasNoControls => string.IsNullOrEmpty(headerText) && !showsSearch && sections.Count <= 1;
 
         // As tall as a list goes: the screen's height; the anchor moves to give it room.
         private float GetMaxListHeight() {
-            return GetBounds(button).height - GetControlsFrameHeight() - DropDownBorder;
+            return GetBounds(button).height - GetControlsFrameHeight() - ListBorder;
         }
 
         // What the list has room for on its side with the anchor where it is.
         private float GetListRoomAtAnchor() {
             var bounds = GetBounds(button);
             var room   = side is DropDownSide.Below ? bounds.yMax - anchor : anchor - bounds.y;
-            return room - GetControlsFrameHeight() - DropDownBorder;
+            return room - GetControlsFrameHeight() - ListBorder;
         }
 
         // Where the anchor goes for a list of the given height: where it is, unless the list needs more room than its side has;
         // then it moves just far enough, away from the list, and stays there.
         private float GetAnchor(float from, float height) {
             var bounds = GetBounds(button);
-            var total  = GetControlsFrameHeight() + height + DropDownBorder;
+            var total  = GetControlsFrameHeight() + height + ListBorder;
             return side is DropDownSide.Below
                 ? Mathf.Max(bounds.y, Mathf.Min(from, bounds.yMax - total))
                 : Mathf.Min(bounds.yMax, Mathf.Max(from, bounds.y + total));
@@ -630,13 +686,16 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// Eases a drop-down to <paramref name="toControls"/> of controls and <paramref name="toList"/> of list shown, both window heights,<br/>
-        /// its anchor to <paramref name="toAnchor"/>, from wherever they are, even midway through an earlier move, then runs <paramref name="onDone"/>.<br/>
+        /// Eases a drop-down to <paramref name="toControls"/> of controls and <paramref name="toList"/> of list shown, both window heights, its anchor to <paramref name="toAnchor"/>, from wherever they are, even midway through an earlier move, then runs <paramref name="onDone"/>.<br/>
         /// Unfolding and folding run as one block: the controls come out of the anchor and, once whole, the list out of them; folding, the other way round.<br/>
         /// Each step moves the windows and draws them; the move ends a tick after its last step, drawn again at its final frames.
         /// </summary>
         private void MoveTo(float toAnchor, float toControls, float toList, double duration = ResizeDuration, Action onDone = null) {
+            // Already on its way there, as a drop-down is from its opening: it keeps its pace.
+            if (moving != null && onDone == null && Mathf.Abs(toAnchor - movingTo.x) < .5f && Mathf.Abs(toControls - movingTo.y) < .5f && Mathf.Abs(toList - movingTo.z) < .5f) return;
+
             StopMoving();
+            movingTo = new Vector3(toAnchor, toControls, toList);
 
             var fromAnchor   = anchor;
             var fromControls = controlsShown;
@@ -749,7 +808,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             // Sized again once shown, as showing it gives it a size of its own.
             var folded = GetFrames(anchor, 0f, 0f).List;
             Frame(listWindow, folded);
-            showWithoutFocus(listWindow);
+            WindowCornerUtils.Show(listWindow, () => showWithoutFocus(listWindow));
             setFrameFloor(listWindow, folded.size);
             Frame(listWindow, folded);
         }
@@ -763,6 +822,23 @@ namespace RiseOn.Utils.Editor.SearchWindow {
 
             Debug.LogWarning($"[{nameof(SearchWindow)}] ContainerWindow.SetMinMaxSizes is gone from this version of Unity: a drop-down may show taller for a moment as it opens.");
             return (_, _) => { };
+        }
+
+        private static Action<EditorWindow> FindBringToFront() {
+            const BindingFlags Members = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            var parent    = typeof(EditorWindow).GetField("m_Parent", Members);
+            var container = parent?.FieldType.GetProperty("window", Members);
+            var bringLive = container?.PropertyType.GetMethod("Internal_BringLiveAfterCreation", Members, null, new[] { typeof(bool), typeof(bool), typeof(bool) }, null);
+            if (bringLive != null) {
+                return window => {
+                    var host = parent.GetValue(window);
+                    var shown = host == null ? null : container.GetValue(host);
+                    if (shown != null) bringLive.Invoke(shown, new object[] { true, false, false });
+                };
+            }
+
+            Debug.LogWarning($"[{nameof(SearchWindow)}] ContainerWindow.Internal_BringLiveAfterCreation is gone from this version of Unity: a drop-down closed by a click on another window folds behind it.");
+            return _ => { };
         }
 
         private static Action<EditorWindow> FindShowWithoutFocus() {
@@ -1147,6 +1223,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             var styleSheet = LoadStyleSheet();
             if (styleSheet != null) root.styleSheets.Add(styleSheet);
 
+            // Focusable for the keys to reach it when there is no search field to hold the focus.
+            root.focusable = true;
             root.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
             root.RegisterCallback<NavigationMoveEvent>(IgnoreNavigation, TrickleDown.TrickleDown);
             root.RegisterCallback<NavigationSubmitEvent>(IgnoreNavigation, TrickleDown.TrickleDown);
@@ -1174,6 +1252,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             var root = rootVisualElement;
             root.EnableInClassList(Uss.DropDown, mode is SearchWindowMode.DropDown);
             root.EnableInClassList(Uss.Above, mode is SearchWindowMode.DropDown && side is DropDownSide.Above);
+            root.EnableInClassList(Uss.NoControls, mode is SearchWindowMode.DropDown && HidesControls);
+            root.EnableInClassList(Uss.EdgeOnly, mode is SearchWindowMode.DropDown && HasNoControls && !HidesControls);
 
             controls = new VisualElement();
             controls.AddToClassList(Uss.Controls);
@@ -1190,6 +1270,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             searchField.AddToClassList(Uss.Search);
             searchField.SetValueWithoutNotify(searchText);
             searchField.RegisterValueChangedCallback(evt => OnSearchChanged(evt.newValue));
+            searchField.style.display = showsSearch ? DisplayStyle.Flex : DisplayStyle.None;
             controls.Add(searchField);
 
             if (sections.Count > 1) controls.Add(CreateTabBar());
@@ -1218,6 +1299,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             ApplyFilter();
             RefreshView(restoreScroll: true);
             FocusSearchField();
+            // A next step may come with controls of its own, or none.
+            ShapeCorners();
         }
 
         /// <summary>
@@ -1527,8 +1610,12 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             Consume(evt);
         }
 
+        // The search field, or the root where the search field is hidden: a hidden field takes no focus, and the arrow keys would reach nothing.
         private void FocusSearchField() {
-            rootVisualElement.schedule.Execute(() => searchField?.Q<TextField>()?.Focus());
+            rootVisualElement.schedule.Execute(() => {
+                if (showsSearch && searchField?.Q<TextField>() is { } field) field.Focus();
+                else rootVisualElement.Focus();
+            });
         }
 
         private void StartAnimation(Page previousPage, bool forward) {
@@ -1641,6 +1728,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             public const string DropDown = "search-window--drop-down";
             public const string Above    = "search-window--above";
             public const string ListFrame = "search-window--list-frame";
+            public const string NoControls = "search-window--no-controls";
+            public const string EdgeOnly   = "search-window--edge-only";
             public const string Controls = "search-window__controls";
 
             public const string Header = "search-window__header";

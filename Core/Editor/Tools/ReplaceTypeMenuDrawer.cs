@@ -9,9 +9,7 @@ using Object = UnityEngine.Object;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
-    /// Adds Replace Type to the context menu of every <c>[SerializeReference]</c> field, a <c>SerRef</c> value or a list element among them:<br/>
-    /// the new type is picked with <see cref="GenericTypePicker"/>, among what Odin offers, plus generic types when the field has <see cref="AllowGenericsAttribute"/>,<br/>
-    /// then <see cref="ReplaceTypeTool"/> carries over what the types share.<br/>
+    /// Adds Replace Type to the context menu of every <c>[SerializeReference]</c> field, a <c>SerRef</c> value or a list element among them: the new type is picked with <see cref="GenericTypePicker"/>, among what Odin offers, plus generic types when the field has <see cref="AllowGenericsAttribute"/>, then <see cref="ReplaceTypeTool"/> carries over what the types share.<br/>
     /// The item is disabled while every target's value is None, as there is nothing to replace; the field's own picker sets a first type.<br/>
     /// A field, or a type, with <see cref="HideReplaceTypeAttribute"/> goes without it.<br/>
     /// It draws nothing itself.

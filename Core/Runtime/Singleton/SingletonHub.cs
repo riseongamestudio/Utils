@@ -22,8 +22,7 @@ namespace RiseOn.Utils {
         }
 
         /// <summary>
-        /// Blocks cases such as <c>class A : Singleton&lt;B&gt; { }</c>,<br/>
-        /// where A is registered as B but is not assignable to B.
+        /// Blocks cases such as <c>class A : Singleton&lt;B&gt; { }</c>, where A is registered as B but is not assignable to B.
         /// </summary>
         private static void ThrowIfInsNotAssignableToInsType(Singleton ins, Type insType) {
             if (insType.IsInstanceOfType(ins)) return;

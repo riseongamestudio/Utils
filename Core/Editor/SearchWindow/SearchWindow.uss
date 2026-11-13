@@ -1,4 +1,4 @@
-/* SearchWindow. Colours that differ by editor skin come from Unity's own theme variables. */
+/* SearchWindow. Colors that differ by editor skin come from Unity's own theme variables. */
 
 /* Header: search field, then one tab per section when there are several. */
 
@@ -50,6 +50,27 @@
 .search-window.search-window--drop-down.search-window--list-frame.search-window--above {
     border-top-width: 1px;
     border-bottom-width: 0;
+}
+
+/* Without a title, a search field or tabs, the controls' window is cut away and the list's window draws its edge all round. */
+
+.search-window.search-window--drop-down.search-window--list-frame.search-window--no-controls {
+    border-top-width: 1px;
+}
+
+.search-window.search-window--drop-down.search-window--list-frame.search-window--no-controls.search-window--above {
+    border-bottom-width: 1px;
+}
+
+/* Where windows cannot be cut, the controls' window without controls stays a line, the drop-down's edge on its side alone. */
+
+.search-window.search-window--drop-down.search-window--edge-only {
+    border-bottom-width: 0;
+}
+
+.search-window.search-window--drop-down.search-window--edge-only.search-window--above {
+    border-top-width: 0;
+    border-bottom-width: 1px;
 }
 
 .search-window--list-frame .search-window__content {
@@ -133,7 +154,7 @@
     flex-grow: 1;
 }
 
-/* A drop-down has no window frame of its own, so it draws its edge, square as Unity's and Odin's drop-downs. */
+/* A drop-down has no window frame of its own, so it draws its edge; its corners round where its windows are cut (WindowCornerUtils). */
 
 .search-window.search-window--drop-down {
     border-width: 1px;

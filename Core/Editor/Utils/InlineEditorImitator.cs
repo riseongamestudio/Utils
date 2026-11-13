@@ -92,7 +92,7 @@ namespace RiseOn.Utils.Editor {
         }
 
         private void DrawEditor(InspectorProperty property, IPropertyValueEntry valueEntry, InlineEditorAttribute attr, Object targetObject) {
-            if (valueEntry.ValueState == PropertyValueState.ReferencePathConflict) {
+            if (valueEntry.ValueState is PropertyValueState.ReferencePathConflict) {
                 SirenixEditorGUI.InfoMessageBox("Reference path conflict detected.");
                 return;
             }
@@ -155,25 +155,25 @@ namespace RiseOn.Utils.Editor {
                 bool drawPreview = attr.DrawPreview || (isGameObjectType && attr.DrawGUI);
                 
                 PreviewAlignment alignment = attr.PreviewAlignment;
-                bool isHorizontal = drawPreview && (alignment == PreviewAlignment.Left || alignment == PreviewAlignment.Right);
-                bool isVertical = drawPreview && (alignment == PreviewAlignment.Top || alignment == PreviewAlignment.Bottom);
+                bool isHorizontal = drawPreview && (alignment is PreviewAlignment.Left || alignment is PreviewAlignment.Right);
+                bool isVertical = drawPreview && (alignment is PreviewAlignment.Top || alignment is PreviewAlignment.Bottom);
 
                 if (!drawGUI && isHorizontal) {
                     isHorizontal = false;
                     isVertical = true;
-                    alignment = alignment == PreviewAlignment.Left ? PreviewAlignment.Top : PreviewAlignment.Bottom;
+                    alignment = alignment is PreviewAlignment.Left ? PreviewAlignment.Top : PreviewAlignment.Bottom;
                 }
 
                 if (isHorizontal) {
                     GUILayout.BeginHorizontal();
-                    if (alignment == PreviewAlignment.Left) {
+                    if (alignment is PreviewAlignment.Left) {
                         GUILayout.BeginVertical();
                         DrawPreview(attr, alignment);
                         GUILayout.EndVertical();
                     }
                     GUILayout.BeginVertical(); 
                 } 
-                else if (isVertical && alignment == PreviewAlignment.Top) {
+                else if (isVertical && alignment is PreviewAlignment.Top) {
                     DrawPreview(attr, alignment);
                 }
 
@@ -182,14 +182,14 @@ namespace RiseOn.Utils.Editor {
 
                 if (isHorizontal) {
                     GUILayout.EndVertical(); 
-                    if (alignment == PreviewAlignment.Right) {
+                    if (alignment is PreviewAlignment.Right) {
                         GUILayout.BeginVertical();
                         DrawPreview(attr, alignment);
                         GUILayout.EndVertical();
                     }
                     GUILayout.EndHorizontal();
                 } 
-                else if (isVertical && alignment == PreviewAlignment.Bottom) {
+                else if (isVertical && alignment is PreviewAlignment.Bottom) {
                     DrawPreview(attr, alignment);
                 }
             } 
@@ -294,7 +294,7 @@ namespace RiseOn.Utils.Editor {
         }
 
         private bool HasConflict(IPropertyValueEntry valueEntry) {
-            if (valueEntry.ValueState != PropertyValueState.ReferenceValueConflict) return false;
+            if (valueEntry.ValueState is not PropertyValueState.ReferenceValueConflict) return false;
 
             var underlyingObjects = valueEntry.WeakValues
                 .Cast<object>()
@@ -309,7 +309,7 @@ namespace RiseOn.Utils.Editor {
         }
 
         private void DrawPreview(InlineEditorAttribute attr, PreviewAlignment alignment) {
-            bool isHorizontal = alignment == PreviewAlignment.Left || alignment == PreviewAlignment.Right;
+            bool isHorizontal = alignment is PreviewAlignment.Left || alignment is PreviewAlignment.Right;
             
             if (!attr.DrawPreview && !(isGameObjectType && attr.DrawGUI)) return;
             if (!previewEditor.HasPreviewGUI() && !(previewEditor.target is GameObject)) return;
@@ -346,7 +346,7 @@ namespace RiseOn.Utils.Editor {
             }
 
             var evt = Event.current;
-            if ((evt.type == EventType.ScrollWheel || evt.type == EventType.DragPerform) && !evt.IsMouseOver(rect)) {
+            if ((evt.type is EventType.ScrollWheel || evt.type is EventType.DragPerform) && !evt.IsMouseOver(rect)) {
                 GUI.enabled = false;
             }
 

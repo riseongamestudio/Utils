@@ -9,8 +9,7 @@ using Object = UnityEngine.Object;
 namespace RiseOn.Utils.Editor {
     /// <summary>
     /// Leaves a <see cref="AllowGenericsAttribute"/> field to Odin's own drawer, so it looks and behaves as any polymorphic field.<br/>
-    /// When Odin opens its type selector for it, from its arrow button or the keyboard, the selector is closed at once<br/>
-    /// and <see cref="GenericTypePicker"/> opens in its place, at the place and width Odin gave it.<br/>
+    /// When Odin opens its type selector for it, from its arrow button or the keyboard, the selector is closed at once and <see cref="GenericTypePicker"/> opens in its place, at the place and width Odin gave it.<br/>
     /// Odin's Change Type menu item opens its selector outside the field's drawing, so it keeps Odin's own selector.
     /// </summary>
     [DrawerPriority(0, 0, 3000)]

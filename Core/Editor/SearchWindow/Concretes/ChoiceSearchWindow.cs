@@ -5,8 +5,9 @@ using UnityEngine;
 namespace RiseOn.Utils.Editor.SearchWindow {
     /// <summary>
     /// Picks one of a list of <see cref="SearchChoice{T}"/> made in code, each at a path whose <c>/</c> make folders, such as <c>Transform/localScale</c>.<br/>
-    /// Folders and choices keep the order they are given in. A choice with a disabled reason is listed grayed out and cannot be picked,<br/>
-    /// and a choice whose value is null is the None row. It opens as a drop-down by default, as wide as the button and as tall as its rows.<br/>
+    /// Folders and choices keep the order they are given in.<br/>
+    /// A choice with a disabled reason is listed grayed out and cannot be picked, and a choice whose value is null is the None row.<br/>
+    /// It opens as a drop-down by default, as wide as the button and as tall as its rows.<br/>
     /// A pick made in steps shows each next list in the same window with <see cref="Present{T}"/>, from the callback of the step before.<br/>
     /// <see cref="OpenToggles{T}"/> picks several instead: each pick toggles its choice, ticked while on, and the window stays open for more.
     /// </summary>
@@ -27,6 +28,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         /// <param name="onSelected">Gets the value of the choice picked.</param>
         /// <param name="onCanceled">Runs when the window closes with nothing picked.</param>
         /// <param name="selected">The value the field holds now, highlighted and scrolled to when the window opens, its folders opened; null highlights nothing.</param>
+        /// <param name="search">False for a short list that shows whole, without the search field.</param>
         public static ChoiceSearchWindow Open<T>(
             Rect btnRect
           , string title
@@ -34,17 +36,18 @@ namespace RiseOn.Utils.Editor.SearchWindow {
           , Action<T> onSelected
           , Action onCanceled = null
           , SearchWindowMode mode = SearchWindowMode.DropDown
-          , object selected = null) {
+          , object selected = null
+          , bool search = true) {
             var window = CreateInstance<ChoiceSearchWindow>();
             window.Prepare(title, choices);
             if (selected != null) window.PreselectOnOpen(selected);
-            window.Show(btnRect, title, ToCallback(onSelected), defaultSize, mode: mode, onCanceled: onCanceled);
+            window.Show(btnRect, title, ToCallback(onSelected), defaultSize, mode: mode, onCanceled: onCanceled, search: search);
             return window;
         }
 
         /// <summary>
-        /// Opens a window whose picks toggle: picking a choice calls <paramref name="onToggled"/> with it, then the window stays open,<br/>
-        /// each choice ticked while <paramref name="isOn"/> says it is on, asked again after every toggle. It closes as any drop-down does.
+        /// Opens a window whose picks toggle: picking a choice calls <paramref name="onToggled"/> with it, then the window stays open, each choice ticked while <paramref name="isOn"/> says it is on, asked again after every toggle.<br/>
+        /// It closes as any drop-down does.
         /// </summary>
         public static ChoiceSearchWindow OpenToggles<T>(
             Rect btnRect
@@ -52,7 +55,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
           , IEnumerable<SearchChoice<T>> choices
           , Func<T, bool> isOn
           , Action<T> onToggled
-          , SearchWindowMode mode = SearchWindowMode.DropDown) {
+          , SearchWindowMode mode = SearchWindowMode.DropDown
+          , bool search = true) {
             var window = CreateInstance<ChoiceSearchWindow>();
             window.isOn = node => node.Data is T value && isOn(value);
             window.Prepare(title, choices);
@@ -61,7 +65,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                 window.KeepOpen();
                 window.Tick(window.tree);
                 window.RefreshRows();
-            }, defaultSize, mode: mode);
+            }, defaultSize, mode: mode, search: search);
             return window;
         }
 

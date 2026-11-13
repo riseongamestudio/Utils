@@ -1,108 +1,102 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
+using UnityEngine;
 
 namespace RiseOn.Utils.Editor {
+    /// <summary>
+    /// Moves the attributes a <see cref="ForwardAttributesToAttribute"/> wrapper's field carries onto the wrapped member.<br/>
+    /// Only attributes about the value itself that name no member move by default: a label, group or order stays with the field, and an expression naming the owner's members (ValidateInput, ValueDropdown, OnValueChanged...) would lose its owner.
+    /// </summary>
     public sealed class ForwardAttributeProcessor : OdinAttributeProcessor {
-        private IEnumerable<Type> DefaultForwardableAttributes { get; } = new[] {
-            typeof(InlineEditorAttribute)
-          , typeof(RequiredAttribute)
-          , typeof(PreviewFieldAttribute)
+        /// <summary>Moved from a wrapper's field, and from a list of wrappers onto each one.</summary>
+        public static readonly HashSet<Type> ValueAttributes = new() {
+            // Objects
+            typeof(RequiredAttribute), typeof(RequiredInAttribute), typeof(InlineEditorAttribute), typeof(PreviewFieldAttribute),
+            typeof(AssetsOnlyAttribute), typeof(SceneObjectsOnlyAttribute), typeof(ChildGameObjectsOnlyAttribute),
+            typeof(AssetSelectorAttribute), typeof(DisallowModificationsInAttribute),
+            // References
+            typeof(HideReferenceObjectPickerAttribute), typeof(AllowGenericsAttribute),
+            // Numbers
+            typeof(MinValueAttribute), typeof(MaxValueAttribute), typeof(PropertyRangeAttribute), typeof(MinMaxSliderAttribute),
+            typeof(WrapAttribute), typeof(ProgressBarAttribute), typeof(UnitAttribute), typeof(RangeAttribute), typeof(MinAttribute),
+            // Text
+            typeof(MultilineAttribute), typeof(TextAreaAttribute), typeof(MultiLinePropertyAttribute), typeof(FilePathAttribute),
+            typeof(FolderPathAttribute), typeof(DisplayAsStringAttribute), typeof(DelayedAttribute), typeof(DelayedPropertyAttribute),
+            // Enums and colours
+            typeof(EnumToggleButtonsAttribute), typeof(EnumPagingAttribute), typeof(ColorUsageAttribute), typeof(ColorPaletteAttribute),
+            // Beside the value
+            typeof(SuffixLabelAttribute)
         };
 
-        private ForwardAttributesToAttribute GetForwardingInfo(Type type) {
-            if (type == null) return null;
+        /// <summary>Moved only from a field whose wrapper itself wraps a list: a list of wrappers keeps them for itself.</summary>
+        public static readonly HashSet<Type> CollectionAttributes = new() {
+            typeof(ListDrawerSettingsAttribute), typeof(TableListAttribute), typeof(TableMatrixAttribute)
+        };
 
-            var attr = type.GetCustomAttribute<ForwardAttributesToAttribute>();
-            if (attr != null) return attr;
+        public override bool CanProcessSelfAttributes(InspectorProperty property) => Info(property.Info.TypeOfValue, out _) != null;
 
-            if (type.IsGenericType && !type.IsGenericTypeDefinition) {
-                attr = type.GetGenericTypeDefinition().GetCustomAttribute<ForwardAttributesToAttribute>();
-                if (attr != null) return attr;
-            }
-
-            if (typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string)) {
-                if (type.IsArray) return GetForwardingInfo(type.GetElementType());
-
-                foreach (var arg in type.GetGenericArguments()) {
-                    var childAttr = GetForwardingInfo(arg);
-                    if (childAttr != null) return childAttr;
-                }
-            }
-
-            return null;
-        }
-
-        private HashSet<Type> GetTargetAttributeTypes(ForwardAttributesToAttribute info) {
-            var types = new HashSet<Type>();
-
-            if (info.IncludeProcessorDefaults) {
-                foreach (var defaultType in DefaultForwardableAttributes) {
-                    types.Add(defaultType);
-                }
-            }
-
-            if (info.AdditionalAttributes != null) {
-                foreach (var specificType in info.AdditionalAttributes) {
-                    types.Add(specificType);
-                }
-            }
-
-            return types;
-        }
-
-        public override bool CanProcessSelfAttributes(InspectorProperty property) {
-            return GetForwardingInfo(property.Info.TypeOfValue) != null;
-        }
-
+        // The field drops what moves, so nothing draws twice.
         public override void ProcessSelfAttributes(InspectorProperty property, List<Attribute> attributes) {
-            var info = GetForwardingInfo(property.Info.TypeOfValue);
+            var info = Info(property.Info.TypeOfValue, out var ofElements);
             if (info == null) return;
 
-            var typesToForward = GetTargetAttributeTypes(info);
-
-            for (int i = attributes.Count - 1; i >= 0; i--) {
-                if (typesToForward.Contains(attributes[i].GetType())) {
-                    attributes.RemoveAt(i);
-                }
-            }
+            var moved = Moved(info, ofElements);
+            attributes.RemoveAll(attribute => moved.Contains(attribute.GetType()));
         }
 
         public override bool CanProcessChildMemberAttributes(InspectorProperty parentProperty, MemberInfo member) {
-            var info = GetForwardingInfo(parentProperty.Info.TypeOfValue);
+            var info = Info(parentProperty.Info.TypeOfValue, out _);
             return info != null && info.TargetNames.Contains(member.Name);
         }
 
         public override void ProcessChildMemberAttributes(InspectorProperty parentProperty, MemberInfo member, List<Attribute> attributes) {
-            var info = GetForwardingInfo(parentProperty.Info.TypeOfValue);
+            var info = Info(parentProperty.Info.TypeOfValue, out _);
             if (info == null) return;
 
-            var typesToForward = GetTargetAttributeTypes(info);
-            var rawAttributes = parentProperty.Parent is { ChildResolver: ICollectionResolver }
-                ? parentProperty.Parent.Info.Attributes
-                : parentProperty.Info.Attributes;
-
-            foreach (var rawAttr in rawAttributes) {
-                var attrType = rawAttr.GetType();
-
-                if (!typesToForward.Contains(attrType)) continue;
-                
-                bool alreadyExists = false;
-                foreach (var attr in attributes) {
-                    if (attr.GetType() != attrType) continue;
-
-                    alreadyExists = true;
-                    break;
-                }
-                
-                if (alreadyExists) continue;
-
-                attributes.Add(rawAttr);
+            // A wrapper in a list takes what the list's field carries.
+            var inList = parentProperty.Parent is { ChildResolver: ICollectionResolver };
+            var source = inList ? parentProperty.Parent.Info.Attributes : parentProperty.Info.Attributes;
+            var moved  = Moved(info, inList);
+            foreach (var attribute in source) {
+                var type = attribute.GetType();
+                if (moved.Contains(type) && attributes.All(existing => existing.GetType() != type)) attributes.Add(attribute);
             }
+        }
+
+        private static HashSet<Type> Moved(ForwardAttributesToAttribute info, bool ofElements) {
+            var moved = new HashSet<Type>();
+            if (info.IncludeProcessorDefaults) {
+                moved.UnionWith(ValueAttributes);
+                if (!ofElements) moved.UnionWith(CollectionAttributes);
+            }
+
+            if (info.AdditionalAttributes != null) moved.UnionWith(info.AdditionalAttributes);
+            return moved;
+        }
+
+        // The wrapper's forwarding, found on the type, its generic definition, or the element type of a list of wrappers.
+        private static ForwardAttributesToAttribute Info(Type type, out bool ofElements) {
+            ofElements = false;
+            if (type == null) return null;
+
+            var info = type.GetCustomAttribute<ForwardAttributesToAttribute>();
+            if (info == null && type.IsGenericType && !type.IsGenericTypeDefinition) info = type.GetGenericTypeDefinition().GetCustomAttribute<ForwardAttributesToAttribute>();
+            if (info != null || type == typeof(string) || !typeof(IEnumerable).IsAssignableFrom(type)) return info;
+
+            ofElements = true;
+            if (type.IsArray) return Info(type.GetElementType(), out _);
+
+            foreach (var argument in type.GetGenericArguments()) {
+                info = Info(argument, out _);
+                if (info != null) return info;
+            }
+
+            return null;
         }
     }
 }

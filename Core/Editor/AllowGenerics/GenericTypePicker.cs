@@ -14,10 +14,8 @@ using Object = UnityEngine.Object;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
-    /// Picks the type a polymorphic field is set to, generic types included: first among what the field can hold, then, for a generic type<br/>
-    /// whose arguments the field does not fix, each argument in turn, closing any generic argument the same way first.<br/>
-    /// Every step lists types as Odin's type selector does, under the same categories and names, hidden types left out,<br/>
-    /// in one <see cref="ChoiceSearchWindow"/> drop-down that moves to the next step without closing.
+    /// Picks the type a polymorphic field is set to, generic types included: first among what the field can hold, then, for a generic type whose arguments the field does not fix, each argument in turn, closing any generic argument the same way first.<br/>
+    /// Every step lists types as Odin's type selector does, under the same categories and names, hidden types left out, in one <see cref="ChoiceSearchWindow"/> drop-down that moves to the next step without closing.
     /// </summary>
     public static class GenericTypePicker {
         private const string SLOT = "▢";

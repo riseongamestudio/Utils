@@ -169,8 +169,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// The row's text in the results: <see cref="LabelSearch"/> when given, or else the path of folders above it grayed out,<br/>
-        /// then the label with the letters the search matched in bold.
+        /// The row's text in the results: <see cref="LabelSearch"/> when given, or else the path of folders above it grayed out, then the label with the letters the search matched in bold.
         /// </summary>
         internal string GetSearchLabel() {
             if (!string.IsNullOrEmpty(LabelSearch)) return LabelSearch;

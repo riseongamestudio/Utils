@@ -4,6 +4,39 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.15] - Chưa phát hành
+
+### Thêm
+
+- Trang settings (Editor): `SettingsPage` (lề và cột nhãn như trang Player), `SettingsSection`
+  (mục có thanh, viền bo, gập mở với fade của Odin, nút và giá trị trên thanh, dòng sọc với màu
+  hover của list Unity, `ReorderableList` chạm viền), `SettingsTabs` (tab nền tảng, trượt khi
+  đổi), `PlatformFieldUtils` (cặp ô Android, iOS), `HelpBoxUtils` (hộp báo có nút sửa),
+  `ScriptUtils`, `SpinnerUtils` (vòng quay chờ), `PixelUtils`, `HoverUtils`. Xem
+  [Trang settings](Editor/Utils/README.md#trang-settings).
+- `[SectionGroup]`: gom member thành một mục `SettingsSection`, thay `[FoldoutGroup]`.
+  `[ScriptField]`: hiện một `Type` như ô Script của component.
+- `ChoiceFieldUtils` và drawer cho mọi enum, của Odin lẫn Unity: ô enum mở drop-down
+  `ChoiceSearchWindow` thay menu hệ thống và ô chọn của Odin; có ô tìm từ 11 lựa chọn, `[Flags]`
+  bật tắt từng cờ.
+- `DeferredSave`: lưu asset của trang settings khi không còn ô chữ nào đang gõ, để gõ không khựng.
+  `AssetFindUtils`: giữ kết quả `FindAssets` tới khi project đổi.
+- `WindowCornerUtils`: bo góc chọn của cửa sổ Editor không viền trên Windows, viền liền một nét.
+- `ChoiceSearchWindow.Open`, `OpenToggles` nhận `search`: `false` bỏ ô tìm cho danh sách ngắn,
+  phím mũi tên và Enter vẫn chọn.
+
+### Đổi
+
+- Drop-down của cửa sổ tìm kiếm: góc bo bằng góc của field, cách field một khoảng bằng khoảng
+  giữa hai field; mở thì phóng ra ngay, đóng thì thu về cả khi bấm lại field hay bấm sang cửa
+  sổ khác; không có tiêu đề, ô tìm hay tab thì chỉ còn danh sách.
+- Alt+click foldout: mục `SettingsSection.Foldout(property, ...)` cũng gập mở theo.
+- `RectFieldUtils`: enum vẽ bằng `ChoiceFieldUtils`.
+- `ForwardAttributesTo`: bộ mặc định chuyển thêm các attribute về object, tham chiếu, số, chuỗi,
+  enum, màu, `SuffixLabel`; `ListDrawerSettings`/`TableList`/`TableMatrix` chỉ chuyển khi chính
+  wrapper bọc danh sách. Project thêm kiểu cho mọi wrapper qua
+  `ForwardAttributeProcessor.ValueAttributes`/`CollectionAttributes`.
+
 ## [1.0.14] - 2026-11-06
 
 ### Thêm
