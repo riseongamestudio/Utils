@@ -66,8 +66,9 @@ namespace RiseOn.Utils.Editor {
         // A name's text and Unity's space between a label and its field.
         private static float Width(GUIContent name) => EditorStyles.label.CalcSize(name).x + SettingsSection.LabelGap;
 
-        // Between the Android field and the iOS name, as RectFieldUtils.Split leaves between its halves.
-        private const float Gap = 6;
+        // Between the Android field and the iOS name: Unity's space between the fields of one row, as in Vector2Field
+        // (EditorGUI.kSpacingSubLabel).
+        private const float Gap = 4;
 
         private static bool Fits(float width) {
             Split(new Rect(0, 0, width, 0), out var left, out _);
