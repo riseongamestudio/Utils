@@ -9,7 +9,8 @@ using UnityEngine.UIElements;
 namespace RiseOn.Utils.Editor {
     /// <summary>
     /// Rounds chosen corners of a borderless editor window, a drop-down's, by <see cref="SettingsSection.Radius"/>, as the fields and boxes in it round.<br/>
-    /// The window is cut to the shape, and its root's border and content follow the curve.<br/>
+    /// The window is cut to the shape, and its root's background and border follow the curve. UI Toolkit draws an element's border under
+    /// its children, so a window whose content reaches into a corner draws its edge in a last child over the content (SearchWindow does).<br/>
     /// Only the corners asked for round, so two windows that meet along an edge round as one, where Windows' own rounding (DWM) takes all four or none; Windows 10 rounds the same.<br/>
     /// The cut keeps the pixels the curve covers three quarters of or more, so the corner looks as round as a smoothed one of the same radius.<br/>
     /// On another editor platform the window stays square (<see cref="IsSupported"/>).
@@ -77,7 +78,6 @@ namespace RiseOn.Utils.Editor {
             root.style.borderTopRightRadius    = (corners & Corners.TopRight) != 0 ? radius : 0;
             root.style.borderBottomLeftRadius  = (corners & Corners.BottomLeft) != 0 ? radius : 0;
             root.style.borderBottomRightRadius = (corners & Corners.BottomRight) != 0 ? radius : 0;
-            root.style.overflow                = Overflow.Hidden;
 
             Apply(shape);
             if (tracking) return;

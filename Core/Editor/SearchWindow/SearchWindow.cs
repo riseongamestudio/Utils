@@ -24,8 +24,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         // The height of a drop-down's body while its first section builds, and the height a drop-down stops growing at.
         private const float DropDownLoadingHeight = 80f;
 
-        // The edge a drop-down draws, as SearchWindow.uss sets it, and the height of a page's breadcrumb.
-        private const float DropDownBorder   = 1f;
+        // The height of a page's breadcrumb.
         private const float BreadcrumbHeight = 22f;
 
         // How long a drop-down takes to reach a new size, to fold back to its button as it closes, and a list to fade in once built.
@@ -642,6 +641,9 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         // The list's edges: the far one, and the near one too when the controls' window is cut away.
         private float ListBorder => HidesControls ? 2f * DropDownBorder : DropDownBorder;
 
+        // The edge a drop-down draws, 1px as SearchWindow.uss sets it: Unity lays a border out a whole number of the screen's pixels thick.
+        private float DropDownBorder => rootVisualElement.RoundToPanelPixelSize(1f);
+
         // The two windows round as one: the controls' window its outer corners and the list's its own, or, without controls, the list all four.
         private void ShapeCorners() {
             if (mode is not SearchWindowMode.DropDown) return;
@@ -649,10 +651,30 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             var near = side is DropDownSide.Above ? WindowCornerUtils.Corners.Bottom : WindowCornerUtils.Corners.Top;
             var far  = side is DropDownSide.Above ? WindowCornerUtils.Corners.Top : WindowCornerUtils.Corners.Bottom;
             WindowCornerUtils.Round(this, near, hidden: HidesControls);
+            RaiseEdge(rootVisualElement);
             if (listWindow == null) return;
 
             listWindow.rootVisualElement.EnableInClassList(Uss.NoControls, HidesControls);
             WindowCornerUtils.Round(listWindow, HidesControls ? WindowCornerUtils.Corners.All : far);
+            RaiseEdge(listWindow.rootVisualElement);
+        }
+
+        // The window's edge over all it holds, rounded as its root is; content added since goes under it.
+        private static void RaiseEdge(VisualElement root) {
+            var edge = root.Q(className: Uss.Edge);
+            if (edge == null) {
+                edge = new VisualElement { pickingMode = PickingMode.Ignore };
+                edge.AddToClassList(Uss.Edge);
+                root.Add(edge);
+            }
+
+            edge.BringToFront();
+            // Unity has a window's root clip what it holds to inside its border, where the edge would be cut away.
+            root.style.overflow                = Overflow.Visible;
+            edge.style.borderTopLeftRadius     = root.style.borderTopLeftRadius;
+            edge.style.borderTopRightRadius    = root.style.borderTopRightRadius;
+            edge.style.borderBottomLeftRadius  = root.style.borderBottomLeftRadius;
+            edge.style.borderBottomRightRadius = root.style.borderBottomRightRadius;
         }
 
         // No title, search field or tabs: known before the controls are built, for the side the drop-down opens to.
@@ -1730,6 +1752,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             public const string ListFrame = "search-window--list-frame";
             public const string NoControls = "search-window--no-controls";
             public const string EdgeOnly   = "search-window--edge-only";
+            public const string Edge       = "search-window__edge";
             public const string Controls = "search-window__controls";
 
             public const string Header = "search-window__header";

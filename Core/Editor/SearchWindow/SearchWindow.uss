@@ -41,13 +41,25 @@
 }
 
 /* A drop-down's list, a window of its own against the controls': no edge of its own on that side, the controls' edge between them.
-   Its content hangs from its top, as tall as its rows. */
+   Its content hangs from its top, as tall as its rows. Each rule sets the room the root keeps for an edge and the edge drawn in it. */
 
 .search-window.search-window--drop-down.search-window--list-frame {
     border-top-width: 0;
 }
 
+.search-window.search-window--drop-down.search-window--list-frame > .search-window__edge {
+    top: 0;
+    border-top-width: 0;
+}
+
 .search-window.search-window--drop-down.search-window--list-frame.search-window--above {
+    border-top-width: 1px;
+    border-bottom-width: 0;
+}
+
+.search-window.search-window--drop-down.search-window--list-frame.search-window--above > .search-window__edge {
+    top: -1px;
+    bottom: 0;
     border-top-width: 1px;
     border-bottom-width: 0;
 }
@@ -58,7 +70,17 @@
     border-top-width: 1px;
 }
 
+.search-window.search-window--drop-down.search-window--list-frame.search-window--no-controls > .search-window__edge {
+    top: -1px;
+    border-top-width: 1px;
+}
+
 .search-window.search-window--drop-down.search-window--list-frame.search-window--no-controls.search-window--above {
+    border-bottom-width: 1px;
+}
+
+.search-window.search-window--drop-down.search-window--list-frame.search-window--no-controls.search-window--above > .search-window__edge {
+    bottom: -1px;
     border-bottom-width: 1px;
 }
 
@@ -68,7 +90,19 @@
     border-bottom-width: 0;
 }
 
+.search-window.search-window--drop-down.search-window--edge-only > .search-window__edge {
+    bottom: 0;
+    border-bottom-width: 0;
+}
+
 .search-window.search-window--drop-down.search-window--edge-only.search-window--above {
+    border-top-width: 0;
+    border-bottom-width: 1px;
+}
+
+.search-window.search-window--drop-down.search-window--edge-only.search-window--above > .search-window__edge {
+    top: 0;
+    bottom: -1px;
     border-top-width: 0;
     border-bottom-width: 1px;
 }
@@ -154,12 +188,23 @@
     flex-grow: 1;
 }
 
-/* A drop-down has no window frame of its own, so it draws its edge; its corners round where its windows are cut (WindowCornerUtils). */
+/* A drop-down has no window frame of its own, so it draws its edge; its corners round where its windows are cut (WindowCornerUtils).
+   The root keeps the room and the edge, its last child, draws there, over the content: a row lit at the top or the bottom then lies
+   under the edge's curve, where UI Toolkit draws an element's own border under its children. */
 
 .search-window.search-window--drop-down {
     border-width: 1px;
+    border-color: rgba(0, 0, 0, 0);
+}
+
+.search-window.search-window--drop-down > .search-window__edge {
+    position: absolute;
+    left: -1px;
+    right: -1px;
+    top: -1px;
+    bottom: -1px;
+    border-width: 1px;
     border-color: var(--unity-colors-default-border);
-    overflow: hidden;
 }
 
 /* The title of a drop-down, which has no title bar to carry it. */

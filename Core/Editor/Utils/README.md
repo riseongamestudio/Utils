@@ -272,7 +272,7 @@ tabs.Draw(page => DrawPlatform(page));
 ## Bo góc cửa sổ: WindowCornerUtils
 
 Dành cho người viết cửa sổ Editor không viền (cửa sổ drop-down): bo các góc chọn của cửa sổ
-theo `SettingsSection.Radius`, bằng góc của field và mục trong nó. Cửa sổ được cắt theo hình, viền và nội dung của root đi theo
+theo `SettingsSection.Radius`, bằng góc của field và mục trong nó. Cửa sổ được cắt theo hình, nền và viền của root đi theo
 đường cong. Chỉ bo góc được chọn, nên hai cửa sổ ghép liền (dòng điều khiển và danh sách của
 `ChoiceSearchWindow`) bo như một.
 
@@ -281,6 +281,14 @@ WindowCornerUtils.Show(window, window.ShowPopup);              // mở và giữ
 WindowCornerUtils.Round(window, WindowCornerUtils.Corners.All);
 WindowCornerUtils.Round(window, WindowCornerUtils.Corners.All, hidden: true);   // cắt bỏ cả cửa sổ khi chưa có gì để hiện
 ```
+
+UI Toolkit vẽ viền của một phần tử dưới các con của nó, nên nội dung chạm tới góc (một dòng được chọn chẳng hạn)
+che mất viền. Cửa sổ như vậy vẽ viền ở một con riêng, như `SearchWindow` làm:
+
+- root giữ độ dày viền nhưng để màu trong suốt, và đặt `overflow: visible` để con viền không bị cắt;
+- con viền `position: absolute`, mỗi cạnh lùi ra ngoài đúng độ dày viền của root, cùng độ dày, chép bán kính bốn góc từ root
+  sau mỗi lần `Round`, `pickingMode = PickingMode.Ignore` để không chặn chuột;
+- con viền luôn là con cuối của root: thêm nội dung thì gọi lại `BringToFront`.
 
 Cửa sổ chỉ giữ hoặc bỏ được nguyên pixel, nên cắt bỏ mọi pixel mà đường cong phủ dưới ba phần
 tư: góc trông tròn bằng góc của các mục trên trang, vốn vẽ khử răng cưa. Viền của root nằm đúng
