@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
-    /// A text value for Android and one for iOS under one label: both on the label's row, in the halves of the value column, while each half's field is at least <see cref="FieldMinWidth"/> wide, else a row each, as Unity drops a vector's fields to a row of their own in a narrow Inspector.<br/>
+    /// A text value for Android and one for iOS under one label: both on the label's row, the two fields as wide as each other, while each is at least <see cref="FieldMinWidth"/> wide, else a row each, as Unity drops a vector's fields to a row of their own in a narrow Inspector.<br/>
     /// Every Android and iOS pair of a settings page draws with it.
     /// </summary>
     /// <example><code>
     /// PlatformFieldUtils.Draw(new GUIContent("App Key"), settings.FindProperty("androidKey"), settings.FindProperty("iosKey"));
     /// </code></example>
     public static class PlatformFieldUtils {
-        /// <summary>The least width of a half's field for both halves to share a row: an AdMob ad unit id, the longest these pairs hold, shows whole.</summary>
+        /// <summary>The least width of each field for both to share a row: an AdMob ad unit id, the longest these pairs hold, shows whole.</summary>
         public const float FieldMinWidth = 250;
 
         private static readonly GUIContent android = new("Android");
@@ -40,7 +40,7 @@ namespace RiseOn.Utils.Editor {
 
             EditorGUI.BeginChangeCheck();
             if (wide) {
-                // Each name as wide as its own text, as a vector's X, Y and Z are, so it sits by its field.
+                // Each name as wide as its own text, as a vector's X, Y and Z are, so it sits by its field; the fields as wide as each other.
                 Split(value, out var left, out var right);
                 androidValue = Field(left, android, Width(android), androidValue);
                 iosValue     = Field(right, ios, Width(ios), iosValue);
@@ -67,20 +67,27 @@ namespace RiseOn.Utils.Editor {
         // A name's text and Unity's space between a label and its field.
         private static float Width(GUIContent name) => EditorStyles.label.CalcSize(name).x + SettingsSection.LabelGap;
 
+        // Between the Android field and the iOS name, as RectFieldUtils.Split leaves between its halves.
+        private const float Gap = 6;
+
         private static bool Fits(float width) {
-            Split(new Rect(0, 0, width, 0), out var half, out _);
-            return half.width - Width(android) >= FieldMinWidth;
+            Split(new Rect(0, 0, width, 0), out var left, out _);
+            return left.width - Width(android) >= FieldMinWidth;
         }
 
-        // Halves of the value column as it is at the page's edge, so the iOS half starts in one line in and out of sections;
-        // the right half then ends where this row's column does.
+        // The value column as it is at the page's edge, so the iOS name starts in one line in and out of sections: there the two
+        // fields are as wide as each other, each after its name. The iOS field ends where this row's column does, inside a section
+        // short by its padding. Too narrow for the names, they share what there is, so neither covers the other.
         private static void Split(Rect value, out Rect left, out Rect right, float rightInset = 0) {
-            RectFieldUtils.Split(new Rect(value.x, value.y, value.width + SettingsSection.RightInset + rightInset, value.height), out left, out right);
-            right.xMax = value.xMax;
+            var full  = value.width + SettingsSection.RightInset + rightInset;
+            var names = Width(android) + Width(ios) + Gap;
+            var width = full >= names ? Width(android) + (full - names) / 2 : Mathf.Max(0, full - Gap) * Width(android) / (names - Gap);
+            left  = new Rect(value.x, value.y, width, value.height);
+            right = Rect.MinMaxRect(Mathf.Min(left.xMax + Gap, value.xMax), value.y, value.xMax, value.yMax);
         }
 
         private static string Field(Rect rect, GUIContent name, float nameWidth, string value) {
-            var label = new Rect(rect.x, rect.y, nameWidth, rect.height);
+            var label = new Rect(rect.x, rect.y, Mathf.Min(nameWidth, rect.width), rect.height);
             GUI.Label(label, name, EditorStyles.label);
             return EditorGUI.TextField(Rect.MinMaxRect(label.xMax, rect.y, rect.xMax, rect.yMax), value ?? "");
         }

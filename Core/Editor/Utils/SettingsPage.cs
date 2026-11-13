@@ -43,10 +43,11 @@ namespace RiseOn.Utils.Editor {
         }
 
         /// <summary>
-        /// The label column, as the Inspector sizes its own: 45% of the width less 40, at least 120.<br/>
+        /// The label column, as the Inspector sizes its own (EditorGUIUtility.labelWidth in hierarchy mode): 45% of the width rounded up, less 40, at least 120.<br/>
+        /// The width is the page's, which is what Unity's context width is on a settings page, its scroll bar left out.<br/>
         /// A settings page left to Unity keeps 150 at any width, which cuts long labels in a wide window and leaves short values a narrow one.
         /// </summary>
-        public static float LabelWidth => width > 0 ? Mathf.Max(width * 0.45f - 40, 120) : 150;
+        public static float LabelWidth => width > 0 ? Mathf.Max(Mathf.Ceil(width * 0.45f) - 40, 120) : 150;
 
         public void Dispose() {
             if (!begun) return;

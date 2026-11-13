@@ -140,8 +140,8 @@ trang thẳng hàng và giống nhau tới từng pixel.
 ### SettingsPage
 
 Bọc `guiHandler` của `SettingsProvider`: lề trái phải như trang Player của Unity (tiêu đề, nhãn
-và viền các mục cùng một đường), cột nhãn rộng theo cách Inspector tính (45% bề rộng trừ 40,
-ít nhất 120).
+và viền các mục cùng một đường), cột nhãn rộng đúng công thức Inspector của Unity: 45% bề rộng
+trang làm tròn lên, trừ 40, ít nhất 120.
 
 ```csharp
 new SettingsProvider("Project/RiseOn/MyPack", SettingsScope.Project) {
@@ -259,7 +259,7 @@ tabs.Draw(page => DrawPlatform(page));
 
 | Hàm | Vẽ gì |
 |---|---|
-| `PlatformFieldUtils.Draw(label, android, ios)` | Một giá trị Android và một giá trị iOS dưới một nhãn, hai nửa cột giá trị; cửa sổ hẹp tới mức mỗi ô dưới `FieldMinWidth` (250) thì mỗi ô một dòng |
+| `PlatformFieldUtils.Draw(label, android, ios)` | Một giá trị Android và một giá trị iOS dưới một nhãn, trên một dòng, mỗi ô sau tên của nó: chữ "iOS" thẳng cột giữa các dòng ở mọi độ sâu, hai ô rộng bằng nhau ở mép trang, trong mục thì ô iOS ngắn đi đúng lề phải của mục. Cửa sổ hẹp tới mức mỗi ô dưới `FieldMinWidth` (250) thì mỗi ô một dòng |
 | `HelpBoxUtils.Draw(message, type, button)` | Hộp báo chữ cỡ nhãn của trang, icon cao một dòng, nút sửa (nếu có) nằm trong hộp ở đầu phải; trả `true` khi bấm nút |
 | `ScriptUtils.Field(label, type)` | File script của một kiểu C#, như ô Script của component: chỉ đọc, bấm thì ping, bấm đúp thì mở. Trong lớp dữ liệu dùng `[ScriptField]` |
 | `SpinnerUtils.LabelField(label, text)`, `SpinnerUtils.Content(text)` | Vòng quay chờ của Unity trước một dòng chữ, cho việc đang chạy (như trang Firebase lúc kiểm tra Firebase CLI). Cửa sổ tự vẽ lại khi vòng quay còn hiện; `Content` dùng được với mọi nhãn |
