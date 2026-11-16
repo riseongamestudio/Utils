@@ -25,14 +25,14 @@ Package `com.riseon.utils.ui`, namespace `RiseOn.Utils.UI`. Xây trên
 | [UniTask](https://github.com/Cysharp/UniTask) (`com.cysharp.unitask`) 2.5.11 | Tự cài theo `package.json`, cần scope `com.cysharp` | Chờ frame trong `AspectRatioFitterElement` |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute Inspector của các component |
 
-"Tự cài" là khi cài qua OpenUPM; cài bằng git URL thì phải cài `com.riseon.utils`
+"Tự cài" là khi cài qua registry; cài bằng git URL thì phải cài `com.riseon.utils`
 trước. Project đã cài UniTask bằng git URL thì bản đó được dùng luôn, không cần scope
 `com.cysharp`. Odin không có trên UPM nên phải cài vào project trước.
 Thiếu Odin thì project báo một lỗi từ `RiseOn.Utils.UI.Requirements`.
 
 ## Cài đặt
 
-**OpenUPM** (khuyên dùng): thêm registry OpenUPM với scope `com.riseon` và
+**Registry RiseOn** (khuyên dùng): thêm registry RiseOn với scope `com.riseon`, và registry OpenUPM với scope
 `com.cysharp` vào `Packages/manifest.json`, rồi thêm package. `com.riseon.utils` và
 UniTask được kéo về tự động:
 
@@ -40,9 +40,14 @@ UniTask được kéo về tự động:
 {
   "scopedRegistries": [
     {
-      "name": "package.openupm.com",
+      "name": "RiseOn",
+      "url": "https://upm.riseongamestudio.com",
+      "scopes": ["com.riseon"]
+    },
+    {
+      "name": "OpenUPM",
       "url": "https://package.openupm.com",
-      "scopes": ["com.riseon", "com.cysharp"]
+      "scopes": ["com.cysharp"]
     }
   ],
   "dependencies": {

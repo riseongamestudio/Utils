@@ -22,13 +22,13 @@ UPM riêng, cài và đánh version độc lập.
 | `com.riseon.utils.litmotion` | `com.riseon.utils`, `com.annulusgames.lit-motion` | Odin Inspector |
 
 Odin là gói Asset Store nên không khai được trong `package.json`; cài nó vào project
-trước khi cài các package cần nó. UniTask (`com.cysharp.unitask`) có trên OpenUPM:
-thêm scope `com.cysharp` cạnh `com.riseon` thì nó được kéo về cùng
-`com.riseon.utils.ui`.
+trước khi cài các package cần nó. UniTask (`com.cysharp.unitask`) và LitMotion
+(`com.annulusgames.lit-motion`) có trên OpenUPM: thêm registry OpenUPM với scope `com.cysharp`,
+`com.annulusgames` thì chúng được kéo về cùng `com.riseon.utils.ui` và `com.riseon.utils.litmotion`.
 
 ## Cài đặt
 
-Qua OpenUPM (scope `com.riseon`) hoặc git URL có `?path=/<Thư mục>`. Cách cài
+Qua registry RiseOn (scope `com.riseon`) hoặc git URL có `?path=/<Thư mục>`. Cách cài
 chi tiết nằm trong README của từng package.
 
 ## Phát hành

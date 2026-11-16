@@ -23,13 +23,13 @@ Package `com.riseon.utils.litmotion`, namespace `RiseOn.Utils.LitMotion`. Xây t
 | [LitMotion](https://github.com/annulusgames/LitMotion) (`com.annulusgames.lit-motion`) 2.0.2 | Tự cài theo `package.json`, cần scope `com.annulusgames` | `Ease`, `EaseUtility` |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Drawer |
 
-"Tự cài" là khi cài qua OpenUPM; cài bằng git URL thì phải cài `com.riseon.utils` và
+"Tự cài" là khi cài qua registry; cài bằng git URL thì phải cài `com.riseon.utils` và
 LitMotion trước. Odin không có trên UPM nên phải cài vào project trước; thiếu Odin thì
 project báo một lỗi từ `RiseOn.Utils.LitMotion.Requirements`.
 
 ## Cài đặt
 
-**OpenUPM** (khuyên dùng): thêm registry OpenUPM với scope `com.riseon` và
+**Registry RiseOn** (khuyên dùng): thêm registry RiseOn với scope `com.riseon`, và registry OpenUPM với scope
 `com.annulusgames` vào `Packages/manifest.json`, rồi thêm package. `com.riseon.utils` và
 LitMotion được kéo về tự động:
 
@@ -37,9 +37,14 @@ LitMotion được kéo về tự động:
 {
   "scopedRegistries": [
     {
-      "name": "package.openupm.com",
+      "name": "RiseOn",
+      "url": "https://upm.riseongamestudio.com",
+      "scopes": ["com.riseon"]
+    },
+    {
+      "name": "OpenUPM",
       "url": "https://package.openupm.com",
-      "scopes": ["com.riseon", "com.annulusgames"]
+      "scopes": ["com.annulusgames"]
     }
   ],
   "dependencies": {

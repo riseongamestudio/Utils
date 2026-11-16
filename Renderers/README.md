@@ -24,13 +24,13 @@ trên [RiseOn.Utils](../Core/README.md).
 | [`com.riseon.utils`](../Core/README.md) 1.0.1 | Tự cài theo `package.json` | Undo, extension |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute và Inspector của các component |
 
-"Tự cài" là khi cài qua OpenUPM; cài bằng git URL thì phải cài `com.riseon.utils`
+"Tự cài" là khi cài qua registry; cài bằng git URL thì phải cài `com.riseon.utils`
 trước. Odin không có trên UPM nên phải cài vào project trước.
 Thiếu Odin thì project báo một lỗi từ `RiseOn.Utils.Renderers.Requirements`.
 
 ## Cài đặt
 
-**OpenUPM** (khuyên dùng): thêm registry OpenUPM với scope `com.riseon` vào
+**Registry RiseOn** (khuyên dùng): thêm registry RiseOn với scope `com.riseon` vào
 `Packages/manifest.json`, rồi thêm package. `com.riseon.utils` được kéo về tự
 động:
 
@@ -38,8 +38,8 @@ Thiếu Odin thì project báo một lỗi từ `RiseOn.Utils.Renderers.Requirem
 {
   "scopedRegistries": [
     {
-      "name": "package.openupm.com",
-      "url": "https://package.openupm.com",
+      "name": "RiseOn",
+      "url": "https://upm.riseongamestudio.com",
       "scopes": ["com.riseon"]
     }
   ],

@@ -35,15 +35,15 @@ project báo đúng một lỗi từ `RiseOn.Utils.Requirements`.
 
 ## Cài đặt
 
-**OpenUPM** (khuyên dùng): thêm registry OpenUPM với scope `com.riseon` vào
+**Registry RiseOn** (khuyên dùng): thêm registry RiseOn với scope `com.riseon` vào
 `Packages/manifest.json`, rồi thêm package:
 
 ```json
 {
   "scopedRegistries": [
     {
-      "name": "package.openupm.com",
-      "url": "https://package.openupm.com",
+      "name": "RiseOn",
+      "url": "https://upm.riseongamestudio.com",
       "scopes": ["com.riseon"]
     }
   ],
@@ -52,9 +52,6 @@ project báo đúng một lỗi từ `RiseOn.Utils.Requirements`.
   }
 }
 ```
-
-Hoặc chạy `openupm add com.riseon.utils` bằng
-[openupm-cli](https://openupm.com/docs/getting-started-cli.html).
 
 **Git URL**: *Package Manager → + → Add package from git URL*:
 
