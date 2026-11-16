@@ -151,14 +151,14 @@ namespace RiseOn.Utils.Editor {
                 if (!targetIsOpenForEdit) GUIHelper.PushGUIEnabled(false);
 
                 bool drawHeader = attr.DrawHeader;
-                bool drawGUI = !isGameObjectType && attr.DrawGUI;
+                bool drawGui = !isGameObjectType && attr.DrawGUI;
                 bool drawPreview = attr.DrawPreview || (isGameObjectType && attr.DrawGUI);
                 
                 PreviewAlignment alignment = attr.PreviewAlignment;
                 bool isHorizontal = drawPreview && (alignment is PreviewAlignment.Left || alignment is PreviewAlignment.Right);
                 bool isVertical = drawPreview && (alignment is PreviewAlignment.Top || alignment is PreviewAlignment.Bottom);
 
-                if (!drawGUI && isHorizontal) {
+                if (!drawGui && isHorizontal) {
                     isHorizontal = false;
                     isVertical = true;
                     alignment = alignment is PreviewAlignment.Left ? PreviewAlignment.Top : PreviewAlignment.Bottom;
@@ -178,7 +178,7 @@ namespace RiseOn.Utils.Editor {
                 }
 
                 DrawHeaderLogic(drawHeader);
-                if (drawGUI) DrawGUILogic(drawHeader);
+                if (drawGui) DrawGuiLogic(drawHeader);
 
                 if (isHorizontal) {
                     GUILayout.EndVertical(); 
@@ -234,7 +234,7 @@ namespace RiseOn.Utils.Editor {
             }
         }
 
-        private void DrawGUILogic(bool drawHeader) {
+        private void DrawGuiLogic(bool drawHeader) {
             var config = GlobalConfig<GeneralDrawerConfig>.Instance;
             bool prevShowScript = config.ShowMonoScriptInEditor;
             try {

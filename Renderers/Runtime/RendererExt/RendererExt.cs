@@ -123,8 +123,8 @@ namespace RiseOn.Utils.Renderers {
 
         #if UNITY_EDITOR
 
-        private Vector2 prevPivot_Editor;
-        private float prevPPU_Editor;
+        private Vector2 prevPivotEditor;
+        private float prevPpuEditor;
 
         private bool IsNeedUpdateRdrTrackingProps() {
             if (Rdr == null) return false;
@@ -135,16 +135,16 @@ namespace RiseOn.Utils.Renderers {
 
             if (Sprite == null) return false;
 
-            if (Sprite.pivot != prevPivot_Editor) return true;
-            if (!Mathf.Approximately(Sprite.pixelsPerUnit, prevPPU_Editor)) return true;
+            if (Sprite.pivot != prevPivotEditor) return true;
+            if (!Mathf.Approximately(Sprite.pixelsPerUnit, prevPpuEditor)) return true;
 
             return false;
         }
 
         private void UpdateRdrTrackingProps() {
             if (Sprite != null) {
-                prevPivot_Editor = Sprite.pivot;
-                prevPPU_Editor   = Sprite.pixelsPerUnit;
+                prevPivotEditor = Sprite.pivot;
+                prevPpuEditor   = Sprite.pixelsPerUnit;
             }
             
             Rdr.transform.hasChanged = false;
