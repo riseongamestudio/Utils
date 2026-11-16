@@ -150,7 +150,7 @@
     bottom: 0;
 }
 
-/* Centred while it fits: the auto margins share the spare room. When it does not, they drop to 0, the row starts at
+/* Centered while it fits: the auto margins share the spare room. When it does not, they drop to 0, the row starts at
    the left and the label is cut with an ellipsis. */
 .search-window .search-window__breadcrumb {
     height: 22px;

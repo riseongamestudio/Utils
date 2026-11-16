@@ -257,7 +257,7 @@ tabs.Draw(page => DrawPlatform(page));
 
 | Hàm | Vẽ gì |
 |---|---|
-| `PlatformFieldUtils.Draw(label, android, ios)` | Một giá trị Android và một giá trị iOS dưới một nhãn, trên một dòng: mỗi ô sau tên của nó, hai ô rộng bằng nhau. Cửa sổ hẹp tới mức mỗi ô dưới `FieldMinWidth` (250) thì mỗi ô một dòng. Bản `Draw(rect, ...)` cho dòng tự đặt (như thanh của mục) luôn một dòng; hết chỗ cho tên thì hai tên chia nhau, không đè lên nhau |
+| `PlatformFieldUtils.Draw(label, android, ios)` | Một giá trị Android và một giá trị iOS dưới một nhãn, trên một dòng: mỗi ô sau tên của nó, hai ô rộng bằng nhau. Cửa sổ hẹp tới mức mỗi ô dưới `FieldMinWidth` (250) thì mỗi ô một dòng; khi chuyển giữa một dòng và hai dòng, ô Android giãn hoặc co, ô iOS trượt tới chỗ mới và các dòng bên dưới trượt theo, cùng thời gian với cú trượt tab của `SettingsTabs`; cửa sổ hay trang vừa mở thì cặp ô vào thẳng dạng đúng, không trượt (khung hình đầu theo bề rộng lần trước của cùng nhãn, chưa có thì một dòng). Bản `Draw(rect, ...)` cho dòng tự đặt (như thanh của mục) luôn một dòng; hết chỗ cho tên thì hai tên chia nhau, không đè lên nhau |
 | `HelpBoxUtils.Draw(message, type, button)` | Hộp báo chữ cỡ nhãn của trang, icon cao một dòng, nút sửa (nếu có) nằm trong hộp ở đầu phải; trả `true` khi bấm nút |
 | `ScriptUtils.Field(label, type)` | File script của một kiểu C#, như ô Script của component: chỉ đọc, bấm thì ping, bấm đúp thì mở. Trong lớp dữ liệu dùng `[ScriptField]` |
 | `SpinnerUtils.LabelField(label, text)`, `SpinnerUtils.Content(text)` | Vòng quay chờ của Unity trước một dòng chữ, cho việc đang chạy (như trang Firebase lúc kiểm tra Firebase CLI). Cửa sổ tự vẽ lại khi vòng quay còn hiện; `Content` dùng được với mọi nhãn |

@@ -179,7 +179,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         /// <param name="search">False for a short list that shows whole: no search field, the keys still move through it.</param>
         /// <param name="defaultSize">
         /// Size of the first open of a <see cref="SearchWindowMode.Window"/>; later opens reuse whatever size it was left at.<br/>
-        /// A <see cref="SearchWindowMode.DropDown"/> takes its width from <paramref name="btnRect"/>, at least this one's, and fits its height to its rows.
+        /// A <see cref="SearchWindowMode.DropDown"/> is as wide as <paramref name="btnRect"/>, wider only when its longest row needs it to show whole, as Unity's drop-downs are, and fits its height to its rows.
         /// </param>
         protected void Show(
             Rect btnRect
@@ -213,7 +213,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             titleContent = new GUIContent(headerText);
             if (mode is SearchWindowMode.DropDown) {
                 var bounds = GetBounds(button);
-                frameWidth = Mathf.Max(button.width, defaultSize.x);
+                frameWidth = button.width;
                 frameX     = Mathf.Clamp(button.x, bounds.x, Mathf.Max(bounds.x, bounds.xMax - frameWidth));
                 openDropDown = this;
                 Place();
@@ -566,6 +566,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                 }
 
                 if (page.Root.resolvedStyle.display is DisplayStyle.Flex && page.List.layout.height <= 0f) return;
+                if (WidenToRows()) return;
 
                 StopFitting();
                 var afterLayouts = afterFitting.ToArray();
@@ -577,6 +578,32 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                 MoveTo(toAnchor, GetControlsFrameHeight(), height + ListBorder);
             };
             EditorApplication.update += fitting;
+        }
+
+        // Widens both windows by what the longest row's text lacks of the room a row gives it, kept on the screen; true when it did,
+        // so the fit waits for the layout of the new width.
+        private bool WidenToRows() {
+            if (page.List.Q(className: Uss.Row) is not { } row) return false;
+
+            var label  = (Label) row[1];
+            var arrow  = row[2].resolvedStyle.width;
+            var room   = label.contentRect.width + (row[2].resolvedStyle.display is DisplayStyle.Flex ? arrow : 0f);
+            var needed = 0f;
+            foreach (var item in page.Items) {
+                var text = label.MeasureTextSize(RowText(page, item), 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x;
+                needed = Mathf.Max(needed, text + (item.HasChildren || item.HasNextStep ? arrow : 0f));
+            }
+
+            var pixels = EditorGUIUtility.pixelsPerPoint;
+            var extra  = Mathf.Ceil((needed - room) * pixels) / pixels;
+            if (extra <= 0f) return false;
+
+            var bounds = GetBounds(button);
+            frameWidth = Mathf.Min(frameWidth + extra, bounds.width);
+            frameX     = Mathf.Clamp(button.x, bounds.x, Mathf.Max(bounds.x, bounds.xMax - frameWidth));
+            Frame(this, new Rect(frameX, position.y, frameWidth, position.height));
+            if (listWindow != null) Frame(listWindow, new Rect(frameX, listWindow.position.y, frameWidth, listWindow.position.height));
+            return frameWidth < bounds.width;
         }
 
         private void StopFitting() {
@@ -1557,9 +1584,12 @@ namespace RiseOn.Utils.Editor.SearchWindow {
 
             row[0].style.display  = owner.ShowsIcons ? DisplayStyle.Flex : DisplayStyle.None;
             ((Image)row[0]).image = item.Icon;
-            ((Label)row[1]).text = (owner.IsInSearchMode ? item.GetSearchLabel() : item.Label ?? string.Empty)
-                                 + (item.DisabledReason == null ? string.Empty : $"   ({item.DisabledReason})");
+            ((Label)row[1]).text = RowText(owner, item);
             row[2].style.display = item.HasChildren || item.HasNextStep ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        private static string RowText(Page owner, SearchNode item) {
+            return (owner.IsInSearchMode ? item.GetSearchLabel() : item.Label ?? string.Empty) + (item.DisabledReason == null ? string.Empty : $"   ({item.DisabledReason})");
         }
 
         private void OnKeyDown(KeyDownEvent evt) {

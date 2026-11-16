@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
     /// A text value for Android and one for iOS under one label: both on the label's row, the two fields as wide as each other, while each is at least <see cref="FieldMinWidth"/> wide, else a row each, as Unity drops a vector's fields to a row of their own in a narrow Inspector.<br/>
+    /// Between one row and two the iOS field slides to its place and the rows below with it, as <see cref="SettingsTabs"/> slides, repainting every frame of it on any window; a window opening shows the pair in its place at once.<br/>
     /// Every Android and iOS pair of a settings page draws with it.
     /// </summary>
     /// <example><code>
@@ -17,8 +19,29 @@ namespace RiseOn.Utils.Editor {
         private static readonly GUIContent android = new("Android");
         private static readonly GUIContent ios     = new("iOS");
 
-        // The value column's width at the last repaint, by control: the next frame lays out one row or two by it.
-        private static readonly Dictionary<int, float> widths = new();
+        // As long as SettingsTabs' slide, and eased as it is.
+        private const float Duration = 0.25f;
+
+        // A pair in one window: the value column's width at its last repaint, which the next frame lays out one row or two by, and how
+        // far it is from one row (0) to two (1), with where its move started.
+        private sealed class Pair {
+            public float  Width = -1;
+            public bool   Shown;
+            public bool   Settle;
+            public float  From;
+            public float  To;
+            public double Started = -1;
+            public float  Progress = 1;
+
+            public float Value => Mathf.Lerp(From, To, 1 - (1 - Progress) * (1 - Progress));
+        }
+
+        // By window, control and label: a window opening, or a page of it, starts its own pairs.
+        private static readonly Dictionary<(int window, int control, string label), Pair> pairs = new();
+
+        // By label, the width a pair had last in any window: a pair a window has not drawn yet starts as wide as it, which a window
+        // opened again at the size it was left at is. By label, as a control's id differs from one window to the next.
+        private static readonly Dictionary<string, float> lastWidths = new();
 
         /// <summary>Draws the pair of string properties.</summary>
         public static void Draw(GUIContent label, SerializedProperty androidValue, SerializedProperty iosValue) {
@@ -32,26 +55,72 @@ namespace RiseOn.Utils.Editor {
 
         /// <summary>Draws the pair; true when either changed. A null label gives the values the whole row.</summary>
         public static bool Draw(GUIContent label, ref string androidValue, ref string iosValue) {
-            var id    = GUIUtility.GetControlID(FocusType.Passive);
-            var wide  = !widths.TryGetValue(id, out var width) || Fits(width);
-            var row   = EditorGUILayout.GetControlRect(label != null);
-            var value = label == null ? row : EditorGUI.PrefixLabel(row, label);
-            if (Event.current.type is EventType.Repaint) widths[id] = value.width;
+            var id     = GUIUtility.GetControlID(FocusType.Passive);
+            var window = GUIHelper.CurrentWindow;
+            var name   = label?.text ?? "";
+            var at     = (window ? window.GetInstanceID() : 0, id, name);
+            if (!pairs.TryGetValue(at, out var pair)) pairs[at] = pair = new Pair { Width = lastWidths.TryGetValue(name, out var last) ? last : -1 };
 
-            EditorGUI.BeginChangeCheck();
-            if (wide) {
-                // Each name as wide as its own text, as a vector's X, Y and Z are, so it sits by its field; the fields as wide as each other.
-                Split(value, out var left, out var right);
-                androidValue = Field(left, android, Width(android), androidValue);
-                iosValue     = Field(right, ios, Width(ios), iosValue);
-            } else {
-                // Stacked, both names as wide as the longer, so the two fields start in line.
-                androidValue = Field(value, android, Width(android), androidValue);
-                var next = EditorGUILayout.GetControlRect(label != null);
-                iosValue = Field(new Rect(value.x, next.y, value.width, next.height), ios, Width(android), iosValue);
+            var stacked = StackOf(pair, pair.Width >= 0 && !Fits(pair.Width));
+            var line    = EditorGUIUtility.singleLineHeight;
+            var below   = line + EditorGUIUtility.standardVerticalSpacing;
+            var row     = EditorGUILayout.GetControlRect(label != null, line + stacked * below);
+            var first   = new Rect(row.x, row.y, row.width, line);
+            var value   = label == null ? first : EditorGUI.PrefixLabel(first, label);
+            if (Event.current.type is EventType.Repaint) {
+                // The first repaint knows the width the window really gives; a pair laid out by another window's width takes its place
+                // at once on the next frame, rather than sliding to it as the window opens.
+                if (!pair.Shown && (pair.Width < 0 || Fits(pair.Width) != Fits(value.width))) {
+                    pair.Settle = true;
+                    HandleUtility.Repaint();
+                }
+
+                pair.Width = lastWidths[name] = value.width;
+                pair.Shown = true;
             }
 
+            // On one row each name as wide as its own text, as a vector's X, Y and Z are, so it sits by its field, the fields as wide
+            // as each other; stacked, the Android field takes the row and the iOS one the row below, its name as wide as the longer, so
+            // the two fields start in line.
+            Split(value, out var left, out var right);
+            var under = new Rect(value.x, value.y + below, value.width, line);
+
+            EditorGUI.BeginChangeCheck();
+            androidValue = Field(Lerp(left, value, stacked), android, Width(android), androidValue);
+            iosValue     = Field(Lerp(right, under, stacked), ios, Mathf.Lerp(Width(ios), Width(android), stacked), iosValue);
             return EditorGUI.EndChangeCheck();
+
+            // Where the pair is between one row and two, moving toward stacked or not. It changes only at layout, so every event of
+            // a frame lays out the same; the clock starts with the first frame shown, so a move begun while the window waits is still seen.
+            // Until its first repaint a pair is where its width puts it, with no move: the window is only opening.
+            static float StackOf(Pair stack, bool stacked) {
+                var to = stacked ? 1f : 0f;
+                if (Event.current.type is EventType.Layout) {
+                    if (!stack.Shown || stack.Settle) {
+                        stack.From     = stack.To = to;
+                        stack.Progress = 1;
+                        stack.Settle   = false;
+                    } else if (!Mathf.Approximately(stack.To, to)) {
+                        stack.From     = stack.Value;
+                        stack.To       = to;
+                        stack.Started  = -1;
+                        stack.Progress = 0;
+                    } else if (stack.Started >= 0) {
+                        stack.Progress = Mathf.Clamp01((float) ((EditorApplication.timeSinceStartup - stack.Started) / Duration));
+                    }
+                }
+
+                if (stack.Progress < 1) {
+                    if (Event.current.type is EventType.Repaint && stack.Started < 0) stack.Started = EditorApplication.timeSinceStartup;
+                    HandleUtility.Repaint();
+                }
+
+                return stack.Value;
+            }
+
+            static Rect Lerp(Rect from, Rect to, float t) {
+                return Rect.MinMaxRect(Mathf.Lerp(from.xMin, to.xMin, t), Mathf.Lerp(from.yMin, to.yMin, t), Mathf.Lerp(from.xMax, to.xMax, t), Mathf.Lerp(from.yMax, to.yMax, t));
+            }
         }
 
         /// <summary>The pair in one row of <paramref name="value"/>, whatever its width: for a row laid out by hand, such as a section's bar.</summary>
