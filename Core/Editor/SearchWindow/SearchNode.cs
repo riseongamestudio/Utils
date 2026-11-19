@@ -47,6 +47,11 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         /// </summary>
         public bool HasNextStep;
 
+        /// <summary>The text of a button at the row's end, or null for none; pressing it runs <see cref="Action"/> and closes the window as Escape does.</summary>
+        public string ActionLabel;
+
+        public Action Action;
+
         /// <summary>
         /// Loads <see cref="Icon"/> the first time the row is shown, so a long list does not load every icon up front.
         /// </summary>

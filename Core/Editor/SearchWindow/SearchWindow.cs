@@ -223,10 +223,16 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                 // Sized again once shown, as showing it gives it a size of its own.
                 var folded = GetFrames(anchor, 0f, 0f).Controls;
                 Frame(this, folded);
-                WindowCornerUtils.Show(this, ShowPopup);
+                BorderlessWindow.Show(this, ShowPopup);
+                BorderlessWindow.KeepOnTop(this);
                 setFrameFloor(this, folded.size);
                 Frame(this, folded);
                 ShapeCorners();
+
+                // As wide as its rows before it unfolds, not widened midway: the folded windows, drawn here, lay the rows out to measure.
+                repaintNow(this);
+                if (listWindow != null) repaintNow(listWindow);
+                WidenToRows();
 
                 // Unfolds at once to the height it is likely to take, with no pause while the layout runs; the fit then corrects the move
                 // where the layout says otherwise, which a list of plain rows never does.
@@ -663,26 +669,28 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             return HasNoControls ? DropDownBorder : controlsHeight + 2f * DropDownBorder;
         }
 
-        private bool HidesControls => HasNoControls && WindowCornerUtils.IsSupported;
+        private bool HidesControls => HasNoControls && BorderlessWindow.IsSupported;
 
         // The list's edges: the far one, and the near one too when the controls' window is cut away.
         private float ListBorder => HidesControls ? 2f * DropDownBorder : DropDownBorder;
 
         // The edge a drop-down draws, 1px as SearchWindow.uss sets it: Unity lays a border out a whole number of the screen's pixels thick.
-        private float DropDownBorder => rootVisualElement.RoundToPanelPixelSize(1f);
+        // Before the window shows, it is on no panel yet: from the scale of the screen it opens on, which its panel then takes.
+        private float DropDownBorder => rootVisualElement.panel != null ? rootVisualElement.RoundToPanelPixelSize(1f) : Mathf.Max(1f, Mathf.Round(EditorGUIUtility.pixelsPerPoint)) / EditorGUIUtility.pixelsPerPoint;
 
-        // The two windows round as one: the controls' window its outer corners and the list's its own, or, without controls, the list all four.
+        // The two windows round as one: the edge where they meet is square, the controls' far one and the list's near one; without controls,
+        // the list rounds all four.
         private void ShapeCorners() {
             if (mode is not SearchWindowMode.DropDown) return;
 
-            var near = side is DropDownSide.Above ? WindowCornerUtils.Corners.Bottom : WindowCornerUtils.Corners.Top;
-            var far  = side is DropDownSide.Above ? WindowCornerUtils.Corners.Top : WindowCornerUtils.Corners.Bottom;
-            WindowCornerUtils.Round(this, near, hidden: HidesControls);
+            var near = side is DropDownSide.Above ? BorderlessWindow.Corners.Bottom : BorderlessWindow.Corners.Top;
+            var far  = side is DropDownSide.Above ? BorderlessWindow.Corners.Top : BorderlessWindow.Corners.Bottom;
+            BorderlessWindow.Square(this, far, hidden: HidesControls);
             RaiseEdge(rootVisualElement);
             if (listWindow == null) return;
 
             listWindow.rootVisualElement.EnableInClassList(Uss.NoControls, HidesControls);
-            WindowCornerUtils.Round(listWindow, HidesControls ? WindowCornerUtils.Corners.All : far);
+            BorderlessWindow.Square(listWindow, HidesControls ? BorderlessWindow.Corners.None : near);
             RaiseEdge(listWindow.rootVisualElement);
         }
 
@@ -857,7 +865,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             // Sized again once shown, as showing it gives it a size of its own.
             var folded = GetFrames(anchor, 0f, 0f).List;
             Frame(listWindow, folded);
-            WindowCornerUtils.Show(listWindow, () => showWithoutFocus(listWindow));
+            BorderlessWindow.Show(listWindow, () => showWithoutFocus(listWindow));
+            BorderlessWindow.KeepOnTop(listWindow);
             setFrameFloor(listWindow, folded.size);
             Frame(listWindow, folded);
         }
@@ -1534,6 +1543,17 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             arrow.AddToClassList(Uss.RowArrow);
             row.Add(arrow);
 
+            // Picks nothing: it runs the choice's action, then the window closes as on Escape, onCanceled included.
+            var action = new Button();
+            action.AddToClassList(Uss.RowAction);
+            action.clicked += () => {
+                if (isClosing || action.userData is not SearchNode node) return;
+
+                node.Action?.Invoke();
+                Dismiss();
+            };
+            row.Add(action);
+
             // The highlight follows the mouse, like Unity's Add Component popup.
             row.RegisterCallback<PointerMoveEvent>(_ => {
                 if (isAnimating || owner != page || row.userData is not int index || index == page.SelectedIndex) return;
@@ -1542,7 +1562,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             });
 
             row.RegisterCallback<PointerDownEvent>(evt => {
-                if (evt.button != 0 || isAnimating || owner != page) return;
+                if (evt.button != 0 || isAnimating || owner != page || evt.target == action) return;
                 if (row.userData is not int index || index >= page.Items.Count) return;
 
                 evt.StopPropagation();
@@ -1586,6 +1606,11 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             ((Image)row[0]).image = item.Icon;
             ((Label)row[1]).text = RowText(owner, item);
             row[2].style.display = item.HasChildren || item.HasNextStep ? DisplayStyle.Flex : DisplayStyle.None;
+
+            var action = (Button)row[3];
+            action.userData      = item;
+            action.text          = item.ActionLabel;
+            action.style.display = item.ActionLabel == null ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
         private static string RowText(Page owner, SearchNode item) {
@@ -1806,6 +1831,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             public const string RowIcon     = "search-window__row-icon";
             public const string RowLabel    = "search-window__row-label";
             public const string RowArrow    = "search-window__row-arrow";
+            public const string RowAction   = "search-window__row-action";
         }
 
         #endregion

@@ -48,7 +48,7 @@ project báo đúng một lỗi từ `RiseOn.Utils.Requirements`.
     }
   ],
   "dependencies": {
-    "com.riseon.utils": "1.0.14"
+    "com.riseon.utils": "1.0.15"
   }
 }
 ```
@@ -56,7 +56,7 @@ project báo đúng một lỗi từ `RiseOn.Utils.Requirements`.
 **Git URL**: *Package Manager → + → Add package from git URL*:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Core#com.riseon.utils/1.0.14
+https://github.com/riseongamestudio/Utils.git?path=/Core#com.riseon.utils/1.0.15
 ```
 
 Repo chứa nhiều package nên tag có tiền tố tên package
@@ -163,12 +163,12 @@ Cách dùng từng tool: [Tool trong Editor](Editor/Tools/README.md).
 | EnumLabel | Đặt nhãn phần tử mảng theo enum (Odin) | [Runtime/EnumLabel](Runtime/EnumLabel/README.md) |
 | ForwardAttributesTo | Chuyển attribute Odin từ field wrapper xuống field bên trong | [Runtime/ForwardAttributes](Runtime/ForwardAttributes/README.md) |
 | AllowGenerics | Cho field `[SerializeReference]` chọn được lớp generic, hỏi từng tham số | [Runtime/AllowGenerics](Runtime/AllowGenerics/README.md) |
-| SectionGroup, ScriptField | `[SectionGroup]` gom member thành một mục của trang settings; `[ScriptField]` hiện một `Type` như ô Script của component | [Editor/Utils](Editor/Utils/README.md#trang-settings) |
+| SectionGroup, SectionList, SectionReference, ScriptField | `[SectionGroup]` gom member thành một mục của trang settings, `[SectionList]` vẽ một list thành mục có +, × và kéo đổi chỗ, `[SectionReference]` vẽ một `[SerializeReference]` Editor tự chọn lớp thành mục có script trên thanh; `[ScriptField]` hiện một `Type` như ô Script của component | [Editor/Utils](Editor/Utils/README.md#attribute-trong-lớp-dữ-liệu) |
 | Tool Editor | Capture Game View, Find References, Replace Component, Replace Type | [Editor/Tools](Editor/Tools/README.md) |
 | Foldout đệ quy | Alt+click foldout bất kỳ trong Inspector của Odin mở hay gập cả nhánh bên dưới | [Editor/Utils](Editor/Utils/README.md#foldout-đệ-quy) |
 | Cửa sổ tìm kiếm | `ComponentSearchWindow`, `ObjectSearchWindow`, `ChoiceSearchWindow` cho drawer riêng, dạng cửa sổ hoặc drop-down | [Editor/SearchWindow](Editor/SearchWindow/README.md) |
-| Chọn enum | Mọi ô enum, của Odin lẫn Unity, mở drop-down `ChoiceSearchWindow`; `ChoiceFieldUtils` cho ô vẽ tay | [Editor/Utils](Editor/Utils/README.md#chọn-enum-choicefieldutils) |
-| Utils Editor | `PrefabUtils`, `InspectorPropertyUtils`, `RectFieldUtils`, `InlineEditorImitator` cho người viết drawer; `SettingsPage`, `SettingsSection`, `SettingsTabs`, các ô dùng chung (`PlatformFieldUtils`, `HelpBoxUtils`, `ScriptUtils`, `SpinnerUtils`), `DeferredSave`, `AssetFindUtils` cho trang settings; `WindowCornerUtils` bo góc cửa sổ; `PixelUtils`, `HoverUtils` cho control vẽ tay | [Editor/Utils](Editor/Utils/README.md) |
+| Chọn giá trị | Mọi ô enum, của Odin lẫn Unity, và mọi ô `[ValueDropdown]` của một giá trị mở drop-down `ChoiceSearchWindow`; `ChoiceFieldUtils` cho ô vẽ tay | [Editor/Utils](Editor/Utils/README.md#chọn-giá-trị-choicefieldutils) |
+| Utils Editor | `PrefabUtils`, `InspectorPropertyUtils`, `RectFieldUtils`, `InlineEditorImitator` cho người viết drawer; `SettingsPage`, `SettingsTree`, `SettingsAssetUtils`, `SettingsAssetInspector`, `Section`, `SectionRows`, `SectionTabs`, các ô dùng chung (`PlatformFieldUtils`, `HelpBoxUtils`, `ScriptUtils`, `SpinnerUtils`), `DeferredSave`, `AssetFindUtils` cho trang settings và inspector; `PixelUtils`, `HoverUtils` cho control vẽ tay | [Editor/Utils](Editor/Utils/README.md) |
 
 ## Lịch sử thay đổi
 

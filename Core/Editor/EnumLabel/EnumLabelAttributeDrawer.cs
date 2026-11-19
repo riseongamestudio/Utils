@@ -375,13 +375,11 @@ namespace RiseOn.Utils.Editor {
 
             var enumNames = Enum.GetNames(enumType);
             if (Property.Children.Count != enumNames.Length) {
-                SirenixEditorGUI.WarningMessageBox(
-                    $"Array size ({Property.Children.Count}) does not match {enumType.Name} value count ({enumNames.Length}).");
+                HelpBoxUtils.Draw($"Array size ({Property.Children.Count}) does not match {enumType.Name} value count ({enumNames.Length}).", MessageType.Warning);
             }
 
             if (!HasSequentialValues(enumType)) {
-                SirenixEditorGUI.WarningMessageBox(
-                    $"{enumType.Name} values must start at 0 and be sequential to match array indexes.");
+                HelpBoxUtils.Draw($"{enumType.Name} values must start at 0 and be sequential to match array indexes.", MessageType.Warning);
             }
         }
 

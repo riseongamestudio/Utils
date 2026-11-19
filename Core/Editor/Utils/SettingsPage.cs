@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
-    /// The margins of a settings page, as Unity's Player page keeps them: the page's title, the labels of plain rows and the edges of <see cref="SettingsSection"/> boxes share one line, and the right edge mirrors the left.<br/>
+    /// The margins of a settings page, as Unity's Player page keeps them: the page's title, the labels of plain rows and the edges of <see cref="Section"/> boxes share one line, and the right edge mirrors the left.<br/>
     /// Wrap a SettingsProvider's guiHandler in it.
     /// </summary>
     /// <example><code>

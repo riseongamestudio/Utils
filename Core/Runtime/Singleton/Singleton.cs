@@ -20,10 +20,10 @@ namespace RiseOn.Utils {
             "DontDestroyOnLoad only works on root GameObjects."
           , InfoMessageType.Warning,
             VisibleIf = "@isPersistent && transform.parent != null")]
-        [SerializeField, FoldoutGroup("Singleton")]
+        [SerializeField, SectionGroup("Singleton", Foldable = true, Closed = true)]
         private bool isPersistent = true;
 
-        [SerializeField, FoldoutGroup("Singleton")]
+        [SerializeField, SectionGroup("Singleton")]
         private DuplicateAction duplicateAction = DuplicateAction.DestroyGameObject;
 
         private protected Singleton() { }

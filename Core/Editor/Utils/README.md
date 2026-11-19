@@ -9,14 +9,14 @@ Namespace `RiseOn.Utils.Editor`.
 - [RectFieldUtils](#rectfieldutils)
 - [Foldout đệ quy](#foldout-đệ-quy)
 - [InlineEditorImitator](#inlineeditorimitator)
-- [Chọn enum: ChoiceFieldUtils](#chọn-enum-choicefieldutils)
+- [Chọn giá trị: ChoiceFieldUtils](#chọn-giá-trị-choicefieldutils)
 - [Trang settings](#trang-settings)
-  - [SettingsPage](#settingspage)
-  - [SettingsSection](#settingssection)
-  - [SettingsTabs](#settingstabs)
+  - [Khung một trang](#khung-một-trang)
+  - [Attribute trong lớp dữ liệu](#attribute-trong-lớp-dữ-liệu)
+  - [Section](#section)
+  - [SectionRows](#sectionrows)
+  - [SectionTabs](#sectiontabs)
   - [Các ô dùng chung](#các-ô-dùng-chung)
-  - [Lưu và tìm asset](#lưu-và-tìm-asset)
-- [Bo góc cửa sổ: WindowCornerUtils](#bo-góc-cửa-sổ-windowcornerutils)
 - [Vẽ theo pixel: PixelUtils, HoverUtils](#vẽ-theo-pixel-pixelutils-hoverutils)
 
 ## PrefabUtils
@@ -36,8 +36,8 @@ property.SetExpandedRecursively(true);   // mở property và mọi property bê
 ```
 
 Chỉ đổi trạng thái của các property. Trên trang settings thì dùng
-`SettingsSection.SetExpandedRecursively(property, true)`: bản này ghi luôn trạng thái gập mở
-mà mục `SettingsSection.Foldout(property, ...)` giữ trong phiên, nên mục chưa vẽ lần nào cũng
+`Section.SetExpandedRecursively(property, true)`: bản này ghi luôn trạng thái gập mở
+mà mục `Section.Foldout(property, ...)` giữ trong phiên, nên mục chưa vẽ lần nào cũng
 mở đúng.
 
 ## RectFieldUtils
@@ -53,7 +53,7 @@ RectFieldUtils.Draw(curveProperty, right);
 
 - `Draw` vẽ trong scope property của Unity, nên có dấu override của prefab; giá trị sửa xong
   ghi qua Odin, có Undo.
-- Enum vẽ bằng [`ChoiceFieldUtils`](#chọn-enum-choicefieldutils).
+- Enum vẽ bằng [`ChoiceFieldUtils`](#chọn-giá-trị-choicefieldutils).
 - `CanDraw(type)` cho biết kiểu có vẽ được không: số, `bool`, `string`, enum, vector, `Color`,
   `AnimationCurve`, `Gradient`, `UnityEngine.Object`.
 - `Split` để một khe giữa hai nửa vừa dấu override của prefab, nên các dòng chia đôi thẳng
@@ -64,15 +64,15 @@ RectFieldUtils.Draw(curveProperty, right);
 Alt+click một foldout bất kỳ trong Inspector của Odin thì mở hay gập cả nhánh bên dưới, như
 Inspector và Hierarchy của Unity. `RecursiveFoldoutDrawer` bọc ngoài mọi property: thấy trạng
 thái mở/gập của property vừa đổi trong lúc giữ Alt thì đặt cùng trạng thái cho mọi property
-con, qua `SettingsSection.SetExpandedRecursively`. Foldout của Odin, của list và mục
-`SettingsSection.Foldout(property, ...)` đều được mà drawer không phải làm gì.
+con, qua `Section.SetExpandedRecursively`. Foldout của Odin, của list và mục
+`Section.Foldout(property, ...)` đều được mà drawer không phải làm gì.
 
 Drawer tự vẽ foldout cho một property con, không phải property của chính nó (như dòng provider
 trên trang Ads), thì tự chuyển Alt+click xuống:
 
 ```csharp
 var expanded = EditorGUI.Foldout(rect, child.State.Expanded, title, true);
-if (expanded != child.State.Expanded && Event.current.alt) SettingsSection.SetExpandedRecursively(child, expanded);
+if (expanded != child.State.Expanded && Event.current.alt) Section.SetExpandedRecursively(child, expanded);
 child.State.Expanded = expanded;
 ```
 
@@ -101,15 +101,18 @@ public void Dispose() => inline.Dispose();   // hủy các editor đã tạo
 Tôn trọng các tùy chọn của `InlineEditorAttribute` (`ObjectFieldMode`, preview,
 ...). `drawBaseFieldAction` vẽ ô chọn object ở vùng `rect` được đưa vào.
 
-## Chọn enum: ChoiceFieldUtils
+## Chọn giá trị: ChoiceFieldUtils
 
-Mọi ô enum trong Editor mở cùng một cửa sổ chọn, drop-down `ChoiceSearchWindow`, thay cho
-menu hệ thống của Unity và ô chọn của Odin:
+Mọi ô enum, và mọi ô `[ValueDropdown]` của một giá trị, trong Editor mở cùng một cửa sổ chọn,
+drop-down `ChoiceSearchWindow`, thay cho menu hệ thống của Unity và ô chọn của Odin:
 
 - `ChoiceEnumDrawer` cho mọi enum Odin vẽ, `[DrawerPriority(0, 0, 0.9995)]`: ngay trên drawer enum
   của Odin (0.999), dưới mọi drawer khác. Attribute tự vẽ enum theo cách riêng (`[EnumToggleButtons]`,
-  `[ValueDropdown]`, `[EnumPaging]`) và drawer viết cho một enum cụ thể (priority mặc định 1)
-  vẫn vẽ theo cách của chúng.
+  `[EnumPaging]`) và drawer viết cho một enum cụ thể (priority mặc định 1) vẫn vẽ theo cách của chúng.
+- `ValueDropdownChoiceDrawer` cho `[ValueDropdown]` của Odin trên một giá trị, mọi kiểu,
+  `[DrawerPriority(0, 0, 2003)]`, ngay trên drawer của Odin: danh sách của attribute (giá trị
+  thường hay `ValueDropdownItem` có tên) mở trong cửa sổ chọn. `[ValueDropdown]` trên list vẫn
+  là của Odin, vì ở đó nó chọn nhiều phần tử thêm vào list.
 - `ChoiceEnumPropertyDrawer` cho mọi enum Unity vẽ: Inspector không có Odin,
   `EditorGUILayout.PropertyField`, phần tử của mảng và `List`.
 
@@ -125,6 +128,10 @@ ChoiceFieldUtils.Enum(rect, property);                                          
 ChoiceFieldUtils.Enum(new GUIContent("Access"), FirebaseAccess.Mode, mode => FirebaseAccess.Mode = mode);
 ```
 
+Danh sách giá trị có tên không phải enum (như sorting layer theo id) thì gọi
+`ChoiceFieldUtils.Value(label, choices, current, onPicked)`, hay bản nhận `rect`; `choices` là
+các cặp `(tên, giá trị)`, giá trị không có trong danh sách thì ô hiện chính nó.
+
 Bản `SerializedProperty` vẽ qua `ChoiceEnumPropertyDrawer`, nên có đủ `[Flags]`, `—` và dấu
 override của prefab. Giá trị chọn đến sau khi trang đã vẽ xong, nên bản nhận callback
 (`Enum<T>`, `Enum(Rect, Enum, Action<Enum>)`) ghi giá trị trong callback: đọc lại
@@ -133,45 +140,139 @@ bản `InspectorProperty` có `search: true/false` để bắt có hoặc bỏ �
 
 ## Trang settings
 
-Dành cho người viết trang Project Settings của một pack. Mọi trang của các pack RiseOn
-(Ads, Consent, Firebase, Remote Config, Analytics, IAP) vẽ bằng các phần dưới đây, nên các
-trang thẳng hàng và giống nhau tới từng pixel.
+Dành cho người viết trang Project Settings hay inspector của một pack. Mọi trang của các pack
+RiseOn (Ads, Analytics, Consent, Firebase, Remote Config, IAP) và inspector của Outline2D,
+Wipe2D, Transitions vẽ bằng các phần dưới đây, nên chúng thẳng hàng và giống nhau tới từng
+pixel. Viết trang mới thì làm theo khung ở [Khung một trang](#khung-một-trang).
 
-### SettingsPage
+### Khung một trang
 
-Bọc `guiHandler` của `SettingsProvider`: lề trái phải như trang Player của Unity (tiêu đề, nhãn
-và viền các mục cùng một đường), cột nhãn rộng đúng công thức Inspector của Unity: 45% bề rộng
-trang làm tròn lên, trừ 40, ít nhất 120.
+Asset settings nằm trong Resources, trang vẽ asset qua cây Odin: các field mang attribute
+(`[SectionGroup]`, `[SectionList]`, `[LabelText]`, `[Tooltip]`), trang chỉ vẽ hộp báo ở đầu
+và phần không phải field.
 
 ```csharp
-new SettingsProvider("Project/RiseOn/MyPack", SettingsScope.Project) {
-    guiHandler = _ => {
-        using var page = SettingsPage.Begin();
-        Draw();
-    }
-};
+internal static class MySettingsProvider {
+    internal const string PagePath = "Project/RiseOn/My Pack";
+
+    private static readonly SettingsTree tree = new();
+
+    [SettingsProvider]
+    private static SettingsProvider Create() =>
+        new(PagePath, SettingsScope.Project) {
+            guiHandler = _ => {
+                using var page = SettingsPage.Begin();
+                if (SettingsAssetUtils.OutsideResources<MySettings>(MySettings.ResourceName) is { } path
+                 && HelpBoxUtils.Draw($"{path} is outside a Resources folder.", MessageType.Error, new GUIContent("Move it"))) {
+                    SettingsAssetUtils.MoveToResources<MySettings>(MySettings.ResourceName);
+                }
+
+                tree.Draw(SettingsAssetUtils.LoadOrCreate<MySettings>(MySettings.ResourceName));
+            }
+          , deactivateHandler = tree.Dispose
+        };
+}
+
+[CustomEditor(typeof(MySettings))]
+internal sealed class MySettingsInspector : SettingsAssetInspector {
+    protected override string PagePath => MySettingsProvider.PagePath;
+}
 ```
 
-### SettingsSection
+| Thành phần | Việc |
+|---|---|
+| `SettingsPage.Begin()` | Bọc `guiHandler`: lề trái phải như trang Player của Unity (tiêu đề, nhãn và viền các mục cùng một đường), cột nhãn rộng đúng công thức Inspector của Unity: 45% bề rộng trang làm tròn lên, trừ 40, ít nhất 120 |
+| `SettingsTree` | Cây Odin của asset: tạo cho asset, tạo lại khi asset khác thế chỗ, mỗi sửa đổi có Undo và được ghi xuống đĩa qua `DeferredSave`. Giữ một cây cho mỗi trang, `Dispose` trong `deactivateHandler`. `Draw(asset)` vẽ mọi field; trang cần chen phần riêng giữa các field thì `var root = tree.Begin(asset)`, vẽ từng field bằng `root.Children["field"].Draw()`, rồi `tree.End()` |
+| `SettingsAssetUtils` | Tìm, tạo và chuyển asset settings theo tên Resources của nó: `Find<T>(name)`, `FindPath<T>(name)`, `LoadOrCreate<T>(name)` (tạo ở `Assets/RiseOn/Resources`), `OutsideResources<T>(name)` (đường dẫn khi asset nằm ngoài mọi thư mục Resources, game không đọc được; `null` khi ổn), `MoveToResources<T>(name)` |
+| `SettingsAssetInspector` | Inspector của asset settings: một nút mở trang. Asset chỉ sửa trên trang, như asset settings của Input System, nên mọi sửa đổi ở một chỗ |
+| `DeferredSave.Request(asset)` | Lưu asset khi không còn ô chữ nào đang gõ: mỗi lần lưu ghi và import lại file mất khoảng 60 ms, gõ từng chữ mà lưu thì trang khựng. `SettingsTree` đã gọi; trang tự sửa asset ngoài cây thì gọi mỗi lần vẽ |
+| `AssetFindUtils.Paths(filter)` | Đường dẫn của `AssetDatabase.FindAssets(filter)`, giữ tới khi project đổi: mỗi lần tìm mất khoảng 25 ms, trang tìm asset mỗi lần vẽ thì chậm |
 
-Một mục của trang: thanh tiêu đề, viền bo `Radius` (3, bằng góc field của Unity) quanh thanh
-và nội dung, màu theo nhóm của Odin. Tooltip của thanh giải thích mục. Các mục cách nhau bằng
-khoảng giữa hai field.
+Field trên trang lấy nhãn ngắn bằng `[LabelText]` khi tên field bị cột nhãn cắt, giữ
+`[Tooltip]` làm lời giải thích. Giới hạn số dùng `[MinValue]` của Odin: `[Min]` của Unity
+khiến Odin nhường field cho drawer của Unity, field đó mất nhãn ngắn và lệch cột.
+
+### Attribute trong lớp dữ liệu
+
+Ba attribute ở `RiseOn.Utils` (runtime, chỉ có trong Editor) đặt mục của trang ngay trên field:
+
+| Attribute | Vẽ gì |
+|---|---|
+| `[SectionGroup("Title")]` | Gom các member mang nó thành một mục, thay cho `[FoldoutGroup]` của Odin |
+| `[SectionList]` | Một list hay mảng thành một mục: + trên thanh thêm, × ở dòng xóa, kéo tay nắm ở đầu dòng để đổi chỗ, kéo object từ Project hay Hierarchy vào để chèn (list object hay list có `Drop`). Thanh lấy nhãn và tooltip của member |
+| `[SectionReference]` | Một member `[SerializeReference]` mà Editor tự chọn lớp (như lớp quản lý duy nhất của game kế thừa từ lớp gốc của pack) thành một mục gập mở: script của giá trị nằm trên thanh, chỉ đọc, các field của nó bên trong. Thanh không có ô chọn kiểu |
+
+Tùy chọn của `[SectionGroup]`:
+
+| Tùy chọn | Ý nghĩa |
+|---|---|
+| `Foldable` | Thanh gập mở được: cho mục dài hay ít dùng. Trạng thái gập mở là của property, nên Alt+click ở mục ngoài gập mở luôn mục này |
+| `Closed` | Mục `Foldable` gập sẵn lần đầu trong phiên |
+| `Paddingless` | Nội dung chạm viền, cho nội dung có khung riêng như tab |
+| `Tooltip` | Lời giải thích hiện khi rê chuột lên thanh |
+| `Toggle` | Tên một member `bool` trong mục, vẽ thành ô tick trên thanh trước tiêu đề: cho mục là một tính năng bật tắt (như bóng của Outline2D). Mục chỉ mở khi ô được tick, tick thì mở ra; mục thành gập mở được |
+
+```csharp
+[SectionGroup("Shadow", Toggle = nameof(shadowEnabled))]
+[SerializeField] private bool shadowEnabled;
+[SectionGroup("Shadow")]
+[SerializeField] private Vector2 shadowOffset;
+```
+
+Tùy chọn của `[SectionList]`:
+
+| Tùy chọn | Ý nghĩa |
+|---|---|
+| `Item` | Tên một phần tử trong tooltip của + và ×, như `"device"`; mặc định là tên kiểu phần tử |
+| `New` | Tên method hay biểu thức Odin trả phần tử mà + thêm, tìm trên đối tượng chứa list: cho phần tử cần giá trị riêng, như sản phẩm IAP có số ngẫu nhiên khác mọi sản phẩm khác. Mặc định là chuỗi rỗng, instance mới của lớp có constructor không tham số, hay giá trị mặc định |
+| `Drop` | Tên method hay biểu thức Odin biến object kéo vào list thành phần tử, tìm trên đối tượng chứa list, object là tham số `obj` (`UnityEngine.Object`); trả mặc định hay `null` là không nhận. Cho list của kiểu bọc object, như `ListSerObject` |
+| `Pick` | Tên member hay biểu thức Odin trả `Type` của object mà + chọn, như interface phần tử bọc; đi cùng `Drop`, nó biến object được chọn thành phần tử |
+| `Foldable`, `Closed` | Như của `[SectionGroup]` |
+
+List của một enum là một tập hợp: + chỉ đưa các giá trị list chưa có, dòng giữ giá trị của nó và
+hiện tên, các giá trị theo thứ tự của enum, không kéo đổi chỗ.
+
+List của một kiểu `UnityEngine.Object`, hay list có `Drop`, nhận object kéo từ Project hay
+Hierarchy:
+
+- Thả ở tay nắm, ở ×, ở khe giữa hai dòng hay dưới dòng cuối thì object chèn vào đúng chỗ đó.
+  Khi đang kéo, các dòng dạt ra mở một ô ghi tên object, kéo nhiều object cũng chỉ một ô.
+- Thả lên thanh tiêu đề thì object thêm vào cuối list; khi đang kéo, cả mục sáng lên.
+- Thả lên phần nội dung của một dòng thì chỗ đó là của field trong dòng: ô object dưới con trỏ
+  nhận, như ô object thay giá trị của nó; không có ô nào nhận thì thả không làm gì.
+- List của một kiểu component nhận cả game object: list lấy component đầu tiên đúng kiểu của nó.
+- Asset chỉ nhận asset; object trong scene nhận cả object trong scene.
+
+List của một kiểu `UnityEngine.Object`, hay list có `Pick` và `Drop`, mở cửa sổ chọn object (cửa sổ của ô
+`SerObject`) khi bấm +, như list object của Odin; object được chọn thêm vào cuối, chọn None thì
+thêm một dòng trống (list có `New` thì thêm phần tử `New` cho).
+
+```csharp
+[SerializeField, SectionList(Item = "product", Foldable = true, New = "NewEntry")]
+[Tooltip("Ids as in the Play Console.")]
+private List<Entry> products = new();
+```
+
+### Section
+
+Một mục vẽ bằng code, cho phần trang không phải field (file config, tài khoản trên máy) hay
+mục có nút riêng trên thanh: thanh tiêu đề, viền bo `Radius` (3, bằng góc field của Unity)
+quanh thanh và nội dung, màu theo nhóm của Odin. Các mục cách nhau bằng khoảng giữa hai field.
 
 ```csharp
 // Mục luôn mở, một nút ở đầu phải thanh.
-using (var section = new SettingsSection("Items", "What the game sells.", buttons: 1, padded: false)) {
+using (var section = new Section("Items", "What the game sells.", buttons: 1, padded: false)) {
     if (section.Button(0, SdfIconType.Plus, "Add an item")) Add();
-    for (var i = 0; i < items.Count; i++) DrawItem(SettingsSection.Row(i), i);
+    rows.Draw(items.Count, DrawItem, remove: Remove);
 }
 
 // Mục gập mở, gập sẵn lần đầu trong phiên.
-using (var section = SettingsSection.Foldout("MyPack.Testing", "Testing", open: false)) {
+using (var section = Section.Foldout("MyPack.Testing", "Testing", open: false)) {
     if (section.Open) DrawTesting();
 }
 
 // Một giá trị nằm ngay trên thanh, ở cột giá trị của trang.
-using (var section = SettingsSection.Foldout("MyPack.Prompt", "Prompt", barValue: true)) {
+using (var section = Section.Foldout("MyPack.Prompt", "Prompt", barValue: true)) {
     prompt = EditorGUI.TextField(section.BarValue, prompt);
     if (section.Open) DrawTranslations();
 }
@@ -183,73 +284,103 @@ using (var section = SettingsSection.Foldout("MyPack.Prompt", "Prompt", barValue
 | `title`, `tooltip` | Chữ trên thanh, và lời giải thích hiện khi rê chuột |
 | `open` | Mở hay gập lần đầu trong phiên |
 | `buttons` | Số nút ở đầu phải thanh; `section.Button(i, ...)` vẽ nút thứ `i` tính từ phải |
-| `padded` | `false` khi nội dung có khung riêng (tab, danh sách) hoặc là các dòng `Row`, chạm viền |
-| `barValue` | Tiêu đề chỉ chiếm cột nhãn, cột giá trị trên thanh là `section.BarValue` |
+| `padded` | `false` khi nội dung có khung riêng (tab) hoặc là dòng của `SectionRows`, chạm viền |
+| `barValue` | Tiêu đề chỉ chiếm cột nhãn, cột giá trị trên thanh là `section.BarValue`, kết thúc sát nút đầu tiên như giá trị của một dòng kết thúc sát nút × |
 | `barOnly` | Mục chỉ có thanh, hình như mục đang gập: cho một mục đứng giữa các mục gập mở cùng loại |
 
 Vẽ mọi thứ trên thanh (nút, `BarValue`) trước, rồi mới đọc `section.Open`: lần đọc đầu bắt đầu
 phần nội dung, phần này mờ dần và cắt theo khi gập mở. Vẽ thanh sau đó thì giá trị trên thanh
 biến mất trong lúc gập mở.
 
-Mục vẽ cho một property của Odin thì dùng `SettingsSection.Foldout(property, ...)`: trạng thái
-gập mở là của chính property, nên Alt+click ở mục ngoài gập mở luôn mục này. Gọi
-`SettingsSection.Restore(property)` trong `Initialize` của drawer để mục mở như lúc rời trang.
-Trong lớp dữ liệu, `[SectionGroup("Title")]` gom các member thành một mục, thay cho
-`[FoldoutGroup]` của Odin. Mặc định là mục luôn mở; các tùy chọn:
+Mục vẽ cho một property của Odin thì dùng `Section.Foldout(property, ...)`: trạng thái gập mở
+là của chính property, nên Alt+click ở mục ngoài gập mở luôn mục này. Gọi
+`Section.Restore(property)` trong `Initialize` của drawer để mục mở như lúc rời trang. Tham số
+`toggle` vẽ một `bool` thành ô tick trên thanh, như tùy chọn `Toggle` của `[SectionGroup]`.
 
-| Tùy chọn | Ý nghĩa |
-|---|---|
-| `Foldable` | Thanh gập mở được, trạng thái là của property như trên: cho mục dài hay ít dùng |
-| `Closed` | Mục `Foldable` gập sẵn lần đầu trong phiên |
-| `Paddingless` | Như `padded: false` |
-| `Tooltip` | Lời giải thích hiện khi rê chuột lên thanh |
+Phần tử dùng chung của mục:
 
-```csharp
-[SectionGroup("Formats", Paddingless = true, Foldable = true, Tooltip = "Which providers serve each format.")]
-```
+- `Section.IconButton(rect, icon, tooltip)` là nút một icon cỡ `IconSize` (12), màu của nhãn,
+  sáng lên dưới chuột, icon nằm giữa `rect` tới từng pixel ở mọi tỉ lệ màn hình. Mọi nút icon của
+  trang vẽ bằng nó; nút có chữ (như nút sửa trong hộp báo) là nút thường của Unity.
+- `Section.Icon(rect, icon, lit)` vẽ icon như `IconButton` mà không có nút, cho icon chỉ để
+  nhìn hay kéo, như tay nắm của dòng.
+- `Section.TextField(rect, text, icon, tooltip, shown, out clicked)` là ô chữ có một nút icon
+  nằm trong đầu phải ô, như nút xóa của ô tìm: cho việc làm trên chữ của ô, như trả về chữ mặc
+  định (câu hỏi tracking của trang Consent). Nút hiện khi `shown`, chữ chừa chỗ cho nó; chuột trên
+  nút là mũi tên; bấm nút thì ô thôi gõ và `clicked` là `true`.
 
-Dòng trong mục `padded: false`:
-
-- `SettingsSection.Row(i)` một dòng cao 22 (`Height`), dòng lẻ tối hơn (`Shade`), dòng dưới
-  chuột tô `Hover`, đúng màu hover của list Unity (#303030 tối, #B2B2B2 sáng);
-  `RowContent` là chỗ đặt control giữa dòng; `RowButton(row, i)` là ô nút thứ `i` tính từ phải,
-  thẳng cột với nút trên thanh. List tự xếp dòng thì gọi `RowBackground(row, i)` cho sọc và
-  hover, ở mọi event, trước nội dung của dòng.
-- `SettingsSection.List(reorderableList)` vẽ `ReorderableList` không đầu không đuôi, dòng chạm
-  viền. Để dòng cao và sọc như `Row`: đặt
-  `elementHeight = RowHeight(EditorGUIUtility.singleLineHeight) - ListRowPadding` và gọi
-  `RowBackground(rect, index)` trong `drawElementBackgroundCallback` (như danh sách Products của
-  trang IAP).
-- `SettingsSection.IconButton(rect, icon, tooltip)` là nút một icon cỡ `IconSize` (12), màu
-  của nhãn, sáng lên dưới chuột, icon nằm giữa `rect` tới từng pixel ở mọi tỉ lệ màn hình. Mọi
-  nút icon của trang vẽ bằng nó; nút có chữ (như nút sửa trong hộp báo) là nút thường của Unity.
-- `SettingsSection.TextField(rect, text, icon, tooltip, shown, out clicked)` là ô chữ có một nút
-  icon nằm trong đầu phải ô, như nút xóa của ô tìm: cho việc làm trên chữ của ô, như trả về chữ
-  mặc định (câu hỏi tracking của trang Consent). Nút hiện khi `shown`, chữ chừa chỗ cho nó; chuột
-  trên nút là mũi tên; bấm nút thì ô thôi gõ và `clicked` là `true`.
-
-Chiều cao xin từ layout luôn là số point nguyên (`RowHeight`), như control của Unity: layout
-của Unity đặt mỗi phần tử ở point nguyên, nên chiều cao lẻ làm khoảng cách giữa các mục lúc 1,
-lúc 2, lúc 3 point. Căn theo pixel chỉ làm lúc vẽ (`PixelUtils`).
-
-Drawer tự đặt control trong mục thì dùng các số sau của `SettingsSection` để thẳng cột với các
-dòng thường của trang:
+Drawer tự đặt control trong mục thì dùng các số sau của `Section` để thẳng cột với các dòng
+thường của trang:
 
 | Thành phần | Dùng khi |
 |---|---|
 | `Inset` (4) | Khoảng từ viền mục tới nội dung, trái và phải: nhãn trong mục bắt đầu ở `row.x + Inset` |
 | `LabelGap` (2) | Khoảng Unity để giữa cột nhãn và ô: ô tự đặt bắt đầu ở `row.x + Inset + labelWidth + LabelGap` |
 | `Indent` (15) | Nội dung gập dưới foldout của một dòng thụt chừng đó, cột nhãn hẹp đi chừng đó |
+| `ButtonWidth` (20) | Cạnh của ô vuông chứa một nút trên thanh hay trên dòng, và tay nắm của dòng |
 | `ButtonRect(i)`, `RowButton(row, i)` | Ô của nút thứ `i` tính từ phải, trên thanh hay trên dòng, để đặt control khác cạnh nút |
+| `RowHandle(row)` | Ô tay nắm ở đầu trái dòng, đối xứng với ô `RowButton(row, 0)` qua giữa thanh |
+| `RowContent(row, height)` | Chỗ đặt control cao `height` trong một dòng như thanh, trên lưới pixel |
+| `Shade` | Lớp tối phủ lên dòng lẻ, lấy theo chênh lệch màu dòng chẵn và lẻ của list Odin |
+| `Bar`, `DrawDropLight(box)` | Ô của thanh, và vẽ mục sáng lên cho object kéo vào thanh; `box` là `GUILayoutUtility.GetLastRect()` ngay sau khi mục đóng |
+| `DropOutline`, `DropFill` | Màu viền và màu nền của chỗ nhận object kéo từ ngoài vào: ô list mở ra, hay mục sáng lên |
+| `DrawDragFrame(rect, fill)` | Khung của phần nội dung mà thứ đang kéo sẽ vào, như ô list mở ra hay dòng đang kéo đổi chỗ, có nền khi `fill`. Trong một mục, khung vẽ sau viền của mục, chạy từ viền trái sang viền phải; chạm cuối nội dung thì xuống tới đáy hộp, nên viền khung nằm trên viền hộp và góc bo theo hộp |
 | `BeginFade(key, open)`, `EndFade()` | Fade gập mở của Odin cho nội dung gập dưới một dòng, tự vẽ lại cửa sổ trong lúc fade. Gọi `EndFade` dù `BeginFade` trả gì |
 
-### SettingsTabs
+Chiều cao xin từ layout luôn là số point nguyên, như control của Unity: layout của Unity đặt mỗi
+phần tử ở point nguyên, nên chiều cao lẻ làm khoảng cách giữa các mục lúc 1, lúc 2, lúc 3 point.
+Căn theo pixel chỉ làm lúc vẽ (`PixelUtils`).
+
+### SectionRows
+
+Các dòng của một danh sách trong mục `padded: false`, cho danh sách vẽ bằng code (danh sách
+field thì dùng `[SectionList]`, nó vẽ bằng chính `SectionRows`). Dòng sọc xen kẽ như list của
+Odin, không sáng lên dưới chuột; mục nằm trong một dòng giữ nền riêng, sọc của dòng chừa nó ra.
+`isSelected` tô dòng được chọn bằng màu dòng được chọn của Unity; `select` nhận cú nhấn mà control
+trong dòng không nhận, kèm phím bổ trợ (Ctrl, Cmd, Shift), để người gọi tự giữ lựa chọn nhiều dòng.
+Danh sách rỗng hiện một câu gợi ý. Dòng đổi chỗ được có tay nắm ở đầu trái, dòng xóa được có × ở đầu phải; hai ô vuông
+bằng nhau, đối xứng qua giữa thanh, ngang dòng đầu của phần tử. Kéo tay nắm thì phần tử theo
+chuột, các phần tử khác trượt sang để mở chỗ nó sẽ rơi vào. Danh sách có `takes` và `drop` mở
+chỗ như vậy cho object kéo từ ngoài vào, trừ khi con trỏ nằm trên phần nội dung của một phần tử:
+chỗ đó là của field trong phần tử.
+
+```csharp
+private readonly SectionRows rows = new();
+
+using (var section = new Section("Parameters", buttons: 1, padded: false)) {
+    SectionRows.AddButton(section, 0, "language", choices, Add);
+    rows.Draw(items.Count, i => DrawItem(i), "None", move: Move, remove: Remove, removeTooltip: "Remove the language");
+}
+```
+
+| Tham số của `Draw` | Ý nghĩa |
+|---|---|
+| `count`, `drawItem` | Số phần tử, và hàm vẽ phần tử thứ `i` bằng GUILayout; cột nhãn đã chỉnh để giá trị thẳng cột với các field của trang |
+| `emptyHint` | Câu xám hiện khi danh sách rỗng, như điều + thêm |
+| `move` | Đổi phần tử từ chỗ thứ nhất sang chỗ thứ hai (tính khi nó đã rời chỗ cũ); `null` cho danh sách không đổi thứ tự |
+| `remove`, `removeTooltip` | Xóa phần tử ở chỗ đó, và tooltip của ×; `null` cho danh sách không xóa |
+| `marksFirstRow` | Drawer của phần tử gọi `SectionRows.MarkFirstRow(row)` cho dòng đầu của nó: chỉ dòng đó chừa chỗ cho tay nắm và ×, các dòng dưới bắt đầu dưới giữa tay nắm |
+| `takes`, `drop` | Danh sách có nhận một object kéo từ ngoài vào không, và hàm chèn các object nhận được, theo thứ tự kéo, từ chỗ chúng rơi vào; `null` cho danh sách không nhận |
+
+Lượt kéo kết thúc ở view khác thì view này không nhận thêm sự kiện kéo nào.
+`SectionRows.HasDragEnded(type)` cho biết sự kiện đang xử lý báo lượt kéo đã xong (chuột di chuyển,
+bấm, nhả, rời cửa sổ, hay một lần vẽ khi không còn kéo object nào): chỗ nào tự sáng lên cho object
+kéo vào thì dùng nó để tắt.
+
+Đổi chỗ và xóa chạy sau khi danh sách vẽ xong, nên phần tử không đổi giữa chừng. Mỗi danh sách
+vẽ cần một `SectionRows` riêng, vì nó giữ thao tác kéo qua các event.
+
+`SectionRows.AddButton(section, slot, what, choices, add)` là nút + trên thanh: `choices` là
+`null` thì bấm là thêm; có `choices` thì mở cửa sổ chọn (có ô tìm khi hơn 12 lựa chọn); hết lựa
+chọn thì nút mờ, tooltip nói mọi `what` đã có trong danh sách.
+
+### SectionTabs
 
 Tab ngang trong một mục `padded: false`, như tab nền tảng ở trang Player: tab đang chọn cùng
 màu nền với mục, tab khác tối hơn. Đổi tab thì trang trượt ngang, chiều cao chuyển dần.
 
 ```csharp
-tabs ??= new SettingsTabs(new[] { "Editor", "Android", "iOS" }, 0);
+tabs ??= new SectionTabs(new[] { "Editor", "Android", "iOS" }, 0);
 tabs.Draw(page => DrawPlatform(page));
 ```
 
@@ -257,43 +388,11 @@ tabs.Draw(page => DrawPlatform(page));
 
 | Hàm | Vẽ gì |
 |---|---|
-| `PlatformFieldUtils.Draw(label, android, ios)` | Một giá trị Android và một giá trị iOS dưới một nhãn, trên một dòng: mỗi ô sau tên của nó, hai ô rộng bằng nhau. Cửa sổ hẹp tới mức mỗi ô dưới `FieldMinWidth` (250) thì mỗi ô một dòng; khi chuyển giữa một dòng và hai dòng, ô Android giãn hoặc co, ô iOS trượt tới chỗ mới và các dòng bên dưới trượt theo, cùng thời gian với cú trượt tab của `SettingsTabs`; cửa sổ hay trang vừa mở thì cặp ô vào thẳng dạng đúng, không trượt (khung hình đầu theo bề rộng lần trước của cùng nhãn, chưa có thì một dòng). Bản `Draw(rect, ...)` cho dòng tự đặt (như thanh của mục) luôn một dòng; hết chỗ cho tên thì hai tên chia nhau, không đè lên nhau |
+| `PlatformFieldUtils.Draw(label, android, ios)` | Một giá trị Android và một giá trị iOS dưới một nhãn, trên một dòng: mỗi ô sau tên của nó, hai ô rộng bằng nhau. Cửa sổ hẹp tới mức mỗi ô dưới `FieldMinWidth` (250) thì mỗi ô một dòng; khi chuyển giữa một dòng và hai dòng, ô Android giãn hoặc co, ô iOS trượt tới chỗ mới và các dòng bên dưới trượt theo, cùng thời gian với cú trượt tab của `SectionTabs`; cửa sổ hay trang vừa mở thì cặp ô vào thẳng dạng đúng, không trượt (khung hình đầu theo bề rộng lần trước của cùng nhãn, chưa có thì một dòng). Bản `Draw(rect, ...)` cho dòng tự đặt (như thanh của mục) luôn một dòng; hết chỗ cho tên thì hai tên chia nhau, không đè lên nhau. Bản có thêm `toggle, ref androidOn, ref iosOn` gắn một nút bật/tắt liền bên phải mỗi ô, riêng cho từng nền tảng (như nút **Test** của ô unit id quảng cáo); nút liền vào cạnh phải ô nên đọc là của ô đó, hai cụm vẫn cách nhau như khi không có nút, và `FieldMinWidth` tính phần ô chữ, không gồm nút |
 | `HelpBoxUtils.Draw(message, type, button)` | Hộp báo chữ cỡ nhãn của trang, icon cao một dòng, nút sửa (nếu có) nằm trong hộp ở đầu phải; trả `true` khi bấm nút |
+| `HelpBoxUtils.Draw(message, type, (content, enabled), ...)` | Như trên với nhiều nút cạnh nhau ở đầu phải, nút đầu tiên bên trái; trả số thứ tự nút được bấm, `-1` khi không bấm. Nút có `enabled` là `false` thì mờ, tooltip của nó nên nói lý do |
 | `ScriptUtils.Field(label, type)` | File script của một kiểu C#, như ô Script của component: chỉ đọc, bấm thì ping, bấm đúp thì mở. Trong lớp dữ liệu dùng `[ScriptField]` |
 | `SpinnerUtils.LabelField(label, text)`, `SpinnerUtils.Content(text)` | Vòng quay chờ của Unity trước một dòng chữ, cho việc đang chạy (như trang Firebase lúc kiểm tra Firebase CLI). Cửa sổ tự vẽ lại khi vòng quay còn hiện; `Content` dùng được với mọi nhãn |
-
-### Lưu và tìm asset
-
-| Hàm | Việc |
-|---|---|
-| `DeferredSave.Request(asset)` | Gọi mỗi lần vẽ trang. Asset có thay đổi thì lưu xuống đĩa, nhưng chờ tới khi không còn ô chữ nào đang gõ: mỗi lần lưu ghi và import lại file mất khoảng 60 ms, gõ từng chữ mà lưu thì trang khựng. Sửa toggle hay chọn enum thì lưu ngay. Còn chờ thì lưu trước khi Unity compile lại và trước khi tắt |
-| `AssetFindUtils.Paths(filter)` | Đường dẫn của `AssetDatabase.FindAssets(filter)`, giữ tới khi project đổi: mỗi lần tìm mất khoảng 25 ms, trang tìm asset mỗi lần vẽ thì chậm |
-
-## Bo góc cửa sổ: WindowCornerUtils
-
-Dành cho người viết cửa sổ Editor không viền (cửa sổ drop-down): bo các góc chọn của cửa sổ
-theo `SettingsSection.Radius`, bằng góc của field và mục trong nó. Cửa sổ được cắt theo hình, nền và viền của root đi theo
-đường cong. Chỉ bo góc được chọn, nên hai cửa sổ ghép liền (dòng điều khiển và danh sách của
-`ChoiceSearchWindow`) bo như một.
-
-```csharp
-WindowCornerUtils.Show(window, window.ShowPopup);              // mở và giữ cửa sổ native vừa tạo
-WindowCornerUtils.Round(window, WindowCornerUtils.Corners.All);
-WindowCornerUtils.Round(window, WindowCornerUtils.Corners.All, hidden: true);   // cắt bỏ cả cửa sổ khi chưa có gì để hiện
-```
-
-UI Toolkit vẽ viền của một phần tử dưới các con của nó, nên nội dung chạm tới góc (một dòng được chọn chẳng hạn)
-che mất viền. Cửa sổ như vậy vẽ viền ở một con riêng, như `SearchWindow` làm:
-
-- root giữ độ dày viền nhưng để màu trong suốt, và đặt `overflow: visible` để con viền không bị cắt;
-- con viền `position: absolute`, mỗi cạnh lùi ra ngoài đúng độ dày viền của root, cùng độ dày, chép bán kính bốn góc từ root
-  sau mỗi lần `Round`, `pickingMode = PickingMode.Ignore` để không chặn chuột;
-- con viền luôn là con cuối của root: thêm nội dung thì gọi lại `BringToFront`.
-
-Cửa sổ chỉ giữ hoặc bỏ được nguyên pixel, nên cắt bỏ mọi pixel mà đường cong phủ dưới ba phần
-tư: góc trông tròn bằng góc của các mục trên trang, vốn vẽ khử răng cưa. Viền của root nằm đúng
-trên đường cong đó, liền một nét. Cửa sổ đổi cỡ thì tự cắt lại. Chạy trên Editor Windows (10 và 11 như nhau);
-`IsSupported` là `false` trên Editor khác, ở đó cửa sổ giữ góc vuông.
 
 ## Vẽ theo pixel: PixelUtils, HoverUtils
 
@@ -301,6 +400,7 @@ trên đường cong đó, liền một nét. Cửa sổ đổi cỡ thì tự c
   không hở cũng không đè một pixel ở 125%, 150%; `PixelUtils.Pixel` là một pixel tính bằng point,
   bề dày của nét mảnh.
 - `HoverUtils.Track(rect)` cho biết chuột có đang ở trên rect, và tự vẽ lại cửa sổ khi chuột ra
-  vào: Inspector và Project Settings không vẽ lại khi chuột di chuyển, nên control sáng lên dưới
-  chuột sẽ sáng mãi hoặc không sáng. Gọi ở mọi event, không chỉ lúc Repaint, để control giữ
+  vào. Nó bật `wantsMouseMove` cho cửa sổ đang vẽ: cửa sổ không bật thì không nhận sự kiện di
+  chuột (Project Settings mặc định tắt, đo trên Unity 6.3), nên control sáng lên dưới chuột sẽ
+  sáng mãi hoặc không sáng. Gọi ở mọi event, không chỉ lúc Repaint, để control giữ
   một id từ lúc layout tới lúc vẽ.

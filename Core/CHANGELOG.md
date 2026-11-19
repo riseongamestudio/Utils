@@ -4,33 +4,48 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
-## [1.0.15] - Chưa phát hành
+## [1.0.15] - 2026-11-19
 
 ### Thêm
 
-- Trang settings (Editor): `SettingsPage` (lề và cột nhãn như trang Player), `SettingsSection`
-  (mục có thanh, viền bo, gập mở với fade của Odin, nút và giá trị trên thanh, dòng sọc với màu
-  hover của list Unity, `ReorderableList` chạm viền), `SettingsTabs` (tab nền tảng, trượt khi
-  đổi), `PlatformFieldUtils` (cặp ô Android, iOS), `HelpBoxUtils` (hộp báo có nút sửa),
-  `ScriptUtils`, `SpinnerUtils` (vòng quay chờ), `PixelUtils`, `HoverUtils`. Xem
+- Bộ giao diện chung cho trang settings và inspector của các pack RiseOn (Editor): `SettingsPage`
+  (lề và cột nhãn như trang Player), `SettingsTree` (cây Odin của asset settings, có Undo và lưu),
+  `SettingsAssetUtils` (tìm, tạo, chuyển asset settings vào Resources), `SettingsAssetInspector`
+  (inspector của asset chỉ có nút mở trang), `Section` (mục có thanh, viền bo, gập mở với fade của
+  Odin, nút và giá trị trên thanh), `SectionRows` (dòng của danh sách: sọc như list Odin, dòng được
+  chọn và cú nhấn để chọn, tay nắm kéo đổi chỗ và nút × trong hai ô vuông đối xứng), `SectionTabs` (tab nền tảng,
+  trượt khi đổi), `PlatformFieldUtils` (cặp ô Android, iOS, tùy chọn một nút bật/tắt riêng liền
+  sau mỗi ô), `HelpBoxUtils` (hộp báo có một hay
+  nhiều nút sửa), `ScriptUtils`, `SpinnerUtils` (vòng quay chờ), `PixelUtils`, `HoverUtils`. Xem
   [Trang settings](Editor/Utils/README.md#trang-settings).
-- `[SectionGroup]`: gom member thành một mục `SettingsSection`, thay `[FoldoutGroup]`.
-  `[ScriptField]`: hiện một `Type` như ô Script của component.
-- `ChoiceFieldUtils` và drawer cho mọi enum, của Odin lẫn Unity: ô enum mở drop-down
-  `ChoiceSearchWindow` thay menu hệ thống và ô chọn của Odin; có ô tìm từ 11 lựa chọn, `[Flags]`
-  bật tắt từng cờ.
+- Attribute cho lớp dữ liệu: `[SectionGroup]` gom member thành một mục, thay `[FoldoutGroup]`, có
+  `Toggle` cho mục bật tắt bằng ô tick trên thanh; `[SectionList]` vẽ list thành mục có +, × và kéo
+  đổi chỗ, list enum là tập hợp, `New` cho phần tử mới có giá trị riêng; list object nhận object
+  kéo từ Project hay Hierarchy vào đúng chỗ thả (thả lên thanh thì vào cuối) và mở cửa sổ chọn
+  object khi bấm + (chọn None thì thêm một dòng trống, hay phần tử `New` cho), `Drop` và `Pick`
+  cho list của kiểu bọc object; `[SectionReference]` vẽ một `[SerializeReference]` mà Editor tự
+  chọn lớp thành mục có script trên thanh; `[ScriptField]` hiện một `Type` như ô Script của
+  component.
+- `ChoiceFieldUtils` và drawer cho mọi enum, của Odin lẫn Unity, và cho `[ValueDropdown]` của
+  Odin trên một giá trị: ô mở drop-down `ChoiceSearchWindow` thay menu hệ thống và ô chọn của
+  Odin; có ô tìm từ 11 lựa chọn, `[Flags]` bật tắt từng cờ. `ChoiceFieldUtils.Value` cho danh
+  sách giá trị có tên.
 - `DeferredSave`: lưu asset của trang settings khi không còn ô chữ nào đang gõ, để gõ không khựng.
   `AssetFindUtils`: giữ kết quả `FindAssets` tới khi project đổi.
-- `WindowCornerUtils`: bo góc chọn của cửa sổ Editor không viền trên Windows, viền liền một nét.
 - `ChoiceSearchWindow.Open`, `OpenToggles` nhận `search`: `false` bỏ ô tìm cho danh sách ngắn,
   phím mũi tên và Enter vẫn chọn.
+- `SearchChoice` nhận `actionLabel` và `action`: một nút cuối dòng, kể cả dòng bị khóa, như
+  **Install** cho lựa chọn cần cài trước; bấm thì chạy `action` và đóng cửa sổ, không chọn gì.
 
 ### Đổi
 
-- Drop-down của cửa sổ tìm kiếm: góc bo bằng góc của field, cách field một khoảng bằng khoảng
-  giữa hai field; mở thì phóng ra ngay, đóng thì thu về cả khi bấm lại field hay bấm sang cửa
-  sổ khác; không có tiêu đề, ô tìm hay tab thì chỉ còn danh sách.
-- Alt+click foldout: mục `SettingsSection.Foldout(property, ...)` cũng gập mở theo.
+- Drop-down của cửa sổ tìm kiếm: cách field một khoảng bằng khoảng giữa hai field; mở thì phóng
+  ra ngay, đóng thì thu về cả khi bấm lại field hay bấm sang cửa sổ khác. Trên Editor Windows: góc
+  bo bằng góc của field, lúc thu về vẫn nằm trên mọi cửa sổ như một menu nên không chớp, không có
+  tiêu đề, ô tìm hay tab thì chỉ còn danh sách.
+- Alt+click foldout: mục `Section.Foldout(property, ...)` cũng gập mở theo.
+- `Singleton`: hai field là mục *Singleton* gập sẵn. Cảnh báo của `[EnumLabel]` vẽ bằng
+  `HelpBoxUtils`.
 - `RectFieldUtils`: enum vẽ bằng `ChoiceFieldUtils`.
 - `ForwardAttributesTo`: bộ mặc định chuyển thêm các attribute về object, tham chiếu, số, chuỗi,
   enum, màu, `SuffixLabel`; `ListDrawerSettings`/`TableList`/`TableMatrix` chỉ chuyển khi chính

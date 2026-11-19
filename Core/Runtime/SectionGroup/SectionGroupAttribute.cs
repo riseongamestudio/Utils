@@ -3,7 +3,7 @@ using Sirenix.OdinInspector;
 
 namespace RiseOn.Utils {
     /// <summary>
-    /// Groups the members that carry it into a section of a settings page, in place of Odin's FoldoutGroup: the same bar, border and fold as every RiseOn settings page draws with <c>SettingsSection</c>.<br/>
+    /// Groups the members that carry it into a section of a settings page, in place of Odin's FoldoutGroup: the same bar, border and fold as every RiseOn settings page draws with <c>Section</c>.<br/>
     /// Alt+click folds everything under it.
     /// </summary>
     [Conditional("UNITY_EDITOR")]
@@ -20,6 +20,13 @@ namespace RiseOn.Utils {
         /// <summary>A foldable section starts folded the first time it shows in a session: for one seldom used.</summary>
         public bool Closed;
 
+        /// <summary>
+        /// A bool member of the group drawn as a checkbox on the bar, before the title, for a section that is a feature turned on or off, such as a shadow:<br/>
+        /// it opens only while the box is ticked, and opens as it is ticked. Makes the section foldable; set on any one member.<br/>
+        /// A bool marked <c>[ReadOnly]</c> shows unticked and locked, for a feature the project cannot use now, such as one needing a package it lacks; its <c>[Tooltip]</c> says why.
+        /// </summary>
+        public string Toggle;
+
         public SectionGroupAttribute(string title, float order = 0) : base(title, order) { }
 
         protected override void CombineValuesWith(PropertyGroupAttribute other) {
@@ -28,6 +35,7 @@ namespace RiseOn.Utils {
             Foldable    |= section.Foldable;
             Closed      |= section.Closed;
             Tooltip     ??= section.Tooltip;
+            Toggle      ??= section.Toggle;
         }
     }
 }

@@ -7,16 +7,16 @@ using UnityEngine;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
-    /// Tabs across an unpadded <see cref="SettingsSection"/>, drawn as Unity draws a settings page's platform tabs: the selected tab in the page's color, opening into it, the others darker and closed off by a line.<br/>
+    /// Tabs across an unpadded <see cref="Section"/>, drawn as Unity draws a settings page's platform tabs: the selected tab in the page's color, opening into it, the others darker and closed off by a line.<br/>
     /// A tab not selected lights under the mouse; the selected one stays as it is, as Unity's do.<br/>
     /// A switch slides the pages sideways and eases the height between them, as Odin's tab groups do, repainting every frame of it on any window.<br/>
     /// The pages meet the tabs and the section's border: no margin above, below or inside them.
     /// </summary>
     /// <example><code>
-    /// tabs ??= new SettingsTabs(new[] { "Android", "iOS" }, 0);
+    /// tabs ??= new SectionTabs(new[] { "Android", "iOS" }, 0);
     /// tabs.Draw(page => DrawPlatform(page));
     /// </code></example>
-    public sealed class SettingsTabs {
+    public sealed class SectionTabs {
         // Material's medium duration: a settings window repaints at about 20 frames a second, too few for Odin's 0.13 s slide to show.
         private const float Duration = 0.25f;
 
@@ -36,7 +36,7 @@ namespace RiseOn.Utils.Editor {
         /// <summary>The selected tab, the one a slide ends on.</summary>
         public int Current { get; private set; }
 
-        public SettingsTabs(IReadOnlyList<string> labels, int current) {
+        public SectionTabs(IReadOnlyList<string> labels, int current) {
             this.labels = labels.ToArray();
             heights     = new float[this.labels.Length];
             lit         = new bool[this.labels.Length];
@@ -102,7 +102,7 @@ namespace RiseOn.Utils.Editor {
         // The tabs' row and their clicks; what is lit is kept for the paint.
         private Rect LayoutTabs() {
             // As tall as the section's bar shows less the line under it, in whole points as the rest of the layout.
-            var row = GUILayoutUtility.GetRect(0, SettingsSection.Height - 1, GUILayout.ExpandWidth(true));
+            var row = GUILayoutUtility.GetRect(0, Section.Height - 1, GUILayout.ExpandWidth(true));
             if (Event.current.type is EventType.Repaint) width = row.width;
 
             for (var i = 0; i < labels.Length; i++) {
@@ -120,8 +120,8 @@ namespace RiseOn.Utils.Editor {
 
         // Edges on the pixel grid, so neighboring tabs neither overlap nor leave a gap.
         private Rect Cell(Rect row, int index) {
-            var x0 = PixelUtils.Snap(row.x + row.width * index / labels.Length);
-            var x1 = PixelUtils.Snap(row.x + row.width * (index + 1) / labels.Length);
+            var x0 = PixelUtils.SnapX(row.x + row.width * index / labels.Length);
+            var x1 = PixelUtils.SnapX(row.x + row.width * (index + 1) / labels.Length);
             return PixelUtils.Snap(new Rect(x0, row.y, x1 - x0, row.height));
         }
 

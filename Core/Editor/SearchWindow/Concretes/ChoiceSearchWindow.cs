@@ -7,6 +7,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
     /// Picks one of a list of <see cref="SearchChoice{T}"/> made in code, each at a path whose <c>/</c> make folders, such as <c>Transform/localScale</c>.<br/>
     /// Folders and choices keep the order they are given in.<br/>
     /// A choice with a disabled reason is listed grayed out and cannot be picked, and a choice whose value is null is the None row.<br/>
+    /// A choice with an action has a button at its row's end, such as Install for one that cannot be picked yet.<br/>
     /// It opens as a drop-down by default, as wide as the button and as tall as its rows.<br/>
     /// A pick made in steps shows each next list in the same window with <see cref="Present{T}"/>, from the callback of the step before.<br/>
     /// <see cref="OpenToggles{T}"/> picks several instead: each pick toggles its choice, ticked while on, and the window stays open for more.
@@ -152,6 +153,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                     : new SearchNode { Label = name, LabelSearch = choice.LabelSearch, Data = choice.Value, IconLoader = choice.Icon };
                 node.DisabledReason = choice.DisabledReason;
                 node.HasNextStep    = choice.HasNextStep;
+                node.ActionLabel    = choice.ActionLabel;
+                node.Action         = choice.Action;
 
                 var folder = root.AddInFolder(slash < 0 ? string.Empty : choice.Path[..slash], node);
                 if (choice.FolderIcon == null || folder == root || !iconned.Add(folder)) continue;

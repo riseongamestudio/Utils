@@ -188,7 +188,7 @@
     flex-grow: 1;
 }
 
-/* A drop-down has no window frame of its own, so it draws its edge; its corners round where its windows are cut (WindowCornerUtils).
+/* A drop-down has no window frame of its own, so it draws its edge; its corners round where its windows are cut (BorderlessWindow).
    The root keeps the room and the edge, its last child, draws there, over the content: a row lit at the top or the bottom then lies
    under the edge's curve, where UI Toolkit draws an element's own border under its children. */
 
@@ -259,4 +259,12 @@
     width: 14px;
     flex-shrink: 0;
     -unity-text-align: middle-center;
+}
+
+/* A choice's button at the row's end, such as Install; full strength on a grayed-out row, as it is what the row offers. */
+.search-window .search-window__row-action {
+    flex-shrink: 0;
+    height: 16px;
+    margin: 0 4px 0 2px;
+    padding: 0 6px;
 }

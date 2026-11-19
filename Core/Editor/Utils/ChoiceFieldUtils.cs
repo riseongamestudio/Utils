@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using RiseOn.Utils.Editor.SearchWindow;
@@ -51,6 +52,26 @@ namespace RiseOn.Utils.Editor {
             if (property.ValueEntry?.WeakSmartValue is not Enum current) return;
 
             Enum(rect, current, picked => property.Tree.DelayActionUntilRepaint(() => property.ValueEntry.WeakSmartValue = picked), search);
+        }
+
+        /// <summary>One of a list of named values under its label, on a row of its own, drawn as <see cref="Value{T}(Rect, IReadOnlyList{ValueTuple{string, T}}, T, Action{T}, bool?)"/> is.</summary>
+        public static void Value<T>(GUIContent label, IReadOnlyList<(string Name, T Value)> choices, T current, Action<T> onPicked, bool? search = null) {
+            var rect = EditorGUILayout.GetControlRect(true);
+            Value(EditorGUI.PrefixLabel(rect, label), choices, current, onPicked, search);
+        }
+
+        /// <summary>
+        /// One of a list of named values in <paramref name="rect"/>, such as the sorting layers by id; a pick arrives after the draw, through <paramref name="onPicked"/>.<br/>
+        /// A value the list does not hold shows as it reads.
+        /// </summary>
+        public static void Value<T>(Rect rect, IReadOnlyList<(string Name, T Value)> choices, T current, Action<T> onPicked, bool? search = null) {
+            var shown = choices.FirstOrDefault(choice => EqualityComparer<T>.Default.Equals(choice.Value, current)).Name ?? current?.ToString() ?? "None";
+            if (!EditorGUI.DropdownButton(rect, new GUIContent(EditorGUI.showMixedValue ? MixedValue : shown), FocusType.Keyboard, EditorStyles.popup)) return;
+
+            ChoiceSearchWindow.Open(rect, "", choices.Select(choice => new SearchChoice<T>(choice.Name, choice.Value)), (T picked) => {
+                onPicked(picked);
+                InternalEditorUtility.RepaintAllViews();
+            }, selected: current, search: search ?? choices.Count >= SearchFrom);
         }
 
         /// <summary>A choice's name as Unity's Inspector shows it: its [InspectorName], else its name made readable.</summary>

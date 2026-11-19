@@ -14,7 +14,7 @@ namespace RiseOn.Utils.Editor {
             CallNextDrawer(label);
 
             var isExpanded = Property.State.Expanded;
-            if (isExpanded != wasExpanded && Event.current is { alt: true }) SettingsSection.SetExpandedRecursively(Property, isExpanded);
+            if (isExpanded != wasExpanded && Event.current is { alt: true }) Section.SetExpandedRecursively(Property, isExpanded);
         }
     }
 }

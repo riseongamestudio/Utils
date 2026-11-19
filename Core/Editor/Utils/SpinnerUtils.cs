@@ -21,9 +21,9 @@ namespace RiseOn.Utils.Editor {
             return new GUIContent(text, EditorGUIUtility.IconContent($"WaitSpin{frame:00}").image, tooltip);
         }
 
-        /// <summary>A row of a label and a text after a spinner of <see cref="SettingsSection.IconSize"/>, laid out as EditorGUILayout.LabelField.</summary>
+        /// <summary>A row of a label and a text after a spinner of <see cref="Section.IconSize"/>, laid out as EditorGUILayout.LabelField.</summary>
         public static void LabelField(GUIContent label, string text) {
-            EditorGUIUtility.SetIconSize(new Vector2(SettingsSection.IconSize, SettingsSection.IconSize));
+            EditorGUIUtility.SetIconSize(new Vector2(Section.IconSize, Section.IconSize));
             EditorGUILayout.LabelField(label, Content(text));
             EditorGUIUtility.SetIconSize(Vector2.zero);
         }

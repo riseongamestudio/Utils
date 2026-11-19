@@ -46,7 +46,7 @@ IAudio.Ins.Play("click");
 
 ## Cấu hình trong Inspector
 
-Foldout *Singleton*:
+Mục *Singleton*, gập sẵn:
 
 | Trường | Ý nghĩa |
 |---|---|

@@ -36,7 +36,14 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         /// <summary>Whether picking it lists more choices with <see cref="ChoiceSearchWindow.Present{T}"/>: its row shows the arrow of a folder.</summary>
         public readonly bool HasNextStep;
 
-        public SearchChoice(string path, T value, string disabledReason = null, Func<Texture2D> icon = null, string labelSearch = null, Func<Texture2D> folderIcon = null, bool hasNextStep = false) {
+        /// <summary>The text of a button at the row's end, such as Install for a choice that needs something first; null for none.</summary>
+        public readonly string ActionLabel;
+
+        /// <summary>What the button does; pressing it runs this and closes the window as Escape does: nothing is picked, and onCanceled runs.</summary>
+        public readonly Action Action;
+
+        public SearchChoice(string path, T value, string disabledReason = null, Func<Texture2D> icon = null, string labelSearch = null, Func<Texture2D> folderIcon = null, bool hasNextStep = false,
+                            string actionLabel = null, Action action = null) {
             Path           = path;
             Value          = value;
             DisabledReason = disabledReason;
@@ -44,6 +51,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             LabelSearch    = labelSearch;
             FolderIcon     = folderIcon;
             HasNextStep    = hasNextStep;
+            ActionLabel    = action == null ? null : actionLabel;
+            Action         = action;
             IsNone         = false;
         }
 

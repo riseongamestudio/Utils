@@ -6,7 +6,7 @@ using UnityEngine;
 namespace RiseOn.Utils.Editor {
     /// <summary>
     /// A text value for Android and one for iOS under one label: both on the label's row, the two fields as wide as each other, while each is at least <see cref="FieldMinWidth"/> wide, else a row each, as Unity drops a vector's fields to a row of their own in a narrow Inspector.<br/>
-    /// Between one row and two the iOS field slides to its place and the rows below with it, as <see cref="SettingsTabs"/> slides, repainting every frame of it on any window; a window opening shows the pair in its place at once.<br/>
+    /// Between one row and two the iOS field slides to its place and the rows below with it, as <see cref="SectionTabs"/> slides, repainting every frame of it on any window; a window opening shows the pair in its place at once.<br/>
     /// Every Android and iOS pair of a settings page draws with it.
     /// </summary>
     /// <example><code>
@@ -19,7 +19,7 @@ namespace RiseOn.Utils.Editor {
         private static readonly GUIContent android = new("Android");
         private static readonly GUIContent ios     = new("iOS");
 
-        // As long as SettingsTabs' slide, and eased as it is.
+        // As long as SectionTabs' slide, and eased as it is.
         private const float Duration = 0.25f;
 
         // A pair in one window: the value column's width at its last repaint, which the next frame lays out one row or two by, and how
@@ -55,13 +55,23 @@ namespace RiseOn.Utils.Editor {
 
         /// <summary>Draws the pair; true when either changed. A null label gives the values the whole row.</summary>
         public static bool Draw(GUIContent label, ref string androidValue, ref string iosValue) {
+            bool androidOn = false, iosOn = false;
+            return Draw(label, ref androidValue, ref iosValue, null, ref androidOn, ref iosOn);
+        }
+
+        /// <summary>
+        /// The pair with <paramref name="toggle"/> after each field, a switch each platform has of its own, such as an ad unit's Test; true when
+        /// anything changed. A null <paramref name="toggle"/> draws none.
+        /// </summary>
+        public static bool Draw(GUIContent label, ref string androidValue, ref string iosValue, GUIContent toggle, ref bool androidOn, ref bool iosOn) {
             var id     = GUIUtility.GetControlID(FocusType.Passive);
             var window = GUIHelper.CurrentWindow;
             var name   = label?.text ?? "";
             var at     = (window ? window.GetInstanceID() : 0, id, name);
             if (!pairs.TryGetValue(at, out var pair)) pairs[at] = pair = new Pair { Width = lastWidths.TryGetValue(name, out var last) ? last : -1 };
 
-            var stacked = StackOf(pair, pair.Width >= 0 && !Fits(pair.Width));
+            var extra   = ToggleWidth(toggle);
+            var stacked = StackOf(pair, pair.Width >= 0 && !Fits(pair.Width, extra));
             var line    = EditorGUIUtility.singleLineHeight;
             var below   = line + EditorGUIUtility.standardVerticalSpacing;
             var row     = EditorGUILayout.GetControlRect(label != null, line + stacked * below);
@@ -70,7 +80,7 @@ namespace RiseOn.Utils.Editor {
             if (Event.current.type is EventType.Repaint) {
                 // The first repaint knows the width the window really gives; a pair laid out by another window's width takes its place
                 // at once on the next frame, rather than sliding to it as the window opens.
-                if (!pair.Shown && (pair.Width < 0 || Fits(pair.Width) != Fits(value.width))) {
+                if (!pair.Shown && (pair.Width < 0 || Fits(pair.Width, extra) != Fits(value.width, extra))) {
                     pair.Settle = true;
                     HandleUtility.Repaint();
                 }
@@ -86,8 +96,8 @@ namespace RiseOn.Utils.Editor {
             var under = new Rect(value.x, value.y + below, value.width, line);
 
             EditorGUI.BeginChangeCheck();
-            androidValue = Field(Lerp(left, value, stacked), android, Width(android), androidValue);
-            iosValue     = Field(Lerp(right, under, stacked), ios, Mathf.Lerp(Width(ios), Width(android), stacked), iosValue);
+            androidValue = Field(Lerp(left, value, stacked), android, Width(android), androidValue, toggle, ref androidOn);
+            iosValue     = Field(Lerp(right, under, stacked), ios, Mathf.Lerp(Width(ios), Width(android), stacked), iosValue, toggle, ref iosOn);
             return EditorGUI.EndChangeCheck();
 
             // Where the pair is between one row and two, moving toward stacked or not. It changes only at layout, so every event of
@@ -125,24 +135,33 @@ namespace RiseOn.Utils.Editor {
 
         /// <summary>The pair in one row of <paramref name="value"/>, whatever its width: for a row laid out by hand, such as a section's bar.</summary>
         public static bool Draw(Rect value, ref string androidValue, ref string iosValue) {
+            bool androidOn = false, iosOn = false;
+            return Draw(value, ref androidValue, ref iosValue, null, ref androidOn, ref iosOn);
+        }
+
+        /// <summary>The pair in one row of <paramref name="value"/>, with <paramref name="toggle"/> after each field as the layout overload draws it.</summary>
+        public static bool Draw(Rect value, ref string androidValue, ref string iosValue, GUIContent toggle, ref bool androidOn, ref bool iosOn) {
             EditorGUI.BeginChangeCheck();
             Split(value, out var left, out var right);
-            androidValue = Field(left, android, Width(android), androidValue);
-            iosValue     = Field(right, ios, Width(ios), iosValue);
+            androidValue = Field(left, android, Width(android), androidValue, toggle, ref androidOn);
+            iosValue     = Field(right, ios, Width(ios), iosValue, toggle, ref iosOn);
             return EditorGUI.EndChangeCheck();
         }
 
         // A name's text and Unity's space between a label and its field.
-        private static float Width(GUIContent name) => EditorStyles.label.CalcSize(name).x + SettingsSection.LabelGap;
+        private static float Width(GUIContent name) => EditorStyles.label.CalcSize(name).x + Section.LabelGap;
 
         // Between the Android field and the iOS name: Unity's space between the fields of one row, as in Vector2Field
         // (EditorGUI.kSpacingSubLabel).
         private const float Gap = 4;
 
-        private static bool Fits(float width) {
+        private static bool Fits(float width, float extra) {
             Split(new Rect(0, 0, width, 0), out var left, out _);
-            return left.width - Width(android) >= FieldMinWidth;
+            return left.width - Width(android) - extra >= FieldMinWidth;
         }
+
+        // A toggle after a field: a button joined to the field's right edge, as one control.
+        private static float ToggleWidth(GUIContent toggle) => toggle == null ? 0 : EditorStyles.miniButtonRight.CalcSize(toggle).x;
 
         // The row's value column in two, each field after its name and as wide as the other. Too narrow for the names, they share
         // what there is, so neither covers the other.
@@ -153,10 +172,14 @@ namespace RiseOn.Utils.Editor {
             right = Rect.MinMaxRect(Mathf.Min(left.xMax + Gap, value.xMax), value.y, value.xMax, value.yMax);
         }
 
-        private static string Field(Rect rect, GUIContent name, float nameWidth, string value) {
+        private static string Field(Rect rect, GUIContent name, float nameWidth, string value, GUIContent toggle, ref bool on) {
             var label = new Rect(rect.x, rect.y, Mathf.Min(nameWidth, rect.width), rect.height);
             GUI.Label(label, name, EditorStyles.label);
-            return EditorGUI.TextField(Rect.MinMaxRect(label.xMax, rect.y, rect.xMax, rect.yMax), value ?? "");
+            var end = Mathf.Max(label.xMax, rect.xMax - ToggleWidth(toggle));
+            // The field runs a pixel under the button, so their borders meet as one.
+            var text = EditorGUI.TextField(Rect.MinMaxRect(label.xMax, rect.y, toggle == null ? end : end + 1, rect.yMax), value ?? "");
+            if (toggle != null) on = GUI.Toggle(Rect.MinMaxRect(end, rect.y, rect.xMax, rect.yMax), on, toggle, EditorStyles.miniButtonRight);
+            return text;
         }
     }
 }
