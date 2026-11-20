@@ -1,4 +1,4 @@
-using System.Buffers;
+﻿using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -10,7 +10,7 @@ namespace RiseOn.Utils {
     /// Use <see cref="HandleUtils"/> for widths.
     /// </summary>
     public static class GizmoUtils {
-        private const int CIRCLE_SEGMENTS = 48;
+        private const int CircleSegments = 48;
 
         /// <summary>
         /// A line with an <paramref name="outlineColor"/> rim one pixel wide on each side, so it reads on any background.
@@ -54,18 +54,18 @@ namespace RiseOn.Utils {
         /// </summary>
         [Conditional("UNITY_EDITOR")]
         public static void DrawOutlinedWireCircle(Vector3 center, float radius, Color color, Color outlineColor) {
-            var buffer = ArrayPool<Vector3>.Shared.Rent(CIRCLE_SEGMENTS + 1);
+            var buffer = ArrayPool<Vector3>.Shared.Rent(CircleSegments + 1);
 
             try {
-                for (var i = 0; i < CIRCLE_SEGMENTS; ++i) {
-                    var angle = i * (Mathf.PI * 2 / CIRCLE_SEGMENTS);
+                for (var i = 0; i < CircleSegments; ++i) {
+                    var angle = i * (Mathf.PI * 2 / CircleSegments);
 
                     buffer[i] = center + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
                 }
 
-                buffer[CIRCLE_SEGMENTS] = buffer[0];
+                buffer[CircleSegments] = buffer[0];
 
-                DrawOutlined(buffer, CIRCLE_SEGMENTS + 1, true, color, outlineColor);
+                DrawOutlined(buffer, CircleSegments + 1, true, color, outlineColor);
             } finally {
                 ArrayPool<Vector3>.Shared.Return(buffer);
             }

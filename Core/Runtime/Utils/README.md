@@ -294,7 +294,7 @@ title.text = name.TagNoParse();              // tên người chơi có dấu < 
 | `Tag(name)`, `Tag(name, value)` | thẻ bất kỳ | tùy thẻ |
 
 Console và uGUI Text in các thẻ của riêng TextMeshPro ra như chữ thường. Số được ghi
-theo văn hoá bất biến, nên `1.5em` không thành `1,5em` trên máy đặt locale tiếng Việt.
+theo văn hóa bất biến, nên `1.5em` không thành `1,5em` trên máy đặt locale tiếng Việt.
 
 ## Log
 
@@ -339,7 +339,7 @@ dấu chấm. Đọc thành câu: trả `false` kèm một log lỗi.
 | Hàm | Lớp | Việc |
 |---|---|---|
 | `color.WithA(a)`, `WithR`, `WithG`, `WithB`, `With(index, value)` | `ColorUtils` | Bản sao đổi một kênh; có cho cả `Color` và `Color32` |
-| `text.UpcaseFirst()`, `DowncaseFirst`, `UpcaseLast`, `DowncaseLast` | `StringUtils` | Viết hoa / viết thường ký tự đầu hoặc cuối, theo văn hoá bất biến |
+| `text.UpcaseFirst()`, `DowncaseFirst`, `UpcaseLast`, `DowncaseLast` | `StringUtils` | Viết hoa / viết thường ký tự đầu hoặc cuối, theo văn hóa bất biến |
 | `obj.IsPlaying()` | `ObjectUtils` | Đang Play thật sự: trả `false` với object trong prefab stage hay asset, kể cả khi Editor đang Play |
 | `obj.PingObject()` | `ObjectUtils` | Nháy object trong Hierarchy / Project (chỉ Editor) |
 | `obj.GetPath(withSceneName)` | `ObjectUtils` | Đường dẫn dễ đọc: `Scene/Parent/Child<Component>`, hoặc đường dẫn asset |

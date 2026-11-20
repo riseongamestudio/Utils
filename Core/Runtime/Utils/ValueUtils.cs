@@ -1,4 +1,4 @@
-namespace RiseOn.Utils {
+﻿namespace RiseOn.Utils {
     /// <summary>
     /// Helpers that work on a value of any type, taking the variables by ref.<br/>
     /// Extensions called on a struct variable itself are in <see cref="StructUtils"/>.

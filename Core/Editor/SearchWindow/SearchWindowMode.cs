@@ -1,4 +1,4 @@
-namespace RiseOn.Utils.Editor.SearchWindow {
+﻿namespace RiseOn.Utils.Editor.SearchWindow {
     /// <summary>
     /// How a <see cref="SearchWindow"/> opens.<br/>
     /// <see cref="Window"/>: a window with a title bar, like Unity's object picker; it moves, resizes by its edges, and remembers its size per window type.<br/>

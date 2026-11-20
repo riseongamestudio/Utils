@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -13,13 +13,13 @@ namespace RiseOn.Utils.UI {
           , HeightControlsWidth
         }
 
-        private const float MIN_ASPECT_RATIO = 1e-4f;
+        private const float MinAspectRatio = 1e-4f;
 
         [SerializeField] private AspectModeId aspectMode;
         public AspectModeId AspectMode { get => aspectMode; set => SetThisPropThenDirty(ref aspectMode, value); }
 
-        [SerializeField, MinValue(MIN_ASPECT_RATIO)] private float aspectRatio = 1;
-        public float AspectRatio { get => Mathf.Max(aspectRatio, MIN_ASPECT_RATIO); set => SetThisPropThenDirty(ref aspectRatio, Mathf.Max(value, MIN_ASPECT_RATIO)); }
+        [SerializeField, MinValue(MinAspectRatio)] private float aspectRatio = 1;
+        public float AspectRatio { get => Mathf.Max(aspectRatio, MinAspectRatio); set => SetThisPropThenDirty(ref aspectRatio, Mathf.Max(value, MinAspectRatio)); }
 
         private RectTransform rectTF;
         protected RectTransform RectTF => rectTF != null ? rectTF : rectTF = GetComponent<RectTransform>();

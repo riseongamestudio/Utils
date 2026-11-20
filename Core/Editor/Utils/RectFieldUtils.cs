@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using RiseOn.Utils.Editor.SearchWindow;
 using Sirenix.OdinInspector.Editor;
@@ -13,14 +13,14 @@ namespace RiseOn.Utils.Editor {
     /// </summary>
     public static class RectFieldUtils {
         // Between the two halves of a split value column: room for a prefab override mark between them, with as much on either side.
-        private const float HALF_GAP = 6f;
+        private const float HalfGap = 6f;
 
         /// <summary>
         /// <paramref name="value"/>, a value column, split in two halves a gap apart, so rows split so line up with one another.
         /// </summary>
         public static void Split(Rect value, out Rect left, out Rect right) {
-            left = new Rect(value.x, value.y, (value.width - HALF_GAP) / 2f, value.height);
-            right = Rect.MinMaxRect(left.xMax + HALF_GAP, value.y, value.xMax, value.yMax);
+            left = new Rect(value.x, value.y, (value.width - HalfGap) / 2f, value.height);
+            right = Rect.MinMaxRect(left.xMax + HalfGap, value.y, value.xMax, value.yMax);
         }
 
         /// <summary>

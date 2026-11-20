@@ -20,21 +20,22 @@ Package `com.riseon.utils.ui`, namespace `RiseOn.Utils.UI`. Xây trên
 | Phụ thuộc | Cách có | Dùng cho |
 |---|---|---|
 | Unity 6000.3 | | Bản đang dùng để phát triển |
-| [`com.riseon.utils`](../Core/README.md) 1.0.1 | Tự cài theo `package.json` | Undo, extension |
-| `com.unity.ugui` 2.0.0 | Tự cài theo `package.json` | UGUI |
-| [UniTask](https://github.com/Cysharp/UniTask) (`com.cysharp.unitask`) 2.5.11 | Tự cài theo `package.json`, cần scope `com.cysharp` | Chờ frame trong `AspectRatioFitterElement` |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute Inspector của các component |
+| [`com.riseon.utils`](../Core/README.md) 1.0.18 | Tự cài theo `package.json` | Undo, extension |
+| `com.unity.ugui` 2.0.0 | Tự cài theo `package.json` | UGUI |
+| [`com.cysharp.unitask`](https://github.com/Cysharp/UniTask) 2.5.11 | Tự cài theo `package.json`, từ OpenUPM | Chờ frame trong `AspectRatioFitterElement` |
 
-"Tự cài" là khi cài qua registry; cài bằng git URL thì phải cài `com.riseon.utils`
-trước. Project đã cài UniTask bằng git URL thì bản đó được dùng luôn, không cần scope
-`com.cysharp`. Odin không có trên UPM nên phải cài vào project trước.
-Thiếu Odin thì project báo một lỗi từ `RiseOn.Utils.UI.Requirements`.
+"Tự cài" là Package Manager tự lấy theo version từ Unity Registry và các registry khai
+trong manifest, cả khi cài pack bằng git URL. Project đã cài UniTask bằng git URL thì
+bản đó được dùng luôn, không cần scope `com.cysharp`. Odin không có trên UPM nên phải
+cài vào project trước. Thiếu Odin thì project báo một lỗi từ
+`RiseOn.Utils.UI.Requirements`.
 
 ## Cài đặt
 
-**Registry RiseOn** (khuyên dùng): thêm registry RiseOn với scope `com.riseon`, và registry OpenUPM với scope
-`com.cysharp` vào `Packages/manifest.json`, rồi thêm package. `com.riseon.utils` và
-UniTask được kéo về tự động:
+**Registry RiseOn** (khuyên dùng): thêm registry RiseOn với scope `com.riseon`, và
+registry OpenUPM với scope `com.cysharp` vào `Packages/manifest.json`, rồi thêm package.
+`com.riseon.utils` và UniTask được kéo về tự động:
 
 ```json
 {
@@ -51,16 +52,17 @@ UniTask được kéo về tự động:
     }
   ],
   "dependencies": {
-    "com.riseon.utils.ui": "1.0.5"
+    "com.riseon.utils.ui": "1.0.6"
   }
 }
 ```
 
-**Git URL**: cài `com.riseon.utils` và UniTask trước (Package Manager không tự kéo
-phụ thuộc qua git), rồi:
+**Git URL**: phụ thuộc vẫn lấy theo version từ registry, nên manifest cần OpenUPM như ví
+dụ trên; `com.riseon.utils` lấy từ registry RiseOn, hoặc cài bằng git URL trước. Rồi
+*Package Manager → + → Add package from git URL*:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/UI#com.riseon.utils.ui/1.0.5
+https://github.com/riseongamestudio/Utils.git?path=/UI
 ```
 
 **Thư mục local**: `"com.riseon.utils.ui": "file:D:/path/to/Utils/UI"`.

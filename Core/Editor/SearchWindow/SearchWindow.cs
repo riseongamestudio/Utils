@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -247,8 +247,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// Lists new sections in place of the current ones, in the same window, for a pick made in steps:<br/>
-        /// called from the callback of one step, the window stays open on the next instead of closing.<br/>
+        /// Lists new sections in place of the current ones, in the same window, for a pick made in steps: called from the callback of one step, the window stays open on the next instead of closing.<br/>
         /// <see cref="RegisterSections"/> runs again, so set up what it adds before calling this.
         /// </summary>
         protected void ShowNext(string headerText, Action<SearchNode> onItemSelected) {
@@ -431,7 +430,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
 
             var list = listWindow;
             listWindow = null;
-            list.Owner = null;
+            list.owner = null;
             list.Close();
         }
 
@@ -537,8 +536,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
 
         /// <summary>
         /// Fits a drop-down to its controls and its rows once the layout knows them, then runs <paramref name="afterLayout"/>, as a scroll needs the layout too.<br/>
-        /// The first fit unfolds it. While searching the list fits the results by its far edge alone, the controls staying where they are:<br/>
-        /// rows its side has no room for scroll, where any other change of size moves the anchor to make room.
+        /// The first fit unfolds it.<br/>
+        /// While searching the list fits the results by its far edge alone, the controls staying where they are: rows its side has no room for scroll, where any other change of size moves the anchor to make room.
         /// </summary>
         private void FitDropDown(Action afterLayout = null) {
             if (mode is not SearchWindowMode.DropDown || isClosing || controls == null) return;
@@ -847,7 +846,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             if (listWindow != null) return;
 
             listWindow = CreateInstance<SearchListWindow>();
-            listWindow.Owner = this;
+            listWindow.owner = this;
 
             var root = listWindow.rootVisualElement;
             root.AddToClassList(Uss.Root);
@@ -1072,8 +1071,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             foreach (var child in node.Children) {
                 if (child == null) continue;
 
-                child.Parent = node;
-                child.Path   = path;
+                child.parent = node;
+                child.path   = path;
                 result.Add(child);
                 if (child.HasChildren) FlattenTree(child, result, path.Length == 0 ? child.PlainLabel : $"{path} › {child.PlainLabel}");
             }
@@ -1136,8 +1135,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// Keeps the window open after the pick being handled, for a pick that toggles something and may be followed by more:<br/>
-        /// call it from the pick's callback.
+        /// Keeps the window open after the pick being handled, for a pick that toggles something and may be followed by more: call it from the pick's callback.
         /// </summary>
         protected void KeepOpen() {
             isKeptOpen = true;
@@ -1167,7 +1165,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             if (section?.Root == null) return;
 
             var chain = new List<SearchNode>();
-            for (var node = folder; node != null && node != section.Root; node = node.Parent) chain.Add(node);
+            for (var node = folder; node != null && node != section.Root; node = node.parent) chain.Add(node);
             chain.Reverse();
 
             userTookOver = true;
@@ -1303,8 +1301,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// The window's content under the root: the controls, a title in a drop-down, which has no title bar to carry it, the search field and the tabs, then the list;<br/>
-        /// in a drop-down, the list in a window of its own.
+        /// The window's content under the root: the controls, a title in a drop-down, which has no title bar to carry it, the search field and the tabs, then the list; in a drop-down, the list in a window of its own.
         /// </summary>
         private void BuildUI() {
             var root = rootVisualElement;
@@ -1732,7 +1729,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// One level of the tree on screen. Navigating creates a new page and slides the old one out.<br/>
+        /// One level of the tree on screen.<br/>
+        /// Navigating creates a new page and slides the old one out.<br/>
         /// Turned over in a drop-down above its button: its first item at the bottom, next to the search field, and scrolled from there.
         /// </summary>
         private sealed class Page {

@@ -1,4 +1,4 @@
-using Sirenix.OdinInspector.Editor;
+﻿using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
@@ -10,8 +10,8 @@ namespace RiseOn.Utils.Editor {
     /// </summary>
     public sealed class DirectionExtDrawer : OdinValueDrawer<DirectionExt> {
         // Each field keeps a 3px margin on its own side, so the space ahead of the arrow makes up for it.
-        private const float ARROW_GAP = 6f;
-        private const float FIELD_MARGIN = 3f;
+        private const float ArrowGap = 6f;
+        private const float FieldMargin = 3f;
 
         private InspectorProperty direction;
         private InspectorProperty customAngle;
@@ -32,11 +32,11 @@ namespace RiseOn.Utils.Editor {
                 var field = GUILayoutUtility.GetLastRect();
 
                 // A space takes no part in the row's margins, so the row keeps the spacing of its fields.
-                GUILayout.Space(ARROW_GAP + size + ARROW_GAP - FIELD_MARGIN);
+                GUILayout.Space(ArrowGap + size + ArrowGap - FieldMargin);
                 var space = GUILayoutUtility.GetLastRect();
 
                 // Centered between the fields on both sides, and level with them.
-                var left = (field.xMax + space.xMax + FIELD_MARGIN - size) * .5f;
+                var left = (field.xMax + space.xMax + FieldMargin - size) * .5f;
                 DrawArrow(customAngle, new Rect(left, field.center.y - size * .5f, size, size));
 
                 customAngle.Draw(null);

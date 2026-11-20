@@ -4,8 +4,7 @@ Bộ tiện ích nền cho game Unity: `Singleton`, `Bounds2D`, extension và l�
 những việc lặp đi lặp lại (vector, transform, collection, Undo, UnityEvent), ba
 attribute cho Odin và vài tool Editor.
 
-Package `com.riseon.utils`. Code runtime nằm trong namespace `RiseOn.Utils`,
-code Editor trong `RiseOn.Utils.Editor`.
+Package `com.riseon.utils`, namespace `RiseOn.Utils`.
 
 ## Mục lục
 
@@ -27,11 +26,10 @@ code Editor trong `RiseOn.Utils.Editor`.
 |---|---|---|
 | Unity 6000.3 | | Bản đang dùng để phát triển |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute Inspector ở nhiều lớp, `EnumLabel`, `ForwardAttributesTo`, drawer và tool Editor |
-| `com.unity.modules.uielements` (UI Toolkit) | Tự cài theo `package.json`, có sẵn trong Unity | Cửa sổ tìm kiếm |
+| `com.unity.modules.uielements` 1.0.0 (UI Toolkit) | Tự cài theo `package.json`, có sẵn trong Unity | Cửa sổ tìm kiếm |
 
-UI Toolkit là module có sẵn của Unity, bật mặc định. Odin không có trên UPM nên
-không khai được trong `package.json`, phải cài vào project trước; thiếu Odin thì
-project báo đúng một lỗi từ `RiseOn.Utils.Requirements`.
+Odin không có trên UPM nên phải cài vào project trước. Thiếu Odin thì project báo một
+lỗi từ `RiseOn.Utils.Requirements`.
 
 ## Cài đặt
 
@@ -48,7 +46,7 @@ project báo đúng một lỗi từ `RiseOn.Utils.Requirements`.
     }
   ],
   "dependencies": {
-    "com.riseon.utils": "1.0.15"
+    "com.riseon.utils": "1.0.18"
   }
 }
 ```
@@ -56,14 +54,10 @@ project báo đúng một lỗi từ `RiseOn.Utils.Requirements`.
 **Git URL**: *Package Manager → + → Add package from git URL*:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Core#com.riseon.utils/1.0.15
+https://github.com/riseongamestudio/Utils.git?path=/Core
 ```
 
-Repo chứa nhiều package nên tag có tiền tố tên package
-(`com.riseon.utils/<version>`), còn `?path=/Core` chỉ tới thư mục của package này.
-
-**Thư mục local**, khi đang phát triển pack:
-`"com.riseon.utils": "file:D:/path/to/Utils/Core"`.
+**Thư mục local**: `"com.riseon.utils": "file:D:/path/to/Utils/Core"`.
 
 ## Tổng quan
 

@@ -6,8 +6,7 @@ using UnityEngine;
 namespace RiseOn.Utils.Editor {
     /// <summary>
     /// Hover for IMGUI controls: the view is asked for mouse moves and repainted as the mouse moves onto or off a control.<br/>
-    /// Unity sends a view mouse moves only when it asks for them, and Project Settings does not: its controls see the mouse only at a click
-    /// or a scroll, and its repaints keep where they saw it last (measured with Unity 6.3), so a lit control would stay lit or stay dark.
+    /// Unity sends a view mouse moves only when it asks for them, and Project Settings does not: its controls see the mouse only at a click or a scroll, and its repaints keep where they saw it last (measured with Unity 6.3), so a lit control would stay lit or stay dark.
     /// </summary>
     public static class HoverUtils {
         // Every control under the mouse, as rects inside one another, such as an item and the item of a list inside it, are under it together.

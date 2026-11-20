@@ -1,9 +1,10 @@
 {
   "name": "com.riseon.utils",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "displayName": "RiseOn Utils",
   "description": "Extensions and utilities shared by RiseOn packages: Singleton, Bounds2D, DirectionExt, undo and math utils, EnumLabel, ForwardAttributesTo, AllowGenerics, editor tools and search windows",
-  "documentationUrl": "https://github.com/riseongamestudio/Utils/blob/com.riseon.utils/1.0.17/Core/README.md",
+  "unity": "6000.3",
+  "documentationUrl": "https://github.com/riseongamestudio/Utils/blob/com.riseon.utils/1.0.18/Core/README.md",
   "author": {
     "name": "RiseOn"
   },

@@ -61,8 +61,8 @@ namespace RiseOn.Utils.Editor {
         }
 
         /// <summary>
-        /// The pair with <paramref name="toggle"/> after each field, a switch each platform has of its own, such as an ad unit's Test; true when
-        /// anything changed. A null <paramref name="toggle"/> draws none.<br/>
+        /// The pair with <paramref name="toggle"/> after each field, a switch each platform has of its own, such as an ad unit's Test; true when anything changed.<br/>
+        /// A null <paramref name="toggle"/> draws none.<br/>
         /// With <paramref name="asset"/>, <see cref="SettingsFocus"/> finds the fields by <paramref name="androidPath"/> and <paramref name="iosPath"/>.
         /// </summary>
         public static bool Draw(GUIContent label, ref string androidValue, ref string iosValue, GUIContent toggle, ref bool androidOn, ref bool iosOn,
@@ -152,7 +152,9 @@ namespace RiseOn.Utils.Editor {
         }
 
         // A name's text and Unity's space between a label and its field.
-        private static float Width(GUIContent name) => EditorStyles.label.CalcSize(name).x + Section.LabelGap;
+        private static float Width(GUIContent name) {
+            return EditorStyles.label.CalcSize(name).x + Section.LabelGap;
+        }
 
         // Between the Android field and the iOS name: Unity's space between the fields of one row, as in Vector2Field
         // (EditorGUI.kSpacingSubLabel).
@@ -164,7 +166,9 @@ namespace RiseOn.Utils.Editor {
         }
 
         // A toggle after a field: a button joined to the field's right edge, as one control.
-        private static float ToggleWidth(GUIContent toggle) => toggle == null ? 0 : EditorStyles.miniButtonRight.CalcSize(toggle).x;
+        private static float ToggleWidth(GUIContent toggle) {
+            return toggle == null ? 0 : EditorStyles.miniButtonRight.CalcSize(toggle).x;
+        }
 
         // The row's value column in two, each field after its name and as wide as the other. Too narrow for the names, they share
         // what there is, so neither covers the other.

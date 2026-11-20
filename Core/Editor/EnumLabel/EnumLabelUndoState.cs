@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace RiseOn.Utils.Editor {
     internal sealed class EnumLabelUndoState : ScriptableObject {

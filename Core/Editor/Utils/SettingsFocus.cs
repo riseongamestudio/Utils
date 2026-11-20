@@ -7,10 +7,8 @@ using Object = UnityEngine.Object;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
-    /// Takes a settings page to one of its fields, as an issue's Edit button does: opens every fold above it, scrolls to it, and clicks it as the user
-    /// would: into a text or number field, so typing goes there, and on the label of any other, which selects it without changing its value.<br/>
-    /// The field must be drawn by a <see cref="SettingsTree"/> over <c>asset</c>, or report its place through <see cref="Drawn"/>; the request waits
-    /// for that draw, and a newer one replaces it.
+    /// Takes a settings page to one of its fields, as an issue's Edit button does: opens every fold above it, scrolls to it, and clicks it as the user would: into a text or number field, so typing goes there, and on the label of any other, which selects it without changing its value.<br/>
+    /// The field must be drawn by a <see cref="SettingsTree"/> over <c>asset</c>, or report its place through <see cref="Drawn"/>; the request waits for that draw, and a newer one replaces it.
     /// </summary>
     public static class SettingsFocus {
         private static Object       asset;
@@ -39,7 +37,7 @@ namespace RiseOn.Utils.Editor {
 
         // The first repaint scrolls to the field; the next one clicks where the field then is.
         private static void Reach(Object asset, string unityPath, Rect rect, Vector2 click) {
-            if (path == null || asset != SettingsFocus.asset || unityPath != path || Event.current.type != EventType.Repaint || rect.height <= 0) return;
+            if (path == null || asset != SettingsFocus.asset || unityPath != path || Event.current.type is not EventType.Repaint || rect.height <= 0) return;
 
             if (!scrolled) {
                 GUI.ScrollTo(rect);

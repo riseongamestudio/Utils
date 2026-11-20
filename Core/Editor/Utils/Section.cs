@@ -242,7 +242,9 @@ namespace RiseOn.Utils.Editor {
         }
 
         /// <summary>Gives the property the fold it had this session, else <paramref name="open"/>.</summary>
-        public static void Restore(InspectorProperty property, bool open = true) => property.State.Expanded = SessionState.GetBool(Key(property), open);
+        public static void Restore(InspectorProperty property, bool open = true) {
+            property.State.Expanded = SessionState.GetBool(Key(property), open);
+        }
 
         /// <summary>
         /// Opens or closes the property and everything under it, as an Alt+click on a foldout does, sections from <see cref="Foldout(InspectorProperty,string,string,int,bool,bool)"/> included: their kept fold changes too, so one whose drawer has not started yet opens as asked.
@@ -253,7 +255,9 @@ namespace RiseOn.Utils.Editor {
             foreach (var child in property.Children) SetExpandedRecursively(child, expanded);
         }
 
-        private static string Key(InspectorProperty property) => $"RiseOn.Section.{property.Tree.TargetType.FullName}.{property.Path}";
+        private static string Key(InspectorProperty property) {
+            return $"RiseOn.Section.{property.Tree.TargetType.FullName}.{property.Path}";
+        }
 
         // Opens the property's fold and the one its section keeps, for SettingsFocus.
         internal static void Unfold(InspectorProperty property) {
@@ -271,8 +275,8 @@ namespace RiseOn.Utils.Editor {
         public Rect Bar => bar;
 
         /// <summary>
-        /// Lights a section, as a list lights for objects let go on its bar: <paramref name="box"/> is the section,
-        /// which <see cref="GUILayoutUtility.GetLastRect"/> gives right after the section is disposed. Draws on a repaint only.
+        /// Lights a section, as a list lights for objects let go on its bar: <paramref name="box"/> is the section, which <see cref="GUILayoutUtility.GetLastRect"/> gives right after the section is disposed.<br/>
+        /// Draws on a repaint only.
         /// </summary>
         public static void DrawDropLight(Rect box) {
             if (Event.current.type is not EventType.Repaint) return;
@@ -284,8 +288,9 @@ namespace RiseOn.Utils.Editor {
 
         /// <summary>
         /// Outlines a part of a section's content that something dragged will take, such as a list's gap or its dragged row, and fills it when <paramref name="fill"/>.<br/>
-        /// In a section, it is drawn once the innermost section being drawn has drawn its border, from border to border and, when it reaches the content's end,
-        /// down to the box's bottom: its outline then lies on the border, and its corners round with the box's. Outside a section, it is drawn at once. Draws on a repaint only.
+        /// In a section, it is drawn once the innermost section being drawn has drawn its border, from border to border and, when it reaches the content's end, down to the box's bottom: its outline then lies on the border, and its corners round with the box's.<br/>
+        /// Outside a section, it is drawn at once.<br/>
+        /// Draws on a repaint only.
         /// </summary>
         public static void DrawDragFrame(Rect rect, bool fill) {
             if (Event.current.type is not EventType.Repaint) return;
@@ -336,8 +341,7 @@ namespace RiseOn.Utils.Editor {
         public static readonly Color DropFill = new(.3f, .6f, 1, .1f);
 
         /// <summary>
-        /// A row's button in <paramref name="slot"/>, counted from the right, under the bar's: inside a section being drawn, in the bar's own column on the screen,<br/>
-        /// whatever group draws the row, so its icon lands on the same pixels as the bar's.
+        /// A row's button in <paramref name="slot"/>, counted from the right, under the bar's: inside a section being drawn, in the bar's own column on the screen, whatever group draws the row, so its icon lands on the same pixels as the bar's.
         /// </summary>
         public static Rect RowButton(Rect row, int slot) {
             // A group such as a fade's clip starts on a whole pixel, which can move what it holds by part of a pixel from the bar.
@@ -363,10 +367,9 @@ namespace RiseOn.Utils.Editor {
         }
 
         /// <summary>
-        /// A text field with a button of one icon inside its right end, as a search field holds its clear button: for an action on the text,<br/>
-        /// such as taking it back to a default, so the field still reaches the row's buttons.<br/>
-        /// The button shows while <paramref name="shown"/>, the text then keeping clear of it; it is a control every event even while hidden,<br/>
-        /// so the field keeps its focus as the button comes and goes. A click on it ends the editing of the field.
+        /// A text field with a button of one icon inside its right end, as a search field holds its clear button: for an action on the text, such as taking it back to a default, so the field still reaches the row's buttons.<br/>
+        /// The button shows while <paramref name="shown"/>, the text then keeping clear of it; it is a control every event even while hidden, so the field keeps its focus as the button comes and goes.<br/>
+        /// A click on it ends the editing of the field.
         /// </summary>
         public static string TextField(Rect rect, string text, SdfIconType icon, string tooltip, bool shown, out bool clicked) {
             // On the pixel grid, as the field's frame draws, so the button's middle is the frame's.
@@ -390,8 +393,8 @@ namespace RiseOn.Utils.Editor {
         private static GUIStyle inlineButtonField;
 
         /// <summary>
-        /// An icon as <see cref="IconButton"/> draws it, for one that is not a button, such as a drag handle: the page's one icon size, in the label's color,<br/>
-        /// lighter while <paramref name="lit"/>, its middle on the rect's. Draw it on Repaint.
+        /// An icon as <see cref="IconButton"/> draws it, for one that is not a button, such as a drag handle: the page's one icon size, in the label's color, lighter while <paramref name="lit"/>, its middle on the rect's.<br/>
+        /// Draw it on Repaint.
         /// </summary>
         // Odin draws an icon at whole points, shifted by a table made for whole pixels, off the middle by up to a pixel on a screen
         // not at 100%; made at the screen's pixels and put on the pixel grid, it keeps to the middle.

@@ -21,10 +21,10 @@ Odin, không phụ thuộc package nào khác, chỉ dùng module có sẵn củ
 |---|---|---|
 | Unity 6000.3 | | Bản đang dùng để phát triển |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Pack không dùng Odin, nhưng mọi pack RiseOn đều cần nó, để cài đặt như nhau |
-| `com.unity.modules.unitywebrequest` | Tự cài theo `package.json`, có sẵn trong Unity | Gửi request qua trình duyệt trên WebGL |
+| `com.unity.modules.unitywebrequest` 1.0.0 | Tự cài theo `package.json`, có sẵn trong Unity | Gửi request qua trình duyệt trên WebGL |
 
-Odin không có trên UPM nên phải cài vào project trước. Thiếu Odin thì project
-báo một lỗi từ `RiseOn.Utils.Network.Requirements`.
+Odin không có trên UPM nên phải cài vào project trước. Thiếu Odin thì project báo một
+lỗi từ `RiseOn.Utils.Network.Requirements`.
 
 Trên WebGL, trình duyệt không có UDP (NTP) và chỉ cho đọc response của domain
 cho phép (CORS), nên cả hai hàm đi qua HTTPS tới các endpoint cho phép đọc. Trên
@@ -48,15 +48,15 @@ sẵn; nếu không, đặt *Internet Access* = *Require* trong Player Settings.
     }
   ],
   "dependencies": {
-    "com.riseon.utils.network": "2.0.0"
+    "com.riseon.utils.network": "2.0.1"
   }
 }
 ```
 
-**Git URL**:
+**Git URL**: *Package Manager → + → Add package from git URL*:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Network#com.riseon.utils.network/2.0.0
+https://github.com/riseongamestudio/Utils.git?path=/Network
 ```
 
 **Thư mục local**: `"com.riseon.utils.network": "file:D:/path/to/Utils/Network"`.

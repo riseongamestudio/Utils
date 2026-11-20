@@ -1,4 +1,4 @@
-using LitMotion;
+﻿using LitMotion;
 using RiseOn.Utils.Editor;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities.Editor;
@@ -8,8 +8,7 @@ using UnityEngine;
 namespace RiseOn.Utils.LitMotion.Editor {
     /// <summary>
     /// Draws an <see cref="EaseExt"/> on one row after its label, in rects worked out here rather than by the layout, so both fields line up to the pixel.<br/>
-    /// The curve shares the row only while the ease is <see cref="Ease.CustomAnimationCurve"/>: the value column split in two halves,<br/>
-    /// as a block holding one field splits it.
+    /// The curve shares the row only while the ease is <see cref="Ease.CustomAnimationCurve"/>: the value column split in two halves, as a block holding one field splits it.
     /// </summary>
     public sealed class EaseExtDrawer : OdinValueDrawer<EaseExt> {
         private InspectorProperty ease;

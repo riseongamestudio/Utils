@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace RiseOn.Utils.Editor.SearchWindow {
@@ -22,14 +22,13 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         public readonly Func<Texture2D> Icon;
 
         /// <summary>
-        /// The row's text while searching, when the name alone does not say which one it is, such as the object a component is on;<br/>
-        /// null shows the name. Rich text is allowed.
+        /// The row's text while searching, when the name alone does not say which one it is, such as the object a component is on; null shows the name.<br/>
+        /// Rich text is allowed.
         /// </summary>
         public readonly string LabelSearch;
 
         /// <summary>
-        /// Loads the icon of the folder the choice sits in, such as a GameObject's for the folder of its types;<br/>
-        /// the first choice of a folder that gives one sets it, and a folder none gives one to shows a folder.
+        /// Loads the icon of the folder the choice sits in, such as a GameObject's for the folder of its types; the first choice of a folder that gives one sets it, and a folder none gives one to shows a folder.
         /// </summary>
         public readonly Func<Texture2D> FolderIcon;
 

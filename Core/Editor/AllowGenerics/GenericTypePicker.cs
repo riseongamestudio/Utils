@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -18,23 +18,23 @@ namespace RiseOn.Utils.Editor {
     /// Every step lists types as Odin's type selector does, under the same categories and names, hidden types left out, in one <see cref="ChoiceSearchWindow"/> drop-down that moves to the next step without closing.
     /// </summary>
     public static class GenericTypePicker {
-        private const string SLOT = "▢";
+        private const string Slot = "▢";
 
-        private static readonly string[] SKIPPED_ASSEMBLIES = {
+        private static readonly string[] skippedAssemblies = {
             "System", "Microsoft", "Mono", "mscorlib", "netstandard", "nunit", "Unity.", "UnityEditor", "Sirenix", "JetBrains", "Bee", "ExCSS"
         };
 
-        private static readonly Type[] BUILT_IN = {
+        private static readonly Type[] builtIn = {
             typeof(bool), typeof(int), typeof(long), typeof(float), typeof(double), typeof(string), typeof(object),
             typeof(List<>), typeof(HashSet<>), typeof(Dictionary<,>)
         };
 
         // Listed on a background thread after every domain reload, so the first argument step rarely waits for it.
-        private static readonly Lazy<Type[]> ARGUMENT_TYPES = new(ListArgumentTypes);
+        private static readonly Lazy<Type[]> argumentTypes = new(ListArgumentTypes);
 
         [InitializeOnLoadMethod]
         private static void WarmUp() {
-            System.Threading.Tasks.Task.Run(() => ARGUMENT_TYPES.Value);
+            System.Threading.Tasks.Task.Run(() => argumentTypes.Value);
         }
 
         /// <param name="field">The field, in the current GUI space; call it while the Inspector draws.</param>
@@ -195,25 +195,25 @@ namespace RiseOn.Utils.Editor {
             Next();
 
             void Next() {
-                while (frame.index < frame.arguments.Length && frame.arguments[frame.index] != null) frame.index++;
+                while (frame.Index < frame.Arguments.Length && frame.Arguments[frame.Index] != null) frame.Index++;
 
-                if (frame.index == frame.arguments.Length) {
+                if (frame.Index == frame.Arguments.Length) {
                     chain.Remove(frame);
 
                     // Constraints that tie one argument to another are only checked here, once all arguments are known.
-                    if (!definition.AreGenericConstraintsSatisfiedBy(frame.arguments)) {
-                        Debug.LogError($"{string.Join(", ", frame.arguments.Select(argument => argument.GetNiceName()))} do not satisfy the constraints of {definition.GetNiceName()}.");
+                    if (!definition.AreGenericConstraintsSatisfiedBy(frame.Arguments)) {
+                        Debug.LogError($"{string.Join(", ", frame.Arguments.Select(argument => argument.GetNiceName()))} do not satisfy the constraints of {definition.GetNiceName()}.");
                         return;
                     }
 
-                    var closed = definition.MakeGenericType(frame.arguments);
+                    var closed = definition.MakeGenericType(frame.Arguments);
                     var reason = isPickedIntoField ? rule.GetDisabledReason(closed) : null;
                     if (reason == null) done(closed);
                     else Debug.LogError($"{closed.GetNiceName()} cannot be picked: {reason}.");
                     return;
                 }
 
-                var parameter = frame.parameters[frame.index];
+                var parameter = frame.Parameters[frame.Index];
 
                 // Listed while the window shows its build progress: the first time lists every type of the game and Unity.
                 var choices = ListChoices(() => GetArgumentTypes().Where(type => Fits(parameter, type) && (!isPickedIntoField || rule.Accepts(parameter, type))), false, null, null);
@@ -224,7 +224,7 @@ namespace RiseOn.Utils.Editor {
             }
 
             void Take(Type argument) {
-                frame.arguments[frame.index++] = argument;
+                frame.Arguments[frame.Index++] = argument;
                 Next();
             }
 
@@ -247,15 +247,15 @@ namespace RiseOn.Utils.Editor {
             // The type being built, with the filled arguments named, the slot being filled marked and the rest left as their parameter names.
             static string Describe(List<Frame> chain, int depth) {
                 var frame = chain[depth];
-                var name = frame.definition.Name;
+                var name = frame.Definition.Name;
                 var text = new StringBuilder(name[..name.IndexOf('`')]).Append('<');
 
-                for (var i = 0; i < frame.parameters.Length; i++) {
+                for (var i = 0; i < frame.Parameters.Length; i++) {
                     if (i > 0) text.Append(", ");
 
-                    if (i == frame.index) text.Append(depth + 1 < chain.Count ? Describe(chain, depth + 1) : SLOT);
-                    else if (frame.arguments[i] != null) text.Append(frame.arguments[i].GetNiceName());
-                    else text.Append(frame.parameters[i].Name);
+                    if (i == frame.Index) text.Append(depth + 1 < chain.Count ? Describe(chain, depth + 1) : Slot);
+                    else if (frame.Arguments[i] != null) text.Append(frame.Arguments[i].GetNiceName());
+                    else text.Append(frame.Parameters[i].Name);
                 }
 
                 return text.Append('>').ToString();
@@ -264,12 +264,12 @@ namespace RiseOn.Utils.Editor {
 
         // Every public type a type argument could be, built once: the built-in ones, then the types of the game and Unity runtime assemblies.
         private static Type[] GetArgumentTypes() {
-            return ARGUMENT_TYPES.Value;
+            return argumentTypes.Value;
         }
 
         private static Type[] ListArgumentTypes() {
-            return BUILT_IN.Concat(AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(assembly => !assembly.IsDynamic && !SKIPPED_ASSEMBLIES.Any(skipped => assembly.GetName().Name.StartsWith(skipped)))
+            return builtIn.Concat(AppDomain.CurrentDomain.GetAssemblies()
+                    .Where(assembly => !assembly.IsDynamic && !skippedAssemblies.Any(skipped => assembly.GetName().Name.StartsWith(skipped)))
                     .SelectMany(ListExportedTypes)
                     .Where(type => !type.IsDefined(typeof(CompilerGeneratedAttribute), false) && type.Namespace?.StartsWith(nameof(UnityEditor)) is not true))
                 .ToArray();
@@ -284,15 +284,15 @@ namespace RiseOn.Utils.Editor {
         }
 
         private sealed class Frame {
-            public readonly Type definition;
-            public readonly Type[] parameters;
-            public readonly Type[] arguments;
-            public int index;
+            public readonly Type Definition;
+            public readonly Type[] Parameters;
+            public readonly Type[] Arguments;
+            public int Index;
 
             public Frame(Type definition, Type[] known) {
-                this.definition = definition;
-                parameters = definition.GetGenericArguments();
-                arguments = (Type[])known.Clone();
+                Definition = definition;
+                Parameters = definition.GetGenericArguments();
+                Arguments = (Type[])known.Clone();
             }
         }
     }

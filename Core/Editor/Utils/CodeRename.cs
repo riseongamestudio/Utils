@@ -10,14 +10,13 @@ using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
-    /// Renames members of a generated type where the project's own scripts name them through the type, as <c>Type.member</c>: the scripts under
-    /// Assets and in embedded packages, the code a project writes. A <c>using static</c> of the type, whose members go unqualified, is not
-    /// followed.<br/>
+    /// Renames members of a generated type where the project's own scripts name them through the type, as <c>Type.member</c>: the scripts under Assets and in embedded packages, the code a project writes.<br/>
+    /// A <c>using static</c> of the type, whose members go unqualified, is not followed.<br/>
     /// For a settings page whose Apply renames an enum's members, so code keeps compiling as the names change.
     /// </summary>
     public static class CodeRename {
         // Puts @ before a C# keyword, as a source generator writes a member named after one.
-        private static readonly CSharpCodeProvider CSharp = new();
+        private static readonly CSharpCodeProvider csharp = new();
 
         /// <summary>The scripts that name one of the members to rename, with no change made.</summary>
         public static List<string> Find(string type, IReadOnlyCollection<(string From, string To)> renames) {
@@ -33,7 +32,7 @@ namespace RiseOn.Utils.Editor {
             if (renames.Count == 0) return changed;
 
             var pattern = Pattern(type, renames);
-            var map     = renames.ToDictionary(rename => rename.From, rename => CSharp.CreateEscapedIdentifier(rename.To));
+            var map     = renames.ToDictionary(rename => rename.From, rename => csharp.CreateEscapedIdentifier(rename.To));
             foreach (var path in Scripts()) {
                 var bytes   = File.ReadAllBytes(path);
                 var bom     = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
@@ -49,8 +48,9 @@ namespace RiseOn.Utils.Editor {
         }
 
         // The type's name, not part of a longer one, then a dot and one of the members, with or without @.
-        private static Regex Pattern(string type, IEnumerable<(string From, string To)> renames) =>
-            new($@"(?<![\w@])({Regex.Escape(type)}\s*\.\s*)@?({string.Join("|", renames.Select(rename => Regex.Escape(rename.From)))})\b");
+        private static Regex Pattern(string type, IEnumerable<(string From, string To)> renames) {
+            return new($@"(?<![\w@])({Regex.Escape(type)}\s*\.\s*)@?({string.Join("|", renames.Select(rename => Regex.Escape(rename.From)))})\b");
+        }
 
         private static IEnumerable<string> Scripts() {
             var roots = new List<string> { "Assets" };

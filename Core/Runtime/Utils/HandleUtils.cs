@@ -1,16 +1,16 @@
-using System.Buffers;
+﻿using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
 namespace RiseOn.Utils {
     public static class HandleUtils {
-        private const float DEFAULT_WIDTH = 3;
-        private const float DEFAULT_OUTLINE_WIDTH = 3;
+        private const float DefaultWidth = 3;
+        private const float DefaultOutlineWidth = 3;
 
         // DrawAAPolyLine scales alpha by 0.75 and clamps only after that, so this brings a color back to full.
         // Measured: nothing more to gain past it, the line's tapered profile is applied after the clamp.
-        private const float AA_ALPHA_COMPENSATION = 1 / .75f;
+        private const float AAAlphaCompensation = 1 / .75f;
 
         /// <inheritdoc cref="UnityEditor.Handles.matrix"/>
         public static Matrix4x4 matrix {
@@ -91,7 +91,7 @@ namespace RiseOn.Utils {
         /// An anti-aliased line, placed in world space through <see cref="UnityEditor.Handles.matrix"/>, not <see cref="Gizmos.matrix"/>; <paramref name="width"/> is screen pixels like any other handle line.
         /// </summary>
         [Conditional("UNITY_EDITOR")]
-        public static void DrawLine(Vector3 from, Vector3 to, Color color, float width = DEFAULT_WIDTH) {
+        public static void DrawLine(Vector3 from, Vector3 to, Color color, float width = DefaultWidth) {
             #if UNITY_EDITOR
             var points = RentLine(from, to);
 
@@ -107,7 +107,7 @@ namespace RiseOn.Utils {
         /// <see cref="DrawLine"/> through every point in turn, back to the first one when <paramref name="closed"/>.
         /// </summary>
         [Conditional("UNITY_EDITOR")]
-        public static void DrawPath(IReadOnlyList<Vector3> points, Color color, float width = DEFAULT_WIDTH, bool closed = false) {
+        public static void DrawPath(IReadOnlyList<Vector3> points, Color color, float width = DefaultWidth, bool closed = false) {
             #if UNITY_EDITOR
             if (points.Count < 2) return;
 
@@ -125,7 +125,7 @@ namespace RiseOn.Utils {
         /// <see cref="DrawLine"/> around a circle in the XY plane, with a horizontal and a vertical diameter when <paramref name="cross"/>, the way <see cref="Gizmos.DrawWireSphere"/> looks head-on.
         /// </summary>
         [Conditional("UNITY_EDITOR")]
-        public static void DrawWireCircle(Vector3 center, float radius, Color color, float width = DEFAULT_WIDTH, bool cross = false) {
+        public static void DrawWireCircle(Vector3 center, float radius, Color color, float width = DefaultWidth, bool cross = false) {
             #if UNITY_EDITOR
             var buffer = RentCircle(center, radius, out var count);
 
@@ -143,11 +143,12 @@ namespace RiseOn.Utils {
         }
 
         /// <summary>
-        /// <see cref="DrawLine"/> around every point within <paramref name="radius"/> of the segment <paramref name="from"/> → <paramref name="to"/>, in the XY plane: two half circles joined by straight sides. A segment of no length draws a whole circle.<br/>
+        /// <see cref="DrawLine"/> around every point within <paramref name="radius"/> of the segment <paramref name="from"/> → <paramref name="to"/>, in the XY plane: two half circles joined by straight sides.<br/>
+        /// A segment of no length draws a whole circle.<br/>
         /// With <paramref name="cross"/>, also one line along the capsule from tip to tip and one across it at each end of the segment, the way <see cref="DrawWireCircle"/> crosses a circle.
         /// </summary>
         [Conditional("UNITY_EDITOR")]
-        public static void DrawWireCapsule(Vector3 from, Vector3 to, float radius, Color color, float width = DEFAULT_WIDTH, bool cross = false) {
+        public static void DrawWireCapsule(Vector3 from, Vector3 to, float radius, Color color, float width = DefaultWidth, bool cross = false) {
             #if UNITY_EDITOR
             var direction = ((Vector2)(to - from)).normalized;
 
@@ -185,8 +186,8 @@ namespace RiseOn.Utils {
           , Vector3 to
           , Color color
           , Color outlineColor
-          , float width = DEFAULT_WIDTH
-          , float outlineWidth = DEFAULT_OUTLINE_WIDTH) {
+          , float width = DefaultWidth
+          , float outlineWidth = DefaultOutlineWidth) {
             #if UNITY_EDITOR
             var points = RentLine(from, to);
 
@@ -206,8 +207,8 @@ namespace RiseOn.Utils {
             IReadOnlyList<Vector3> points
           , Color color
           , Color outlineColor
-          , float width = DEFAULT_WIDTH
-          , float outlineWidth = DEFAULT_OUTLINE_WIDTH
+          , float width = DefaultWidth
+          , float outlineWidth = DefaultOutlineWidth
           , bool closed = false) {
             #if UNITY_EDITOR
             if (points.Count < 2) return;
@@ -231,8 +232,8 @@ namespace RiseOn.Utils {
           , float radius
           , Color color
           , Color outlineColor
-          , float width = DEFAULT_WIDTH
-          , float outlineWidth = DEFAULT_OUTLINE_WIDTH) {
+          , float width = DefaultWidth
+          , float outlineWidth = DefaultOutlineWidth) {
             #if UNITY_EDITOR
             var buffer = RentCircle(center, radius, out var count);
 
@@ -267,19 +268,19 @@ namespace RiseOn.Utils {
         }
 
         private static Vector3[] RentCircle(Vector3 center, float radius, out int count) {
-            const int SEGMENTS = 48;
+            const int Segments = 48;
 
-            count = SEGMENTS + 1;
+            count = Segments + 1;
 
             var buffer = ArrayPool<Vector3>.Shared.Rent(count);
 
-            for (var i = 0; i < SEGMENTS; ++i) {
-                var angle = i * (Mathf.PI * 2 / SEGMENTS);
+            for (var i = 0; i < Segments; ++i) {
+                var angle = i * (Mathf.PI * 2 / Segments);
 
                 buffer[i] = center + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
             }
 
-            buffer[SEGMENTS] = buffer[0];
+            buffer[Segments] = buffer[0];
 
             return buffer;
         }
@@ -287,7 +288,7 @@ namespace RiseOn.Utils {
         // One closed polyline, around the `to` end and back around the `from` end, so the sides join the arcs without a
         // seam.
         private static Vector3[] RentCapsule(Vector3 from, Vector3 to, float radius, out int count) {
-            const int ARC_SEGMENTS = 24;
+            const int ArcSegments = 24;
 
             var direction = ((Vector2)(to - from)).normalized;
 
@@ -295,12 +296,12 @@ namespace RiseOn.Utils {
 
             var normal = Vector2.Perpendicular(direction);
 
-            count = (ARC_SEGMENTS + 1) * 2 + 1;
+            count = (ArcSegments + 1) * 2 + 1;
 
             var buffer = ArrayPool<Vector3>.Shared.Rent(count);
 
             AddArc(buffer, 0, to, normal, direction, radius);
-            AddArc(buffer, ARC_SEGMENTS + 1, from, -normal, -direction, radius);
+            AddArc(buffer, ArcSegments + 1, from, -normal, -direction, radius);
 
             buffer[count - 1] = buffer[0];
 
@@ -308,8 +309,8 @@ namespace RiseOn.Utils {
 
             // Half a circle around `center`, from `start` through `apex` to `-start`.
             static void AddArc(Vector3[] buffer, int offset, Vector3 center, Vector2 start, Vector2 apex, float radius) {
-                for (var i = 0; i <= ARC_SEGMENTS; ++i) {
-                    var angle = i * (Mathf.PI / ARC_SEGMENTS);
+                for (var i = 0; i <= ArcSegments; ++i) {
+                    var angle = i * (Mathf.PI / ArcSegments);
 
                     buffer[offset + i] = center + (Vector3)((start * Mathf.Cos(angle) + apex * Mathf.Sin(angle)) * radius);
                 }
@@ -320,7 +321,7 @@ namespace RiseOn.Utils {
             #if UNITY_EDITOR
             var oldColor = UnityEditor.Handles.color;
 
-            UnityEditor.Handles.color = color.WithA(color.a * AA_ALPHA_COMPENSATION);
+            UnityEditor.Handles.color = color.WithA(color.a * AAAlphaCompensation);
             UnityEditor.Handles.DrawAAPolyLine(width, count, points);
             UnityEditor.Handles.color = oldColor;
             #endif
@@ -347,13 +348,13 @@ namespace RiseOn.Utils {
                 points[count - 1] = Extend(camera, points[count - 2], last, outlineWidth);
             }
 
-            UnityEditor.Handles.color = outlineColor.WithA(outlineColor.a * AA_ALPHA_COMPENSATION);
+            UnityEditor.Handles.color = outlineColor.WithA(outlineColor.a * AAAlphaCompensation);
             UnityEditor.Handles.DrawAAPolyLine(width + outlineWidth * 2, count, points);
 
             points[0] = first;
             points[count - 1] = last;
 
-            UnityEditor.Handles.color = color.WithA(color.a * AA_ALPHA_COMPENSATION);
+            UnityEditor.Handles.color = color.WithA(color.a * AAAlphaCompensation);
             UnityEditor.Handles.DrawAAPolyLine(width, count, points);
 
             UnityEditor.Handles.matrix = matrix;

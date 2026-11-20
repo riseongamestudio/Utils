@@ -29,7 +29,8 @@ namespace RiseOn.Utils {
         private protected Singleton() { }
 
         /// <summary>
-        /// This method is not virtual. Override <see cref="OnAwake"/> instead.
+        /// This method is not virtual.<br/>
+        /// Override <see cref="OnAwake"/> instead.
         /// </summary>
         protected internal void Awake() {
             switch (SingletonHub.Register(this)) {

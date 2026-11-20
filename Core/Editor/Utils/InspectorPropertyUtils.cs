@@ -1,4 +1,4 @@
-using Sirenix.OdinInspector.Editor;
+﻿using Sirenix.OdinInspector.Editor;
 
 namespace RiseOn.Utils.Editor {
     public static class InspectorPropertyUtils {

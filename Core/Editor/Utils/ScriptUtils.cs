@@ -25,7 +25,7 @@ namespace RiseOn.Utils.Editor {
 
         /// <summary>
         /// A read-only field holding the type's script, drawn as an object field without its picker: a click pings the script, a double click opens it.<br/>
-        /// Grey as the Inspector's own script field, since nothing here can change it.
+        /// Gray as the Inspector's own script field, since nothing here can change it.
         /// </summary>
         public static void Field(Rect rect, GUIContent label, Type type) {
             var script = Find(type);

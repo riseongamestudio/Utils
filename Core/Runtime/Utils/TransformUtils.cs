@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace RiseOn.Utils {
     public static partial class TransformUtils {

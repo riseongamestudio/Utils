@@ -1,7 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using RiseOn.Utils.Editor.SearchWindow;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.OdinInspector.Editor.Drawers;
 using Sirenix.Utilities.Editor;
@@ -11,18 +12,18 @@ using Object = UnityEngine.Object;
 
 namespace RiseOn.Utils.Editor {
     public sealed class EnumLabelAttributeDrawer : OdinAttributeDrawer<EnumLabelAttribute> {
-        private const string CLEAR_ENUM_TYPE_UNDO_NAME = "Clear Enum Type";
-        private const string CHANGE_ENUM_TYPE_UNDO_NAME = "Change Enum Type";
-        private const string CONTEXT_KEY_PREFIX        = "RiseOn.Utils.EnumLabel";
-        private const string ELEMENT_LABELS_CONTEXT_KEY = "RiseOn.Utils.EnumLabel.ElementLabels";
-        private const string ENUM_TYPE_LABEL           = "Enum Type";
-        private const string MIXED_VALUE_LABEL         = "Mixed";
-        private const string NONE_LABEL                = "None";
-        private const string RESET_ENUM_TYPE_UNDO_NAME = "Reset Enum Type";
-        private const string RESET_LABEL               = "Reset";
+        private const string ClearEnumTypeUndoName   = "Clear Enum Type";
+        private const string ChangeEnumTypeUndoName  = "Change Enum Type";
+        private const string ContextKeyPrefix        = "RiseOn.Utils.EnumLabel";
+        private const string ElementLabelsContextKey = "RiseOn.Utils.EnumLabel.ElementLabels";
+        private const string EnumTypeLabel           = "Enum Type";
+        private const string MixedValueLabel         = "Mixed";
+        private const string NoneLabel               = "None";
+        private const string ResetEnumTypeUndoName   = "Reset Enum Type";
+        private const string ResetLabel              = "Reset";
 
-        private const float CONTEXT_HIGHLIGHT_OFFSET = 4f;
-        private const float CONTEXT_HIGHLIGHT_WIDTH  = 3f;
+        private const float ContextHighlightOffset = 4f;
+        private const float ContextHighlightWidth  = 3f;
 
         private readonly List<LocalPersistentContext<string>> enumTypeNameContexts = new();
         private readonly List<EnumLabelUndoState> enumTypeUndoStates = new();
@@ -54,7 +55,7 @@ namespace RiseOn.Utils.Editor {
             }
 
             if (enumTypeNameContexts.Count is 0) {
-                var context = this.GetPersistentValue(CONTEXT_KEY_PREFIX, defaultEnumTypeName);
+                var context = this.GetPersistentValue(ContextKeyPrefix, defaultEnumTypeName);
                 var undoStateKey = GetFallbackUndoStateKey();
 
                 enumTypeNameContexts.Add(context);
@@ -90,12 +91,12 @@ namespace RiseOn.Utils.Editor {
         private void InitializeEnumTypes() {
             var enumAssemblies = new HashSet<Assembly>();
 
-            if (Attribute.DefaultType is not null) {
+            if (Attribute.DefaultType != null) {
                 enumAssemblies.Add(Attribute.DefaultType.Assembly);
             }
 
             foreach (var weakTarget in Property.Tree.WeakTargets) {
-                if (weakTarget is null) continue;
+                if (weakTarget == null) continue;
 
                 enumAssemblies.Add(weakTarget.GetType().Assembly);
             }
@@ -113,16 +114,16 @@ namespace RiseOn.Utils.Editor {
                 ? target.GetInstanceID().ToString()
                 : globalObjectId.ToString();
 
-            return $"{CONTEXT_KEY_PREFIX}|{targetKey}|{Property.UnityPropertyPath}";
+            return $"{ContextKeyPrefix}|{targetKey}|{Property.UnityPropertyPath}";
         }
 
         private string GetFallbackUndoStateKey() {
             var weakTargetTypeName = Property.Tree.WeakTargets
-                .FirstOrDefault(target => target is not null)
+                .FirstOrDefault(target => target != null)
                 ?.GetType()
                 .AssemblyQualifiedName;
 
-            return $"{CONTEXT_KEY_PREFIX}|{weakTargetTypeName}|{Property.UnityPropertyPath}";
+            return $"{ContextKeyPrefix}|{weakTargetTypeName}|{Property.UnityPropertyPath}";
         }
 
         private Type GetSelectedEnumType(out bool hasMixedValue) {
@@ -162,21 +163,18 @@ namespace RiseOn.Utils.Editor {
             EditorGUI.showMixedValue = hasMixedValue;
 
             var buttonLabel = hasMixedValue
-                ? MIXED_VALUE_LABEL
-                : enumType?.FullName ?? NONE_LABEL;
+                ? MixedValueLabel
+                : enumType?.FullName ?? NoneLabel;
 
             var position = EditorGUILayout.GetControlRect();
             var buttonPosition = EditorGUI.PrefixLabel(
                 position
-              , new GUIContent(ENUM_TYPE_LABEL));
+              , new GUIContent(EnumTypeLabel));
 
             DrawEnumTypeContextMenu(position, enumType, hasMixedValue);
 
             if (GUI.Button(buttonPosition, buttonLabel, EditorStyles.popup)) {
-                var selector = CreateTypeSelector(enumType);
-                selector.EnableSingleClickToSelect();
-                selector.SelectionConfirmed += SetSelectedEnumType;
-                selector.ShowInPopup(buttonPosition);
+                ChoiceSearchWindow.Open(buttonPosition, "", enumTypes.Select(type => new SearchChoice<Type>(type.FullName, type)), (Type picked) => SetSelectedEnumType(picked), selected: enumType);
             }
 
             EditorGUI.showMixedValue = previousMixedValue;
@@ -221,8 +219,8 @@ namespace RiseOn.Utils.Editor {
         }
 
         private static void DrawContextHighlight(Rect position) {
-            position.x    -= CONTEXT_HIGHLIGHT_OFFSET;
-            position.width = CONTEXT_HIGHLIGHT_WIDTH;
+            position.x    -= ContextHighlightOffset;
+            position.width = ContextHighlightWidth;
 
             SirenixEditorGUI.DrawSolidRect(
                 position
@@ -233,26 +231,26 @@ namespace RiseOn.Utils.Editor {
         private void ShowEnumTypeContextMenu(Type enumType, bool hasMixedValue) {
             var menu = new GenericMenu();
 
-            var canClear = hasMixedValue || enumType is not null;
+            var canClear = hasMixedValue || enumType != null;
 
             if (canClear) {
                 menu.AddItem(
-                    new GUIContent(NONE_LABEL)
+                    new GUIContent(NoneLabel)
                   , false
                   , ClearSelectedEnumType);
             } else {
-                menu.AddDisabledItem(new GUIContent(NONE_LABEL), true);
+                menu.AddDisabledItem(new GUIContent(NoneLabel), true);
             }
 
-            if (Attribute.DefaultType is not null) {
+            if (Attribute.DefaultType != null) {
                 var isDefaultType = !hasMixedValue
                                  && ReferenceEquals(enumType, Attribute.DefaultType);
 
                 if (isDefaultType) {
-                    menu.AddDisabledItem(new GUIContent(RESET_LABEL));
+                    menu.AddDisabledItem(new GUIContent(ResetLabel));
                 } else {
                     menu.AddItem(
-                        new GUIContent(RESET_LABEL)
+                        new GUIContent(ResetLabel)
                       , false
                       , ResetSelectedEnumType);
                 }
@@ -261,29 +259,26 @@ namespace RiseOn.Utils.Editor {
             menu.ShowAsContext();
         }
 
-        private void SetSelectedEnumType(IEnumerable<Type> selection) {
-            if (selection is null) return;
-
-            var selectedType = selection.FirstOrDefault();
-            if (selectedType is null) return;
+        private void SetSelectedEnumType(Type selectedType) {
+            if (selectedType == null) return;
 
             var selectedTypeName = selectedType.AssemblyQualifiedName;
-            if (SetSelectedEnumTypeName(selectedTypeName, CHANGE_ENUM_TYPE_UNDO_NAME)) {
+            if (SetSelectedEnumTypeName(selectedTypeName, ChangeEnumTypeUndoName)) {
                 GUIHelper.RequestRepaint();
             }
         }
 
         private void ClearSelectedEnumType() {
-            if (SetSelectedEnumTypeName(string.Empty, CLEAR_ENUM_TYPE_UNDO_NAME)) {
+            if (SetSelectedEnumTypeName(string.Empty, ClearEnumTypeUndoName)) {
                 GUIHelper.RequestRepaint();
             }
         }
 
         private void ResetSelectedEnumType() {
             var defaultEnumTypeName = Attribute.DefaultType?.AssemblyQualifiedName;
-            if (defaultEnumTypeName is null) return;
+            if (defaultEnumTypeName == null) return;
 
-            if (SetSelectedEnumTypeName(defaultEnumTypeName, RESET_ENUM_TYPE_UNDO_NAME)) {
+            if (SetSelectedEnumTypeName(defaultEnumTypeName, ResetEnumTypeUndoName)) {
                 GUIHelper.RequestRepaint();
             }
         }
@@ -337,30 +332,19 @@ namespace RiseOn.Utils.Editor {
             return true;
         }
 
-        private OdinSelector<Type> CreateTypeSelector(Type selectedType) {
-            var selector = new TypeSelector(enumTypes, false) {
-                FlattenTree    = true
-              , HideNamespaces = true
-            };
-
-            if (selectedType is not null) selector.SetSelection(selectedType);
-
-            return selector;
-        }
-
         private void UpdateElementLabels(Type enumType, bool hasMixedValue) {
-            var enumNames = hasMixedValue || enumType is null
+            var enumNames = hasMixedValue || enumType == null
                 ? Array.Empty<string>()
                 : Enum.GetNames(enumType);
 
             Property.Context
-                .GetGlobal(ELEMENT_LABELS_CONTEXT_KEY, Array.Empty<string>())
+                .GetGlobal(ElementLabelsContextKey, Array.Empty<string>())
                 .Value = enumNames;
         }
 
         private void DrawArrayElement() {
             var enumNames = Property.Parent.Context
-                .GetGlobal(ELEMENT_LABELS_CONTEXT_KEY, Array.Empty<string>())
+                .GetGlobal(ElementLabelsContextKey, Array.Empty<string>())
                 .Value;
 
             var label = Property.Index is >= 0 && Property.Index < enumNames.Length
@@ -371,7 +355,7 @@ namespace RiseOn.Utils.Editor {
         }
 
         private void DrawValidation(Type enumType, bool hasMixedValue) {
-            if (hasMixedValue || enumType is null) return;
+            if (hasMixedValue || enumType == null) return;
 
             var enumNames = Enum.GetNames(enumType);
             if (Property.Children.Count != enumNames.Length) {
@@ -395,9 +379,9 @@ namespace RiseOn.Utils.Editor {
 
         private static bool IsArrayElement(InspectorProperty property) {
             var parent = property.Parent;
-            return parent is not null
+            return parent != null
                 && IsOneDimensionalArray(parent.Info.TypeOfValue)
-                && parent.GetAttribute<EnumLabelAttribute>() is not null;
+                && parent.GetAttribute<EnumLabelAttribute>() != null;
         }
 
         private static bool IsOneDimensionalArray(Type type) {
@@ -415,7 +399,7 @@ namespace RiseOn.Utils.Editor {
             try {
                 return assembly.GetTypes();
             } catch (ReflectionTypeLoadException exception) {
-                return exception.Types.Where(type => type is not null);
+                return exception.Types.Where(type => type != null);
             } catch {
                 return Type.EmptyTypes;
             }

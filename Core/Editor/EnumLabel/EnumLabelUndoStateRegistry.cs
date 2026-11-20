@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace RiseOn.Utils.Editor {
@@ -13,16 +13,16 @@ namespace RiseOn.Utils.Editor {
             }
         }
 
-        private static readonly Dictionary<string, List<TargetState>> TARGET_STATES   = new();
-        private static readonly Dictionary<string, EnumLabelUndoState> FALLBACK_STATES = new();
+        private static readonly Dictionary<string, List<TargetState>> targetStatesByKey = new();
+        private static readonly Dictionary<string, EnumLabelUndoState> fallbackStates    = new();
 
         public static EnumLabelUndoState GetOrCreate(
             string key
           , Object target
           , string enumTypeName) {
-            if (!TARGET_STATES.TryGetValue(key, out var targetStates)) {
+            if (!targetStatesByKey.TryGetValue(key, out var targetStates)) {
                 targetStates       = new List<TargetState>();
-                TARGET_STATES[key] = targetStates;
+                targetStatesByKey[key] = targetStates;
             }
 
             foreach (var targetState in targetStates) {
@@ -38,10 +38,10 @@ namespace RiseOn.Utils.Editor {
         }
 
         public static EnumLabelUndoState GetOrCreateFallback(string key, string enumTypeName) {
-            if (FALLBACK_STATES.TryGetValue(key, out var state) && state is not null) return state;
+            if (fallbackStates.TryGetValue(key, out var state) && state != null) return state;
 
             state                = CreateUndoState(enumTypeName);
-            FALLBACK_STATES[key] = state;
+            fallbackStates[key] = state;
             return state;
         }
 

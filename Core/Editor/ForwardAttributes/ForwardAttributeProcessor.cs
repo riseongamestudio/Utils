@@ -27,7 +27,7 @@ namespace RiseOn.Utils.Editor {
             // Text
             typeof(MultilineAttribute), typeof(TextAreaAttribute), typeof(MultiLinePropertyAttribute), typeof(FilePathAttribute),
             typeof(FolderPathAttribute), typeof(DisplayAsStringAttribute), typeof(DelayedAttribute), typeof(DelayedPropertyAttribute),
-            // Enums and colours
+            // Enums and colors
             typeof(EnumToggleButtonsAttribute), typeof(EnumPagingAttribute), typeof(ColorUsageAttribute), typeof(ColorPaletteAttribute),
             // Beside the value
             typeof(SuffixLabelAttribute)
@@ -38,7 +38,9 @@ namespace RiseOn.Utils.Editor {
             typeof(ListDrawerSettingsAttribute), typeof(TableListAttribute), typeof(TableMatrixAttribute)
         };
 
-        public override bool CanProcessSelfAttributes(InspectorProperty property) => Info(property.Info.TypeOfValue, out _) != null;
+        public override bool CanProcessSelfAttributes(InspectorProperty property) {
+            return Info(property.Info.TypeOfValue, out _) != null;
+        }
 
         // The field drops what moves, so nothing draws twice.
         public override void ProcessSelfAttributes(InspectorProperty property, List<Attribute> attributes) {

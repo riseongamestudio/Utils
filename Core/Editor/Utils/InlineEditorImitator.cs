@@ -13,11 +13,11 @@ using Object = UnityEngine.Object;
 
 namespace RiseOn.Utils.Editor {
     public class InlineEditorImitator : IDisposable {
-        private static readonly PropertyInfo MaterialForceVisibleProperty = typeof(MaterialEditor).GetProperty(
+        private static readonly PropertyInfo materialForceVisibleProperty = typeof(MaterialEditor).GetProperty(
             "forceVisible", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
         
-        private static readonly Type AnimationClipEditorType = typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.AnimationClipEditor");
-        private static readonly Stack<LayoutSettings> LayoutSettingsStack = new Stack<LayoutSettings>();
+        private static readonly Type animationClipEditorType = typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.AnimationClipEditor");
+        private static readonly Stack<LayoutSettings> layoutSettingsStack = new Stack<LayoutSettings>();
         private static readonly GUIContent hiddenLabel = new GUIContent(" ");
         
         private readonly bool isGameObjectType;
@@ -283,8 +283,8 @@ namespace RiseOn.Utils.Editor {
                 var comp = targetObject as Component;
                 previewEditor = comp != null ? UnityEditor.Editor.CreateEditor(comp.gameObject) : cachedEditor;
 
-                if (cachedEditor is MaterialEditor matEditor && MaterialForceVisibleProperty != null) {
-                    MaterialForceVisibleProperty.SetValue(matEditor, true, null);
+                if (cachedEditor is MaterialEditor matEditor && materialForceVisibleProperty != null) {
+                    materialForceVisibleProperty.SetValue(matEditor, true, null);
                 }
             }
 
@@ -329,7 +329,7 @@ namespace RiseOn.Utils.Editor {
             bool enabledState = GUI.enabled;
             GUI.enabled = true;
 
-            if (isAnimationClip && previewEditor.GetType() == AnimationClipEditorType) {
+            if (isAnimationClip && previewEditor.GetType() == animationClipEditorType) {
                 DrawAnimationClipEditorPreview(previewRect, attr);
             } else {
                 previewEditor.DrawPreview(previewRect);
@@ -371,7 +371,7 @@ namespace RiseOn.Utils.Editor {
         }
 
         private static void SaveLayoutSettings() {
-            LayoutSettingsStack.Push(new LayoutSettings {
+            layoutSettingsStack.Push(new LayoutSettings {
                 Skin = GUI.skin, Color = GUI.color, ContentColor = GUI.contentColor,
                 BackgroundColor = GUI.backgroundColor, Enabled = GUI.enabled,
                 IndentLevel = EditorGUI.indentLevel, FieldWidth = EditorGUIUtility.fieldWidth,
@@ -381,8 +381,8 @@ namespace RiseOn.Utils.Editor {
         }
 
         private static void RestoreLayout() {
-            if (LayoutSettingsStack.Count == 0) return;
-            var layout = LayoutSettingsStack.Pop();
+            if (layoutSettingsStack.Count == 0) return;
+            var layout = layoutSettingsStack.Pop();
             GUI.skin = layout.Skin; GUI.color = layout.Color; GUI.contentColor = layout.ContentColor;
             GUI.backgroundColor = layout.BackgroundColor; GUI.enabled = layout.Enabled;
             EditorGUI.indentLevel = layout.IndentLevel; EditorGUIUtility.fieldWidth = layout.FieldWidth;

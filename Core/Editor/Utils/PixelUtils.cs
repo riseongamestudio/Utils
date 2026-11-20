@@ -37,9 +37,10 @@ namespace RiseOn.Utils.Editor {
         }
 
         /// <summary>
-        /// Where the group being drawn starts, on the screen: a group such as a fade or a list can start between two pixels, while a window starts on one,<br/>
-        /// so a position is put on the grid with this added, and taken off after.
+        /// Where the group being drawn starts, on the screen: a group such as a fade or a list can start between two pixels, while a window starts on one, so a position is put on the grid with this added, and taken off after.
         /// </summary>
-        public static Vector2 Origin() => GUIUtility.GUIToScreenPoint(Vector2.zero);
+        public static Vector2 Origin() {
+            return GUIUtility.GUIToScreenPoint(Vector2.zero);
+        }
     }
 }

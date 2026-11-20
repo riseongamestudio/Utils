@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Pool;
 using Object = UnityEngine.Object;

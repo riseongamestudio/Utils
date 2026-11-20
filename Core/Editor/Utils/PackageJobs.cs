@@ -7,9 +7,8 @@ using UnityEngine;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
-    /// The package changes settings pages ask for, one at a time, as Unity's Package Manager window takes one: from the press until the Package
-    /// Manager is done, the section that asked shows what runs under a spinner and every install button waits, since the Package Manager<br/>
-    /// resolves every package again before anything compiles. A domain reload, which a change ends with, clears it.
+    /// The package changes settings pages ask for, one at a time, as Unity's Package Manager window takes one: from the press until the Package Manager is done, the section that asked shows what runs under a spinner and every install button waits, since the Package Manager resolves every package again before anything compiles.<br/>
+    /// A domain reload, which a change ends with, clears it.
     /// </summary>
     public static class PackageJobs {
         private static string owner;
@@ -51,8 +50,7 @@ namespace RiseOn.Utils.Editor {
         }
 
         /// <summary>
-        /// For an SDK's own way of changing packages, such as AppLovin's, which edits the manifest and resolves: <paramref name="owner"/> shows
-        /// <paramref name="what"/> until <see cref="End"/>, or until the Package Manager registers the packages again.
+        /// For an SDK's own way of changing packages, such as AppLovin's, which edits the manifest and resolves: <paramref name="owner"/> shows <paramref name="what"/> until <see cref="End"/>, or until the Package Manager registers the packages again.
         /// </summary>
         public static void Begin(string owner, string what) {
             PackageJobs.owner = owner;

@@ -8,11 +8,9 @@ using UnityEngine.UIElements;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
-    /// The native side of a search window opened as a drop-down, a borderless window, on Windows: <see cref="Show"/> opens it rounded by
-    /// <see cref="Section.Radius"/>, as the fields and boxes in it round, <see cref="Square"/> squares the corners along the edge where its
-    /// controls and its list meet, and <see cref="KeepOnTop"/> keeps it over the other windows.<br/>
-    /// The window is cut to the shape, and its root's background and border follow the curve. UI Toolkit draws an element's border under
-    /// its children, so a window whose content reaches into a corner draws its edge in a last child over the content (SearchWindow does).<br/>
+    /// The native side of a search window opened as a drop-down, a borderless window, on Windows: <see cref="Show"/> opens it rounded by <see cref="Section.Radius"/>, as the fields and boxes in it round, <see cref="Square"/> squares the corners along the edge where its controls and its list meet, and <see cref="KeepOnTop"/> keeps it over the other windows.<br/>
+    /// The window is cut to the shape, and its root's background and border follow the curve.<br/>
+    /// UI Toolkit draws an element's border under its children, so a window whose content reaches into a corner draws its edge in a last child over the content (SearchWindow does).<br/>
     /// Squared corners let two windows that meet round as one, where Windows' own rounding (DWM) takes all four or none; Windows 10 rounds the same.<br/>
     /// The cut keeps the pixels the curve covers three quarters of or more, so the corner looks as round as a smoothed one of the same radius.<br/>
     /// On another editor platform the window stays square (<see cref="IsSupported"/>).
@@ -67,19 +65,18 @@ namespace RiseOn.Utils.Editor {
         }
 
         /// <summary>
-        /// Makes a window opened through <see cref="Show"/> a topmost window of Windows, over every window that is not, another
-        /// application's too, as a menu is: a click on another editor window raises that one at once, and Unity raises a popup back only a
-        /// frame later, so a drop-down rolling up after the click would blink out. Where <see cref="IsSupported"/> is false it does nothing.
+        /// Makes a window opened through <see cref="Show"/> a topmost window of Windows, over every window that is not, another application's too, as a menu is: a click on another editor window raises that one at once, and Unity raises a popup back only a frame later, so a drop-down rolling up after the click would blink out.<br/>
+        /// Where <see cref="IsSupported"/> is false it does nothing.
         /// </summary>
         public static void KeepOnTop(EditorWindow window) {
             if (!shapes.TryGetValue(window, out var shape)) return;
 
-            SetWindowPos(shape.Handle, TopMost, 0, 0, 0, 0, NoSize | NoMove | NoActivate);
+            SetWindowPos(shape.Handle, topMost, 0, 0, 0, 0, NoSize | NoMove | NoActivate);
         }
 
         /// <summary>
-        /// Squares <paramref name="corners"/> of a window opened through <see cref="Show"/>, those along an edge another window meets, the
-        /// others round; <see cref="Corners.None"/> rounds all four again. <paramref name="hidden"/> cuts it away whole, for a window that has nothing to show.<br/>
+        /// Squares <paramref name="corners"/> of a window opened through <see cref="Show"/>, those along an edge another window meets, the others round; <see cref="Corners.None"/> rounds all four again.<br/>
+        /// <paramref name="hidden"/> cuts it away whole, for a window that has nothing to show.<br/>
         /// The cut follows the window as it changes size.
         /// </summary>
         public static void Square(EditorWindow window, Corners corners, bool hidden = false) {
@@ -189,7 +186,7 @@ namespace RiseOn.Utils.Editor {
 
         private const int CombineDiff = 4;
 
-        private static readonly IntPtr TopMost = new(-1);
+        private static readonly IntPtr topMost = new(-1);
         private const uint NoSize     = 0x1;
         private const uint NoMove     = 0x2;
         private const uint NoActivate = 0x10;

@@ -21,12 +21,13 @@ trên [RiseOn.Utils](../Core/README.md).
 | Phụ thuộc | Cách có | Dùng cho |
 |---|---|---|
 | Unity 6000.3 | | Bản đang dùng để phát triển |
-| [`com.riseon.utils`](../Core/README.md) 1.0.1 | Tự cài theo `package.json` | Undo, extension |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Attribute và Inspector của các component |
+| [`com.riseon.utils`](../Core/README.md) 1.0.18 | Tự cài theo `package.json` | Undo, extension |
 
-"Tự cài" là khi cài qua registry; cài bằng git URL thì phải cài `com.riseon.utils`
-trước. Odin không có trên UPM nên phải cài vào project trước.
-Thiếu Odin thì project báo một lỗi từ `RiseOn.Utils.Renderers.Requirements`.
+"Tự cài" là Package Manager tự lấy theo version từ Unity Registry và các registry khai
+trong manifest, cả khi cài pack bằng git URL. Odin không có trên UPM nên phải cài vào
+project trước. Thiếu Odin thì project báo một lỗi từ
+`RiseOn.Utils.Renderers.Requirements`.
 
 ## Cài đặt
 
@@ -44,16 +45,17 @@ Thiếu Odin thì project báo một lỗi từ `RiseOn.Utils.Renderers.Requirem
     }
   ],
   "dependencies": {
-    "com.riseon.utils.renderers": "1.0.3"
+    "com.riseon.utils.renderers": "1.0.5"
   }
 }
 ```
 
-**Git URL**: cài `com.riseon.utils` trước (Package Manager không tự kéo phụ thuộc
-qua git), rồi:
+**Git URL**: phụ thuộc vẫn lấy theo version từ registry: `com.riseon.utils` lấy từ
+registry RiseOn như ví dụ trên, hoặc cài bằng git URL trước. Rồi *Package Manager → + →
+Add package from git URL*:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Renderers#com.riseon.utils.renderers/1.0.3
+https://github.com/riseongamestudio/Utils.git?path=/Renderers
 ```
 
 **Thư mục local**: `"com.riseon.utils.renderers": "file:D:/path/to/Utils/Renderers"`.

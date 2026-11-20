@@ -8,14 +8,16 @@ using UnityEngine;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
-    /// Odin's [ValueDropdown] on a single value opens the pick window of <see cref="ChoiceFieldUtils"/>, as every enum field does, rather than Odin's selector:<br/>
-    /// the attribute and its values member stay Odin's. Just above Odin's own drawer (2002); a list carrying it is still Odin's, which also adds its items.
+    /// Odin's [ValueDropdown] on a single value opens the pick window of <see cref="ChoiceFieldUtils"/>, as every enum field does, rather than Odin's selector: the attribute and its values member stay Odin's.<br/>
+    /// Just above Odin's own drawer (2002); a list carrying it is still Odin's, which also adds its items.
     /// </summary>
     [DrawerPriority(0, 0, 2003)]
     public sealed class ValueDropdownChoiceDrawer<T> : OdinAttributeDrawer<ValueDropdownAttribute, T> {
         private ValueResolver<object> values;
 
-        protected override bool CanDrawAttributeValueProperty(InspectorProperty property) => property.ChildResolver is not ICollectionResolver;
+        protected override bool CanDrawAttributeValueProperty(InspectorProperty property) {
+            return property.ChildResolver is not ICollectionResolver;
+        }
 
         protected override void Initialize() {
             values = ValueResolver.Get<object>(Property, Attribute.ValuesGetter);

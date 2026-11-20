@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace RiseOn.Utils.Renderers {
     public class SpriteRendererExt : RendererExt<SpriteRenderer> {

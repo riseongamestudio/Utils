@@ -4,6 +4,16 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.18] - 2026-11-20
+
+### Đổi
+
+- Ô chọn kiểu enum của `[EnumLabel]` mở `ChoiceSearchWindow` như mọi ô chọn khác của các
+  pack RiseOn: có ô tìm kiếm, kiểu đang chọn được tô sẵn; trước đó là cửa sổ chọn kiểu
+  của Odin.
+- Cần Unity 6000.3, bản đang dùng để phát triển: `package.json` ghi `unity`, nên Package
+  Manager không cài pack vào project Unity cũ hơn.
+
 ## [1.0.17] - 2026-11-20
 
 ### Thêm
@@ -245,7 +255,7 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 ### Thêm
 
 - `DowncaseFirst`, `UpcaseLast`, `DowncaseLast`: cùng họ với `UpcaseFirst`, đổi hoa / thường ở ký
-  tự đầu hoặc cuối theo văn hoá bất biến.
+  tự đầu hoặc cuối theo văn hóa bất biến.
 
 ## [1.0.3] - 2026-09-26
 

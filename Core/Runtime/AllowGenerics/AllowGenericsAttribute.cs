@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace RiseOn.Utils {
     /// <summary>
@@ -10,9 +10,9 @@ namespace RiseOn.Utils {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Interface)]
     public class AllowGenericsAttribute : Attribute {
         /// <summary>
-        /// Whether <paramref name="argument"/> may fill <paramref name="parameter"/>, a type parameter of the generic type picked into the field;<br/>
-        /// the arguments of generic types nested inside it are bound only by their own constraints.<br/>
-        /// <paramref name="argument"/> may be a generic type definition, closed in turn if picked. It runs in the Editor only.
+        /// Whether <paramref name="argument"/> may fill <paramref name="parameter"/>, a type parameter of the generic type picked into the field; the arguments of generic types nested inside it are bound only by their own constraints.<br/>
+        /// <paramref name="argument"/> may be a generic type definition, closed in turn if picked.<br/>
+        /// It runs in the Editor only.
         /// </summary>
         public virtual bool Accepts(Type parameter, Type argument) {
             return true;
@@ -20,7 +20,8 @@ namespace RiseOn.Utils {
 
         /// <summary>
         /// Why <paramref name="type"/>, a closed type the field can hold, cannot be picked, or null when it can.<br/>
-        /// The picker shows the type grayed out with the reason beside it, and refuses it. It runs in the Editor only.
+        /// The picker shows the type grayed out with the reason beside it, and refuses it.<br/>
+        /// It runs in the Editor only.
         /// </summary>
         public virtual string GetDisabledReason(Type type) {
             return null;

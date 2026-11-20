@@ -1,10 +1,10 @@
-using System.Net.Http;
+﻿using System.Net.Http;
 
 namespace RiseOn.Utils.Network {
     internal static class NetworkHttp {
         /// <summary>
         /// One client for the whole assembly: <see cref="HttpClient"/> is meant to be reused, not created per request.
         /// </summary>
-        internal static readonly HttpClient Client = new();
+        internal static readonly HttpClient client = new();
     }
 }

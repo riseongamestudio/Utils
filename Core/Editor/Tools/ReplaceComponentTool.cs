@@ -13,7 +13,7 @@ namespace RiseOn.Utils.Editor {
 
         private static readonly List<Component> handlingComponents = new();
 
-        private static readonly HashSet<string> IgnoredProperties = new() {
+        private static readonly HashSet<string> ignoredProperties = new() {
             "m_Script"
           , "m_ObjectHideFlags"
           , "m_CorrespondingSourceObject"
@@ -125,7 +125,7 @@ namespace RiseOn.Utils.Editor {
             if (!srcProp.Next(true)) return;
 
             do {
-                if (IgnoredProperties.Contains(srcProp.name)) continue;
+                if (ignoredProperties.Contains(srcProp.name)) continue;
 
                 if (target.FindProperty(srcProp.name) is not { } targetProp) continue;
 

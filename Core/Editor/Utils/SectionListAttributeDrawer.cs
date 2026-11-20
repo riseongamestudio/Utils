@@ -197,7 +197,9 @@ namespace RiseOn.Utils.Editor {
             GUIHelper.RequestRepaint();
         }
 
-        private static bool IsNone(TElement value) => EqualityComparer<TElement>.Default.Equals(value, default);
+        private static bool IsNone(TElement value) {
+            return EqualityComparer<TElement>.Default.Equals(value, default);
+        }
 
         // As Unity's own list takes an object: one of the type, or a game object's first component of it.
         private static TElement TakeObject(Object obj) {

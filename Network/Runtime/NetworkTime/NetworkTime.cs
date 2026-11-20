@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -233,7 +233,7 @@ namespace RiseOn.Utils.Network {
 
                     try {
                         using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
-                        using (var response = await NetworkHttp.Client.SendAsync(
+                        using (var response = await NetworkHttp.client.SendAsync(
                                    request, HttpCompletionOption.ResponseHeadersRead, attemptCancellation.Token).ConfigureAwait(false)) {
                             if (!response.Headers.Date.HasValue) {
                                 throw new InvalidOperationException($"HTTP response from '{uri}' does not contain Date header.");

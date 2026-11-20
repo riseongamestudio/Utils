@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 
 namespace RiseOn.Utils {
@@ -8,7 +8,7 @@ namespace RiseOn.Utils {
         public Type DefaultType { get; }
 
         public EnumLabelAttribute(Type defaultType = null) {
-            if (defaultType is not null && !defaultType.IsEnum) {
+            if (defaultType != null && !defaultType.IsEnum) {
                 throw new ArgumentException("Default type must be an enum.", nameof(defaultType));
             }
 

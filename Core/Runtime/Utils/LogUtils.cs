@@ -1,12 +1,10 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace RiseOn.Utils {
     /// <summary>
-    /// The Debug.Log family as extensions on the value to return, so a guard clause fits on one line:<br/>
-    /// <c>if (isOpen) return UniTask.CompletedTask.WithLogWarning("Already open.", this);</c><br/>
-    /// Each one logs exactly as its Debug counterpart does, assertions included, then hands back the value.<br/>
+    /// The Debug.Log family as extensions on the value to return, so a guard clause fits on one line: <c>if (isOpen) return UniTask.CompletedTask.WithLogWarning("Already open.", this);</c> Each one logs exactly as its Debug counterpart does, assertions included, then hands back the value.<br/>
     /// Hidden from the Console callstack when Strip logging callstack is on, so the log points at the caller.
     /// </summary>
     public static class LogUtils {

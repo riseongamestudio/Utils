@@ -1,4 +1,4 @@
-namespace RiseOn.Utils.Renderers {
+﻿namespace RiseOn.Utils.Renderers {
     public enum PivotOverrideMode {
         Unchanged
       , Center

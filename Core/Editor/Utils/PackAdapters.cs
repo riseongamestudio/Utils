@@ -28,9 +28,7 @@ namespace RiseOn.Utils.Editor {
     }
 
     /// <summary>
-    /// A pack's adapters on its settings page, as the Package Manager window has packages: each one's version in the project, Install at a
-    /// version picked from the core's registry, Update, Uninstall, and Update All; while the core is a local folder, an adapter installs from
-    /// the folder beside it.<br/>
+    /// A pack's adapters on its settings page, as the Package Manager window has packages: each one's version in the project, Install at a version picked from the core's registry, Update, Uninstall, and Update All; while the core is a local folder, an adapter installs from the folder beside it.<br/>
     /// The versions are read once a session, from the first <see cref="Load"/>, and again from <see cref="Reload"/>.
     /// </summary>
     public sealed class PackAdapters {
@@ -92,8 +90,7 @@ namespace RiseOn.Utils.Editor {
         public PackageRow Row(PackAdapter adapter) => PackageInfo.FindForPackageName(adapter.Package) is { } package ? Installed(adapter, package) : Missing(adapter);
 
         /// <summary>
-        /// An adapter in the project: its version, the newest, Update, and Uninstall; Uninstall only while the manifest names it, as the Package
-        /// Manager removes only what the manifest names.
+        /// An adapter in the project: its version, the newest, Update, and Uninstall; Uninstall only while the manifest names it, as the Package Manager removes only what the manifest names.
         /// </summary>
         /// <param name="uninstall">What Uninstall does, such as asking first; null removes the package.</param>
         public PackageRow Installed(PackAdapter adapter, PackageInfo package, Action uninstall = null) {
@@ -121,7 +118,9 @@ namespace RiseOn.Utils.Editor {
                                 , installVersion: version => Install(adapter, version, "Installing"));
         }
 
-        private PackageInfo Core() => PackageInfo.FindForAssembly(core.Assembly);
+        private PackageInfo Core() {
+            return PackageInfo.FindForAssembly(core.Assembly);
+        }
 
         private void Install(PackAdapter adapter, string version, string verb) {
             PackageJobs.Change(Owner, $"{verb} {adapter.Name}", new[] { version == null ? adapter.Package : $"{adapter.Package}@{version}" }, null);

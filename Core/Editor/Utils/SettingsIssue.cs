@@ -6,8 +6,7 @@ using Object = UnityEngine.Object;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
-    /// Something a pack's setup lacks: a box at the top of its settings page, with a button that fixes it and one that goes to the field to fix by hand,
-    /// and, when <see cref="Blocking"/>, a reason the pack's build check stops the build.
+    /// Something a pack's setup lacks: a box at the top of its settings page, with a button that fixes it and one that goes to the field to fix by hand, and, when <see cref="Blocking"/>, a reason the pack's build check stops the build.
     /// </summary>
     public sealed class SettingsIssue {
         /// <summary>The build target it concerns, or <see cref="BuildTarget.NoTarget"/> for every target.</summary>
@@ -38,7 +37,9 @@ namespace RiseOn.Utils.Editor {
             FieldPath  = fieldPath;
         }
 
-        public bool Concerns(BuildTarget target) => Target is BuildTarget.NoTarget || Target == target;
+        public bool Concerns(BuildTarget target) {
+            return Target is BuildTarget.NoTarget || Target == target;
+        }
 
         /// <summary>Its box, the target's name first when it concerns one, its buttons at the end: the fix, then Edit.</summary>
         public void Draw() {

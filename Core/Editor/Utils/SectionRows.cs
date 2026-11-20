@@ -16,12 +16,12 @@ namespace RiseOn.Utils.Editor {
     /// A section inside an item keeps its own background: the item's stripe goes around it.<br/>
     /// An item that can move has a drag handle on its left, and one that can be removed an x on its right, in squares of one size mirrored at the bar's ends; both are level with the item's first row.<br/>
     /// A drag moves: the dragged item follows the pointer above the others, which glide aside to open the gap it will land in.<br/>
-    /// A list that takes drops opens such a gap for objects dragged from elsewhere, such as assets from the Project window, and they land there:
-    /// over the handle's column, the x's, the edge between two items, past the last item or in the gap itself. Over an item's content, the drag is left to its fields,
-    /// so an object field under the pointer takes the objects itself, as in Unity's lists.<br/>
-    /// An item's own drawer can lay out its first row with <see cref="MarkFirstRow(Rect)"/>, which keeps only that row clear of the handle and the x, the rows below starting under the handle's middle;
-    /// otherwise the whole item keeps clear of them. The values line up with the page's fields either way.<br/>
-    /// Moves and removals run after the list is drawn, so its items never change midway. One per list drawn, as it keeps the drag between events.
+    /// A list that takes drops opens such a gap for objects dragged from elsewhere, such as assets from the Project window, and they land there: over the handle's column, the x's, the edge between two items, past the last item or in the gap itself.<br/>
+    /// Over an item's content, the drag is left to its fields, so an object field under the pointer takes the objects itself, as in Unity's lists.<br/>
+    /// An item's own drawer can lay out its first row with <see cref="MarkFirstRow(Rect)"/>, which keeps only that row clear of the handle and the x, the rows below starting under the handle's middle; otherwise the whole item keeps clear of them.<br/>
+    /// The values line up with the page's fields either way.<br/>
+    /// Moves and removals run after the list is drawn, so its items never change midway.<br/>
+    /// One per list drawn, as it keeps the drag between events.
     /// </summary>
     /// <example><code>
     /// using (var section = Section.Foldout("MyPack.Items", "Items", buttons: 1, padded: false)) {
@@ -142,7 +142,7 @@ namespace RiseOn.Utils.Editor {
             }
 
             // In an item of another list, which gives it its inset; a section drawn in the item between them frames it anew, so it takes its own.
-            var isNested = slots.Count > 0 && slots.Peek().sections == Section.Depth;
+            var isNested = slots.Count > 0 && slots.Peek().Sections == Section.Depth;
             if (!isNested) {
                 root = this;
                 view = CurrentView();
@@ -266,10 +266,10 @@ namespace RiseOn.Utils.Editor {
 
             // Only the outermost section in the item: one inside it is inside its frame already.
             var slot   = slots.Peek();
-            var inset  = new FrameInset(frame, slot.itemRect);
-            if (slot.frames.Any(outer => outer.Contains(frame, slot.itemRect))) return;
+            var inset  = new FrameInset(frame, slot.ItemRect);
+            if (slot.Frames.Any(outer => outer.Contains(frame, slot.ItemRect))) return;
 
-            slot.frames.Add(inset);
+            slot.Frames.Add(inset);
         }
 
         // A section's frame by its distance from the item's four edges.
@@ -286,7 +286,9 @@ namespace RiseOn.Utils.Editor {
                 bottom = item.yMax - frame.yMax;
             }
 
-            public Rect In(Rect item) => Rect.MinMaxRect(item.xMin + left, item.yMin + top, item.xMax - right, item.yMax - bottom);
+            public Rect In(Rect item) {
+                return Rect.MinMaxRect(item.xMin + left, item.yMin + top, item.xMax - right, item.yMax - bottom);
+            }
 
             public bool Contains(Rect frame, Rect item) {
                 var own = In(item);
@@ -307,13 +309,12 @@ namespace RiseOn.Utils.Editor {
         }
 
         /// <summary>
-        /// Puts the drag handle and the x of the item being drawn level with <paramref name="row"/>, its first row, and returns the row clear of them;<br/>
-        /// an item's drawer calls it with its first row. Outside a list, or for any later row, it returns the row as it is.<br/>
-        /// The row is placed across by the item, not by the layout: Unity's groups with no style, such as Odin's around each property, take the smallest margin<br/>
-        /// of what they hold, so a field row would sit a margin further in once its item opens on a list, which has none.
+        /// Puts the drag handle and the x of the item being drawn level with <paramref name="row"/>, its first row, and returns the row clear of them; an item's drawer calls it with its first row.<br/>
+        /// Outside a list, or for any later row, it returns the row as it is.<br/>
+        /// The row is placed across by the item, not by the layout: Unity's groups with no style, such as Odin's around each property, take the smallest margin of what they hold, so a field row would sit a margin further in once its item opens on a list, which has none.
         /// </summary>
         public static Rect MarkFirstRow(Rect row) {
-            if (slots.Count is 0 || slots.Peek().isMarked) return row;
+            if (slots.Count is 0 || slots.Peek().IsMarked) return row;
 
             var slot = slots.Peek();
             row = slot.Span(row);
@@ -322,11 +323,10 @@ namespace RiseOn.Utils.Editor {
         }
 
         /// <summary>
-        /// <see cref="MarkFirstRow(Rect)"/> for a row laid out as a field: split into the label column, returned as <paramref name="prefix"/>, and the value column, returned;<br/>
-        /// split where the rows below split, so the value columns line up, then each kept clear of the handle and the x.
+        /// <see cref="MarkFirstRow(Rect)"/> for a row laid out as a field: split into the label column, returned as <paramref name="prefix"/>, and the value column, returned; split where the rows below split, so the value columns line up, then each kept clear of the handle and the x.
         /// </summary>
         public static Rect MarkFirstRow(Rect row, out Rect prefix) {
-            if (slots.Count is 0 || slots.Peek().isMarked) return SirenixEditorGUI.PrefixRect(row, out prefix);
+            if (slots.Count is 0 || slots.Peek().IsMarked) return SirenixEditorGUI.PrefixRect(row, out prefix);
 
             var slot = slots.Peek();
             row = slot.Span(row);
@@ -347,16 +347,16 @@ namespace RiseOn.Utils.Editor {
             // or the next list would take itself for one nested in this item. Unity drops the layout groups itself.
             try {
                 GUILayout.BeginVertical(content);
-                drawItem(slot.index);
+                drawItem(slot.Index);
                 GUILayout.EndVertical();
             } finally {
                 GUIHelper.PopLabelWidth();
                 GUIHelper.PopHierarchyMode();
                 slots.Pop();
-                if (isRepaint) sectionFrames[(root.view, slot.index)] = slot.frames;
+                if (isRepaint) sectionFrames[(root.view, slot.Index)] = slot.Frames;
             }
 
-            if (!slot.isMarked) slot.Mark(new Rect(slot.itemRect.x, slot.itemRect.y + Section.RowPadding, slot.itemRect.width, EditorGUIUtility.singleLineHeight));
+            if (!slot.IsMarked) slot.Mark(new Rect(slot.ItemRect.x, slot.ItemRect.y + Section.RowPadding, slot.ItemRect.width, EditorGUIUtility.singleLineHeight));
         }
 
         // The dragged item over the list, where the pointer has taken it, in an area of its own drawn after every other item.
@@ -451,7 +451,9 @@ namespace RiseOn.Utils.Editor {
             if (isGliding) RepaintView();
         }
 
-        private static int CurrentView() => GUIHelper.CurrentWindow is { } window ? window.GetInstanceID() : 0;
+        private static int CurrentView() {
+            return GUIHelper.CurrentWindow is { } window ? window.GetInstanceID() : 0;
+        }
 
         // The view the list is in, alone: every view of the editor at each frame of a glide would slow the glide itself.
         private static void RepaintView() {
@@ -486,8 +488,7 @@ namespace RiseOn.Utils.Editor {
         }
 
         /// <summary>
-        /// Whether a drag from elsewhere is over, as far as an event of this view tells: a drag that ends in another view, or is given up there,
-        /// sends this one nothing more, so a list or section lit for it learns from the pointer's next plain event, or a repaint once the drag holds nothing.
+        /// Whether a drag from elsewhere is over, as far as an event of this view tells: a drag that ends in another view, or is given up there, sends this one nothing more, so a list or section lit for it learns from the pointer's next plain event, or a repaint once the drag holds nothing.
         /// </summary>
         public static bool HasDragEnded(EventType type) {
             return type is EventType.MouseMove or EventType.MouseDown or EventType.MouseUp or EventType.MouseLeaveWindow
@@ -617,62 +618,64 @@ namespace RiseOn.Utils.Editor {
             }, search: choices.Count > 12);
         }
 
-        private static string Article(string word) => word.Length > 0 && "aeiouAEIOU".IndexOf(word[0]) >= 0 ? "an" : "a";
+        private static string Article(string word) {
+            return word.Length > 0 && "aeiouAEIOU".IndexOf(word[0]) >= 0 ? "an" : "a";
+        }
 
         private sealed class Slot {
-            public readonly SectionRows list;
-            public readonly Rect        itemRect;
-            public readonly int         index;
-            public          bool        isMarked;
+            public readonly SectionRows Owner;
+            public readonly Rect        ItemRect;
+            public readonly int         Index;
+            public          bool        IsMarked;
 
             // How many sections were open as the item began.
-            public readonly int sections = Section.Depth;
+            public readonly int Sections = Section.Depth;
 
             // The frames of the sections drawn in the item on this repaint.
-            public readonly List<FrameInset> frames = new();
+            public readonly List<FrameInset> Frames = new();
 
-            public Slot(SectionRows list, Rect itemRect, int index) {
-                this.list     = list;
-                this.itemRect = itemRect;
-                this.index    = index;
+            public Slot(SectionRows owner, Rect itemRect, int index) {
+                Owner    = owner;
+                ItemRect = itemRect;
+                Index    = index;
             }
 
             // The first row across the item, from where its body starts to its inset on the right, as a field row sits in it with nothing else beside.
             public Rect Span(Rect row) {
-                row.xMin = itemRect.x + list.bodyInset;
-                row.xMax = itemRect.xMax - Section.Inset;
+                row.xMin = ItemRect.x + Owner.bodyInset;
+                row.xMax = ItemRect.xMax - Section.Inset;
                 return row;
             }
 
             // A part of the first row, kept clear of the handle's column and the x's.
             public Rect Clear(Rect part) {
-                part.xMin = Mathf.Max(part.xMin, itemRect.x + list.handleColumn);
-                part.xMax = Mathf.Min(part.xMax, itemRect.xMax - list.removeColumn);
+                part.xMin = Mathf.Max(part.xMin, ItemRect.x + Owner.handleColumn);
+                part.xMax = Mathf.Min(part.xMax, ItemRect.xMax - Owner.removeColumn);
                 return part;
             }
 
             // The handle and the x sit in squares of one size at the item's two ends, centered on the row, in line with the bar's buttons.
             public void Mark(Rect row) {
-                isMarked = true;
+                IsMarked = true;
 
-                var line = new Rect(itemRect.x, row.center.y - Section.Height / 2, itemRect.width, Section.Height);
-                if (list.move != null) {
+                var line = new Rect(ItemRect.x, row.center.y - Section.Height / 2, ItemRect.width, Section.Height);
+                if (Owner.move != null) {
                     var handle  = Section.RowHandle(line);
                     var lit     = HoverUtils.Track(handle) && GUI.enabled;
                     var current = Event.current;
-                    if (current.type is EventType.MouseDown && current.button is 0 && handle.Contains(current.mousePosition)) list.StartDrag(index);
+                    if (current.type is EventType.MouseDown && current.button is 0 && handle.Contains(current.mousePosition)) Owner.StartDrag(Index);
                     if (current.type is EventType.Repaint) {
                         EditorGUIUtility.AddCursorRect(handle, MouseCursor.Pan);
-                        Section.Icon(handle, SdfIconType.List, lit || list.dragIndex == index);
+                        Section.Icon(handle, SdfIconType.List, lit || Owner.dragIndex == Index);
                     }
                 }
 
-                if (list.remove == null) return;
+                if (Owner.remove == null) return;
 
                 var button = Section.RowButton(line, 0);
-                var owner  = list;
-                var at     = index;
-                if (Section.IconButton(button, SdfIconType.X, list.removeTooltip)) owner.Later(() => owner.remove(at));
+                var owner  = Owner;
+                var at     = Index;
+                if (Section.IconButton(button, SdfIconType.X, Owner.removeTooltip)) owner.Later(() => owner.remove(at));
             }
         }
     }

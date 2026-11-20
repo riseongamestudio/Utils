@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -30,7 +30,8 @@ namespace RiseOn.Utils.Network {
         };
 
         /// <summary>
-        /// Whether the device has a route out: wifi, ethernet or mobile data is connected. Instant, sends nothing.<br/>
+        /// Whether the device has a route out: wifi, ethernet or mobile data is connected.<br/>
+        /// Instant, sends nothing.<br/>
         /// Reachable in the sense the OS uses: packets could leave the device, not that anything answers them, so a wifi that has lost its internet still counts.<br/>
         /// <see cref="HasNetworkAsync"/> checks that the internet really answers.<br/>
         /// Main thread only.
@@ -86,7 +87,7 @@ namespace RiseOn.Utils.Network {
             static async Task<bool> Probe(Uri uri, CancellationToken cancellationToken) {
                 try {
                     using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
-                    using (var response = await NetworkHttp.Client.SendAsync(
+                    using (var response = await NetworkHttp.client.SendAsync(
                                request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false)) {
                         return response.StatusCode is HttpStatusCode.NoContent;
                     }

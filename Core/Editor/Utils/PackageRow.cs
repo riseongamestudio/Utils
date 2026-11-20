@@ -7,17 +7,18 @@ using UnityEngine;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
-    /// A package a settings page lists, such as an ad network's adapter or one of a pack's adapters: whether it is in the project, at which
-    /// version, and what installs or removes it; <see cref="Draw"/> draws it as a row's value column.
+    /// A package a settings page lists, such as an ad network's adapter or one of a pack's adapters: whether it is in the project, at which version, and what installs or removes it; <see cref="Draw"/> draws it as a row's value column.
     /// </summary>
     public sealed class PackageRow {
         private static GUIStyle missingStyle;
 
         // The widest of a row's buttons, whose width every one takes, so rows' buttons line up whatever they say.
-        private static readonly GUIContent Widest = new("Uninstall");
+        private static readonly GUIContent widest = new("Uninstall");
 
         /// <summary>A row button's width: its text's, at least Uninstall's, so a column of rows' buttons lines up.</summary>
-        public static float ButtonWidth(GUIContent label) => Mathf.Max(EditorStyles.miniButton.CalcSize(label).x, EditorStyles.miniButton.CalcSize(Widest).x);
+        public static float ButtonWidth(GUIContent label) {
+            return Mathf.Max(EditorStyles.miniButton.CalcSize(label).x, EditorStyles.miniButton.CalcSize(widest).x);
+        }
 
         // Room in the version picker beside the longest version, for the list's margins and scroll bar, and its least width, for the search field.
         private const float PickerMargin   = 48;
@@ -78,8 +79,7 @@ namespace RiseOn.Utils.Editor {
         }
 
         /// <summary>
-        /// A row's value column: the version in the project, an arrow to the newest when that is newer, then Install, Update and Uninstall as they
-        /// apply, waiting while <see cref="PackageJobs"/> runs a change.
+        /// A row's value column: the version in the project, an arrow to the newest when that is newer, then Install, Update and Uninstall as they apply, waiting while <see cref="PackageJobs"/> runs a change.
         /// </summary>
         public static void Draw(Rect value, PackageRow row) {
             // Only what can be done: Install while missing, Update while a newer version exists; then Uninstall.

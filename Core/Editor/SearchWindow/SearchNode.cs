@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEditor;
@@ -83,8 +83,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         /// <summary>
-        /// Adds <paramref name="item"/> inside the folders of <paramref name="folderPath"/>, such as <c>Physics/2D</c>, making the ones missing;<br/>
-        /// an empty path adds it here. Folders and items keep the order they are first added in.
+        /// Adds <paramref name="item"/> inside the folders of <paramref name="folderPath"/>, such as <c>Physics/2D</c>, making the ones missing; an empty path adds it here.<br/>
+        /// Folders and items keep the order they are first added in.
         /// </summary>
         /// <returns>The folder it was added in, this node for an empty path.</returns>
         public SearchNode AddInFolder(string folderPath, SearchNode item) {
@@ -129,28 +129,28 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         internal string PlainLabel => plainLabel ??= RichText.Strip(Label);
 
         /// <summary>The folder holding the node, set when its section is built; null at the top.</summary>
-        internal SearchNode Parent;
+        internal SearchNode parent;
 
         /// <summary>The labels of the folders above the node, joined by <c> › </c>, set when its section is built; empty at the top.</summary>
-        internal string Path = string.Empty;
+        internal string path = string.Empty;
 
         /// <summary>The indices in <see cref="PlainLabel"/> of the letters the last search matched, for highlighting; empty when it matched elsewhere.</summary>
-        internal readonly List<int> Matches = new();
+        internal readonly List<int> matchIndices = new();
 
         /// <summary>Length of <see cref="SearchName"/>, the tie-breaker between equal scores: shorter names first.</summary>
         internal int RankLength => searchName?.Length ?? 0;
 
         /// <summary>
         /// Scores the node with Unity Search's fuzzy matcher: the letters of each term in order, not necessarily together, with bonuses for consecutive letters, word starts and capitals, so "pb" finds PickableBehaviour.<br/>
-        /// Every term must match, in the name or in the path of folders above it, so "counter canvas" finds CanvasGroup in the folder Counter;<br/>
-        /// a match in the name ranks first. A folder matches by its name alone, to be opened from the results.
+        /// Every term must match, in the name or in the path of folders above it, so "counter canvas" finds CanvasGroup in the folder Counter; a match in the name ranks first.<br/>
+        /// A folder matches by its name alone, to be opened from the results.
         /// </summary>
         internal bool TryScore(string[] terms, out long score) {
             score = 0;
-            Matches.Clear();
+            matchIndices.Clear();
 
             searchName ??= string.IsNullOrEmpty(SearchName) ? PlainLabel : SearchName;
-            searchKey  ??= Path + "\n" + PlainLabel + "\n" + RichText.Strip(LabelSearch);
+            searchKey  ??= path + "\n" + PlainLabel + "\n" + RichText.Strip(LabelSearch);
             if (searchName.Length == 0) return false;
 
             // Letters are highlighted only while the name searched is the label shown.
@@ -161,9 +161,9 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                 if (FuzzySearch.FuzzyMatch(term, searchName, ref termScore, matches)) {
                     termScore += NameBonus;
                     if (ContainsWord(searchName, term)) termScore += WholeWordBonus;
-                    if (matches != null) Matches.AddRange(matches);
+                    if (matches != null) matchIndices.AddRange(matches);
                 } else if (HasChildren || !FuzzySearch.FuzzyMatch(term, searchKey, ref termScore, null)) {
-                    Matches.Clear();
+                    matchIndices.Clear();
                     return false;
                 }
 
@@ -180,12 +180,12 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             if (!string.IsNullOrEmpty(LabelSearch)) return LabelSearch;
 
             var label = new StringBuilder();
-            if (Path.Length > 0) label.Append("<color=#888888>").Append(RichText.Literal(Path)).Append(" › </color>");
-            if (Matches.Count == 0 || PlainLabel != Label) return label.Append(Label).ToString();
+            if (path.Length > 0) label.Append("<color=#888888>").Append(RichText.Literal(path)).Append(" › </color>");
+            if (matchIndices.Count == 0 || PlainLabel != Label) return label.Append(Label).ToString();
 
             for (var i = 0; i < PlainLabel.Length; i++) {
                 var letter = RichText.Literal(PlainLabel[i].ToString());
-                if (Matches.Contains(i)) label.Append("<b>").Append(letter).Append("</b>");
+                if (matchIndices.Contains(i)) label.Append("<b>").Append(letter).Append("</b>");
                 else label.Append(letter);
             }
 

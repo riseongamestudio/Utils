@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -10,12 +10,11 @@ using Object = UnityEngine.Object;
 namespace RiseOn.Utils.Editor {
     /// <summary>
     /// Replaces the value of a <c>[SerializeReference]</c> field with a new instance of another type, keeping what the two types share.<br/>
-    /// Every serialized field the new type has, with the name of a serialized field of the old value and a type that value fits, is carried over as it is:<br/>
-    /// a held reference moves across rather than being rebuilt, so whatever the old value held stays.<br/>
+    /// Every serialized field the new type has, with the name of a serialized field of the old value and a type that value fits, is carried over as it is: a held reference moves across rather than being rebuilt, so whatever the old value held stays.<br/>
     /// Other fields of the same object that shared the old value are pointed to the new one; a <c>[SerializeReference]</c> value cannot be shared across objects.
     /// </summary>
     public static class ReplaceTypeTool {
-        private const BindingFlags FIELD_FLAGS = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+        private const BindingFlags FieldFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 
         /// <param name="targets">The objects whose field is replaced, as many as are selected.</param>
         /// <param name="propertyPath">The Unity property path of the field in each of them.</param>
@@ -74,7 +73,7 @@ namespace RiseOn.Utils.Editor {
 
             static FieldInfo FindSerializedField(Type type, string name) {
                 for (var current = type; current != null; current = current.BaseType) {
-                    var field = current.GetField(name, FIELD_FLAGS);
+                    var field = current.GetField(name, FieldFlags);
                     if (field != null) return IsSerialized(field) ? field : null;
                 }
 
@@ -83,7 +82,7 @@ namespace RiseOn.Utils.Editor {
 
             static IEnumerable<FieldInfo> ListSerializedFields(Type type) {
                 for (var current = type; current != null; current = current.BaseType) {
-                    foreach (var field in current.GetFields(FIELD_FLAGS)) {
+                    foreach (var field in current.GetFields(FieldFlags)) {
                         if (IsSerialized(field)) yield return field;
                     }
                 }

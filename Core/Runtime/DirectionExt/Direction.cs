@@ -1,4 +1,4 @@
-namespace RiseOn.Utils {
+﻿namespace RiseOn.Utils {
     public enum Direction {
         Left
       , Right
