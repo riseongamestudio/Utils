@@ -131,7 +131,7 @@ namespace RiseOn.Utils.Editor {
         /// </param>
         public static Section Foldout(string key, string title, string tooltip = null, bool open = true, int buttons = 0, bool padded = true, bool barValue = false) {
             Begin(out var bar);
-            open = EditorGUI.Foldout(Title(bar, buttons, barValue), SessionState.GetBool(key, open), new GUIContent(title, tooltip), true);
+            open = Fold(Title(bar, buttons, barValue), SessionState.GetBool(key, open), new GUIContent(title, tooltip));
             SessionState.SetBool(key, open);
             return new Section(bar, barValue ? BarValueRect(bar, buttons) : default, key, open, padded);
         }
@@ -156,7 +156,7 @@ namespace RiseOn.Utils.Editor {
         public static Section Foldout(InspectorProperty property, string title, string tooltip = null, int buttons = 0, bool padded = true, bool barValue = false, InspectorProperty toggle = null) {
             Begin(out var bar);
             var content = new GUIContent(title, tooltip);
-            var open    = toggle == null ? property.State.Expanded = EditorGUI.Foldout(Title(bar, buttons, barValue), property.State.Expanded, content, true) : ToggleTitle(bar, buttons, property, toggle, content);
+            var open    = toggle == null ? property.State.Expanded = Fold(Title(bar, buttons, barValue), property.State.Expanded, content) : ToggleTitle(bar, buttons, property, toggle, content);
             // Every draw: an Alt+click on an outer section sets this one's state without its bar.
             SessionState.SetBool(Key(property), property.State.Expanded);
             return new Section(bar, barValue ? BarValueRect(bar, buttons) : default, $"{RuntimeHelpers.GetHashCode(property.Tree)}/{property.Path}", open, padded);
@@ -172,7 +172,7 @@ namespace RiseOn.Utils.Editor {
             var on     = !locked && entry.WeakSmartValue is true;
             if (locked && toggle.GetAttribute<TooltipAttribute>() is { } why) title = new GUIContent(title.text, why.tooltip);
             using (new EditorGUI.DisabledScope(!on)) {
-                var open = EditorGUI.Foldout(new Rect(line.x, line.y, arrow, line.height), on && property.State.Expanded, GUIContent.none, true);
+                var open = Fold(new Rect(line.x, line.y, arrow, line.height), on && property.State.Expanded, GUIContent.none);
                 if (on) property.State.Expanded = open;
             }
 
@@ -465,6 +465,16 @@ namespace RiseOn.Utils.Editor {
             var width = EditorGUIUtility.labelWidth;
             EditorGUIUtility.labelWidth = width - Inset;
             return width;
+        }
+
+        // The bar's foldout, its arrow inside the rect: an Inspector turns hierarchy mode on, which moves a foldout's arrow out to the left of
+        // its rect by the style's padding, past the bar's edge; a settings page has it off.
+        private static bool Fold(Rect rect, bool open, GUIContent title) {
+            var hierarchy = EditorGUIUtility.hierarchyMode;
+            EditorGUIUtility.hierarchyMode = false;
+            open = EditorGUI.Foldout(rect, open, title, true);
+            EditorGUIUtility.hierarchyMode = hierarchy;
+            return open;
         }
 
         // With a value on the bar, the title keeps to the label column.

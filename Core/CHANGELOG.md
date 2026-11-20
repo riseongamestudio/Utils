@@ -4,6 +4,13 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.16] - 2026-11-20
+
+### Sửa
+
+- Mũi tên gập của `Section` (và `[SectionGroup]` gập được hay có toggle) nằm trong thanh cả trong
+  Inspector của component; trước đó Inspector bật `hierarchyMode` nên mũi tên lòi ra ngoài bên trái.
+
 ## [1.0.15] - 2026-11-19
 
 ### Thêm
