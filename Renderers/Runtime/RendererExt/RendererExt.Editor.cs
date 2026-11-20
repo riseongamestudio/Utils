@@ -2,15 +2,15 @@
 
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using RiseOn.Utils.Editor;
 using Sirenix.OdinInspector.Editor;
-using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace RiseOn.Utils.Renderers {
     public partial class RendererExt<TRenderer> where TRenderer : Renderer {
-        private Editor rdrEditor;
+        private UnityEditor.Editor rdrEditor;
         private Object[] rdrTargets = new Object[1];
 
         private static readonly List<RendererExt<TRenderer>> validTargets = new(1);
@@ -34,26 +34,18 @@ namespace RiseOn.Utils.Renderers {
             }
 
             if (invalidTargets.Count > 0) {
-                SirenixEditorGUI.ErrorMessageBox(isSingle
-                    ? $"{nameof(Renderer)} is required!"
-                    : $"{nameof(Renderer)} is missing on {invalidTargets.Count} object(s)!");
-
-                if (GUILayout.Button(isSingle
-                    ? $"Create {nameof(Renderer)}"
-                    : $"Create Missing {nameof(Renderer)}s ({invalidTargets.Count})")) {
+                var message = isSingle ? $"No {nameof(Renderer)} is set." : $"{invalidTargets.Count} objects have no {nameof(Renderer)}.";
+                if (HelpBoxUtils.Draw(message, MessageType.Error, new GUIContent(isSingle ? "Create" : $"Create {invalidTargets.Count}"))) {
                     foreach (var invalidTarget in invalidTargets) invalidTarget.CreateRenderer();
                 }
             }
 
             if (indirectTargets.Count > 0) {
-                SirenixEditorGUI.WarningMessageBox(isSingle
-                    ? $"{nameof(Renderer)} needs to be direct child of this to work property!"
-                    : $"{nameof(Renderer)} is not a direct child on {indirectTargets.Count} object(s)!");
-
-                if (GUILayout.Button(isSingle
-                    ? $"Set {nameof(Renderer)}'s parent to this"
-                    : $"Fix indirect {nameof(Renderer)}s ({indirectTargets.Count})")) {
-                    foreach (var invalidTarget in indirectTargets) invalidTarget.SetParentRdrThenUpdate(resetScale: false);
+                var message = isSingle
+                    ? $"The {nameof(Renderer)} is not a direct child of this object, which it needs to be to work."
+                    : $"{indirectTargets.Count} {nameof(Renderer)}s are not direct children of their objects, which they need to be to work.";
+                if (HelpBoxUtils.Draw(message, MessageType.Warning, new GUIContent(isSingle ? "Make it a child" : $"Fix {indirectTargets.Count}"))) {
+                    foreach (var indirectTarget in indirectTargets) indirectTarget.SetParentRdrThenUpdate(resetScale: false);
                 }
             }
 
@@ -66,7 +58,7 @@ namespace RiseOn.Utils.Renderers {
                     rdrTargets[i] = validTargets[i].Rdr;
                 }
 
-                Editor.CreateCachedEditor(rdrTargets, null, ref rdrEditor);
+                UnityEditor.Editor.CreateCachedEditor(rdrTargets, null, ref rdrEditor);
                 rdrEditor.serializedObject.Update();
 
                 EditorGUILayout.BeginVertical();

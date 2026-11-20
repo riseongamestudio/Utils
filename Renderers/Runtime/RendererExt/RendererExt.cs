@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using RiseOn.Utils;
 using Sirenix.OdinInspector;
 using Debug = UnityEngine.Debug;
 
@@ -58,8 +59,7 @@ namespace RiseOn.Utils.Renderers {
 
         #region PROPERTIES
 
-        [Title("EXTENDED CONFIGS", titleAlignment: TitleAlignments.Centered)]
-        [SerializeField, OnValueChanged(nameof(UpdateRdrPosFromPivot)), OnValueChanged(nameof(TryBlockRdrTransEditor))]
+        [SerializeField, SectionGroup("Renderer"), OnValueChanged(nameof(UpdateRdrPosFromPivot)), OnValueChanged(nameof(TryBlockRdrTransEditor))]
         private TRenderer rdr;
 
         public TRenderer Rdr {
@@ -70,13 +70,13 @@ namespace RiseOn.Utils.Renderers {
             }
         }
 
-        [SerializeField, OnValueChanged(nameof(UpdateRdrPosFromPivot))]
+        [SerializeField, SectionGroup("Renderer"), OnValueChanged(nameof(UpdateRdrPosFromPivot))]
         private PivotOverrideMode pivot;
 
         public PivotOverrideMode Pivot { get => pivot; set => SetThisPropThenUpdate(ref pivot, value); }
 
         [HideLabel, Indent, ShowIf(nameof(Pivot), PivotOverrideMode.Custom)]
-        [SerializeField, OnValueChanged(nameof(UpdateRdrPosFromPivot))]
+        [SerializeField, SectionGroup("Renderer"), OnValueChanged(nameof(UpdateRdrPosFromPivot))]
         private Vector2 customPivot = new(0.5f, 0.5f);
 
         public Vector2 CustomPivot { get => customPivot; set => SetThisPropThenUpdate(ref customPivot, value); }

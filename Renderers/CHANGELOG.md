@@ -4,6 +4,14 @@ Mọi thay đổi đáng kể của `com.riseon.utils.renderers` được ghi �
 theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.4] - 2026-11-20
+
+### Đổi
+
+- Inspector của `RendererExt`: field của nó là mục *Renderer* như trang settings RiseOn; báo thiếu
+  renderer con và renderer không phải con trực tiếp bằng `HelpBoxUtils`, nút sửa nằm trong hộp.
+  Cần `com.riseon.utils` 1.0.15.
+
 ## [1.0.3] - 2026-10-14
 
 ### Đổi
