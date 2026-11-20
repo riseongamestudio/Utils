@@ -3,8 +3,8 @@
 Tiện ích mạng: lấy giờ hiện tại từ mạng, không phụ thuộc đồng hồ của máy, và
 kiểm tra máy có vào được internet thật hay không.
 
-Package `com.riseon.utils.network`, namespace `RiseOn.Utils.Network`. Không phụ
-thuộc package nào khác, chỉ dùng module có sẵn của Unity.
+Package `com.riseon.utils.network`, namespace `RiseOn.Utils.Network`. Ngoài
+Odin, không phụ thuộc package nào khác, chỉ dùng module có sẵn của Unity.
 
 ## Mục lục
 
@@ -20,9 +20,11 @@ thuộc package nào khác, chỉ dùng module có sẵn của Unity.
 | Phụ thuộc | Cách có | Dùng cho |
 |---|---|---|
 | Unity 6000.3 | | Bản đang dùng để phát triển |
+| [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Pack không dùng Odin, nhưng mọi pack RiseOn đều cần nó, để cài đặt như nhau |
 | `com.unity.modules.unitywebrequest` | Tự cài theo `package.json`, có sẵn trong Unity | Gửi request qua trình duyệt trên WebGL |
 
-Không cần Odin hay package RiseOn nào khác.
+Odin không có trên UPM nên phải cài vào project trước. Thiếu Odin thì project
+báo một lỗi từ `RiseOn.Utils.Network.Requirements`.
 
 Trên WebGL, trình duyệt không có UDP (NTP) và chỉ cho đọc response của domain
 cho phép (CORS), nên cả hai hàm đi qua HTTPS tới các endpoint cho phép đọc. Trên
@@ -46,7 +48,7 @@ sẵn; nếu không, đặt *Internet Access* = *Require* trong Player Settings.
     }
   ],
   "dependencies": {
-    "com.riseon.utils.network": "1.0.2"
+    "com.riseon.utils.network": "2.0.0"
   }
 }
 ```
@@ -54,7 +56,7 @@ sẵn; nếu không, đặt *Internet Access* = *Require* trong Player Settings.
 **Git URL**:
 
 ```
-https://github.com/riseongamestudio/Utils.git?path=/Network#com.riseon.utils.network/1.0.2
+https://github.com/riseongamestudio/Utils.git?path=/Network#com.riseon.utils.network/2.0.0
 ```
 
 **Thư mục local**: `"com.riseon.utils.network": "file:D:/path/to/Utils/Network"`.
