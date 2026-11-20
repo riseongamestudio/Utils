@@ -200,7 +200,7 @@ Ba attribute ở `RiseOn.Utils` (runtime, chỉ có trong Editor) đặt mục c
 |---|---|
 | `[SectionGroup("Title")]` | Gom các member mang nó thành một mục, thay cho `[FoldoutGroup]` của Odin |
 | `[SectionList]` | Một list hay mảng thành một mục: + trên thanh thêm, × ở dòng xóa, kéo tay nắm ở đầu dòng để đổi chỗ, kéo object từ Project hay Hierarchy vào để chèn (list object hay list có `Drop`). Thanh lấy nhãn và tooltip của member |
-| `[SectionReference]` | Một member `[SerializeReference]` mà Editor tự chọn lớp (như lớp quản lý duy nhất của game kế thừa từ lớp gốc của pack) thành một mục gập mở: script của giá trị nằm trên thanh, chỉ đọc, các field của nó bên trong. Thanh không có ô chọn kiểu |
+| `[SectionReference]` | Một member `[SerializeReference]` mà Editor tự chọn lớp (như lớp quản lý duy nhất của game kế thừa từ lớp gốc của pack) thành một mục gập mở: script của giá trị nằm trên thanh, chỉ đọc, các field của nó bên trong. Giá trị không có field nào để hiện thì mục chỉ có thanh, không có mũi tên gập mở. Thanh không có ô chọn kiểu |
 
 Tùy chọn của `[SectionGroup]`:
 
@@ -210,7 +210,7 @@ Tùy chọn của `[SectionGroup]`:
 | `Closed` | Mục `Foldable` gập sẵn lần đầu trong phiên |
 | `Paddingless` | Nội dung chạm viền, cho nội dung có khung riêng như tab |
 | `Tooltip` | Lời giải thích hiện khi rê chuột lên thanh |
-| `Toggle` | Tên một member `bool` trong mục, vẽ thành ô tick trên thanh trước tiêu đề: cho mục là một tính năng bật tắt (như bóng của Outline2D). Mục chỉ mở khi ô được tick, tick thì mở ra; mục thành gập mở được |
+| `Toggle` | Tên một member `bool` trong mục, vẽ thành ô tick trên thanh trước tiêu đề: cho mục là một tính năng bật tắt (như bóng của Outline2D). Bấm ô vuông thì bật tắt, tick thì mục mở ra; bấm mũi tên hay tiêu đề thì chỉ gập mở, khi ô đang tick, như header của một override trong Volume của Unity. Ô không tick thì mục đóng |
 
 ```csharp
 [SectionGroup("Shadow", Toggle = nameof(shadowEnabled))]
@@ -228,6 +228,8 @@ Tùy chọn của `[SectionList]`:
 | `Drop` | Tên method hay biểu thức Odin biến object kéo vào list thành phần tử, tìm trên đối tượng chứa list, object là tham số `obj` (`UnityEngine.Object`); trả mặc định hay `null` là không nhận. Cho list của kiểu bọc object, như `ListSerObject` |
 | `Pick` | Tên member hay biểu thức Odin trả `Type` của object mà + chọn, như interface phần tử bọc; đi cùng `Drop`, nó biến object được chọn thành phần tử |
 | `Foldable`, `Closed` | Như của `[SectionGroup]` |
+| `TitleField` | Tên một member `string` của đối tượng chứa list, vẽ thành ô nhập ở chỗ tiêu đề, sau mũi tên; mục thành gập mở được, chỉ mũi tên gập mở. Cho list đứng thay đối tượng chứa nó, khi đối tượng là một phần tử của list ngoài và có tên trên trang (như một plan gồm các bước). Dev viết drawer cho đối tượng chỉ vẽ list (ví dụ `Property.Children["steps"].Draw(null)`); không thì member này và `BarField` hiện thêm thành dòng riêng |
+| `BarField` | Tên một member của đối tượng chứa list, vẽ ở cột giá trị trên thanh, kèm nhãn của nó (cột nhãn vừa đủ chữ); tiêu đề chỉ chiếm cột nhãn của trang. Cho giá trị duy nhất đi kèm list, như weight của plan |
 
 List của một enum là một tập hợp: + chỉ đưa các giá trị list chưa có, dòng giữ giá trị của nó và
 hiện tên, các giá trị theo thứ tự của enum, không kéo đổi chỗ.
@@ -287,6 +289,7 @@ using (var section = Section.Foldout("MyPack.Prompt", "Prompt", barValue: true))
 | `padded` | `false` khi nội dung có khung riêng (tab) hoặc là dòng của `SectionRows`, chạm viền |
 | `barValue` | Tiêu đề chỉ chiếm cột nhãn, cột giá trị trên thanh là `section.BarValue`, kết thúc sát nút đầu tiên như giá trị của một dòng kết thúc sát nút × |
 | `barOnly` | Mục chỉ có thanh, hình như mục đang gập: cho một mục đứng giữa các mục gập mở cùng loại |
+| `titleField` | Chỉ ở `Section.Foldout(property, ...)`: `InspectorProperty` của một member `string`, vẽ thành ô nhập ở chỗ tiêu đề, sau mũi tên, rộng theo chữ (tối thiểu 120 để tên thường dài ngắn vẫn thẳng hàng); chỉ mũi tên gập mở, bấm vào ô là sửa chữ. Tooltip của ô lấy `[Tooltip]` của member; `title` không vẽ |
 
 Vẽ mọi thứ trên thanh (nút, `BarValue`) trước, rồi mới đọc `section.Open`: lần đọc đầu bắt đầu
 phần nội dung, phần này mờ dần và cắt theo khi gập mở. Vẽ thanh sau đó thì giá trị trên thanh
@@ -391,8 +394,14 @@ tabs.Draw(page => DrawPlatform(page));
 | `PlatformFieldUtils.Draw(label, android, ios)` | Một giá trị Android và một giá trị iOS dưới một nhãn, trên một dòng: mỗi ô sau tên của nó, hai ô rộng bằng nhau. Cửa sổ hẹp tới mức mỗi ô dưới `FieldMinWidth` (250) thì mỗi ô một dòng; khi chuyển giữa một dòng và hai dòng, ô Android giãn hoặc co, ô iOS trượt tới chỗ mới và các dòng bên dưới trượt theo, cùng thời gian với cú trượt tab của `SectionTabs`; cửa sổ hay trang vừa mở thì cặp ô vào thẳng dạng đúng, không trượt (khung hình đầu theo bề rộng lần trước của cùng nhãn, chưa có thì một dòng). Bản `Draw(rect, ...)` cho dòng tự đặt (như thanh của mục) luôn một dòng; hết chỗ cho tên thì hai tên chia nhau, không đè lên nhau. Bản có thêm `toggle, ref androidOn, ref iosOn` gắn một nút bật/tắt liền bên phải mỗi ô, riêng cho từng nền tảng (như nút **Test** của ô unit id quảng cáo); nút liền vào cạnh phải ô nên đọc là của ô đó, hai cụm vẫn cách nhau như khi không có nút, và `FieldMinWidth` tính phần ô chữ, không gồm nút |
 | `HelpBoxUtils.Draw(message, type, button)` | Hộp báo chữ cỡ nhãn của trang, icon cao một dòng, nút sửa (nếu có) nằm trong hộp ở đầu phải; trả `true` khi bấm nút |
 | `HelpBoxUtils.Draw(message, type, (content, enabled), ...)` | Như trên với nhiều nút cạnh nhau ở đầu phải, nút đầu tiên bên trái; trả số thứ tự nút được bấm, `-1` khi không bấm. Nút có `enabled` là `false` thì mờ, tooltip của nó nên nói lý do |
+| `SettingsIssue` | Một lỗi cấu hình của pack: nền tảng nó liên quan (`Target`, `NoTarget` là mọi nền tảng), có chặn build không (`Blocking`), lời báo, nút sửa (`FixLabel`, `Fix`) và ô cần sửa tay (`FieldAsset`, `FieldPath` là đường dẫn serialize như `devKey`). `Draw()` vẽ hộp báo, tên nền tảng ở đầu, nút sửa rồi nút **Edit**; `SettingsIssue.Draw(issues)` vẽ cả danh sách. Build check của pack lọc theo `Concerns(target)` và `Blocking`. Trang Ads, Analytics, Consent, IAP dùng nó |
+| `SettingsFocus.Request(asset, path)` | Đưa trang tới một ô, như nút **Edit**: mở mọi mục đang gập chứa ô đó, cuộn tới, rồi click như người dùng (gửi sự kiện chuột vào cửa sổ trang): vào ô chữ, ô số để gõ được ngay; vào nhãn của ô khác (toggle, dropdown) để chọn ô mà không đổi giá trị. Ô do `SettingsTree` vẽ tự được tìm; ô trang tự vẽ thì gọi `SettingsFocus.Drawn(asset, path, rect)` ngay sau khi vẽ, với rect của ô chữ. `PlatformFieldUtils.Draw` nhận thêm `asset, androidPath, iosPath` để báo hai ô của nó. Trang tự gập phần mà cây của nó không biết (như dòng của một list tự vẽ) thì đọc `SettingsFocus.Asset`, asset của yêu cầu đang chờ, để mở phần đó ra |
+| `CodeRename.Members(type, renames)`, `CodeRename.Find(type, renames)` | Đổi tên thành viên của một kiểu sinh ra ở chỗ script của project gọi qua tên kiểu (`Type.ten_cu` thành `Type.ten_moi`, trùng từ khoá C# thì thêm `@`), trong script dưới `Assets` và package embedded, giữ encoding của file; trả các file đã sửa. `Find` chỉ tìm, không sửa. Không theo `using static`. Cho nút Apply của trang sinh enum, như Analytics và Remote Config, để code vẫn compile khi đổi tên |
 | `ScriptUtils.Field(label, type)` | File script của một kiểu C#, như ô Script của component: chỉ đọc, bấm thì ping, bấm đúp thì mở. Trong lớp dữ liệu dùng `[ScriptField]` |
 | `SpinnerUtils.LabelField(label, text)`, `SpinnerUtils.Content(text)` | Vòng quay chờ của Unity trước một dòng chữ, cho việc đang chạy (như trang Firebase lúc kiểm tra Firebase CLI). Cửa sổ tự vẽ lại khi vòng quay còn hiện; `Content` dùng được với mọi nhãn |
+| `PackAdapters` | Các adapter của một pack (mỗi cái một `PackAdapter`: tên hiện, tên package, thư mục cạnh Core trong repo của pack) trên trang settings của pack, như cửa sổ Package Manager. `Row(adapter)` cho `PackageRow` của adapter: phiên bản trong project, **Install** chọn phiên bản từ registry của Core (Core là thư mục local thì lấy thư mục cạnh Core), **Update**, **Uninstall** (khi manifest ghi package đó); `Installed` nhận `uninstall` để hỏi trước khi gỡ, `Missing` cho adapter chưa cài. `Load` đọc phiên bản một lần mỗi phiên, `Reload` đọc lại; `DrawUpdateAll` vẽ **Update All** trên thanh của một mục. Trang Ads vẽ chúng thành dòng của mục Mediations, trang Analytics lên thanh của mục mỗi dịch vụ |
+| `PackageRow`, `PackageRow.Draw(value, row)` | Một package trang liệt kê (adapter của pack, adapter của một ad network): phiên bản trong project, bản mới nhất, việc cài và gỡ. `Draw` vẽ cột giá trị của dòng: phiên bản, mũi tên tới bản mới hơn, rồi **Install**, **Update**, **Uninstall** tùy lúc; có danh sách phiên bản thì **Install** hỏi phiên bản, còn đã cài thì bấm vào phiên bản để chọn bản khác. Mọi nút rộng ít nhất bằng **Uninstall** để nút các dòng thẳng cột; nút tự vẽ trên cùng cột lấy độ rộng từ `PackageRow.ButtonWidth(label)` |
+| `PackageJobs` | Thay đổi package của các trang, mỗi lần một cái như cửa sổ Package Manager: `Change(owner, what, add, remove)` thêm và gỡ trong một yêu cầu, lỗi ra Console là "`what` failed"; `DrawRunning(owner)` vẽ vòng quay chờ và việc đang chạy trong mục `owner`; mọi nút cài chờ khi `IsRunning`. `Removes(package)` cho biết package đang được gỡ, để trang không lấy lại class của nó trước khi domain reload. `Begin`, `End` cho SDK tự đổi package theo cách riêng (như AppLovin) |
 
 ## Vẽ theo pixel: PixelUtils, HoverUtils
 

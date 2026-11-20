@@ -43,11 +43,12 @@ namespace RiseOn.Utils.Editor {
         // opened again at the size it was left at is. By label, as a control's id differs from one window to the next.
         private static readonly Dictionary<string, float> lastWidths = new();
 
-        /// <summary>Draws the pair of string properties.</summary>
+        /// <summary>Draws the pair of string properties; <see cref="SettingsFocus"/> finds either by its path.</summary>
         public static void Draw(GUIContent label, SerializedProperty androidValue, SerializedProperty iosValue) {
             var a = androidValue.stringValue;
             var i = iosValue.stringValue;
-            if (!Draw(label, ref a, ref i)) return;
+            bool androidOn = false, iosOn = false;
+            if (!Draw(label, ref a, ref i, null, ref androidOn, ref iosOn, androidValue.serializedObject.targetObject, androidValue.propertyPath, iosValue.propertyPath)) return;
 
             androidValue.stringValue = a;
             iosValue.stringValue     = i;
@@ -61,9 +62,11 @@ namespace RiseOn.Utils.Editor {
 
         /// <summary>
         /// The pair with <paramref name="toggle"/> after each field, a switch each platform has of its own, such as an ad unit's Test; true when
-        /// anything changed. A null <paramref name="toggle"/> draws none.
+        /// anything changed. A null <paramref name="toggle"/> draws none.<br/>
+        /// With <paramref name="asset"/>, <see cref="SettingsFocus"/> finds the fields by <paramref name="androidPath"/> and <paramref name="iosPath"/>.
         /// </summary>
-        public static bool Draw(GUIContent label, ref string androidValue, ref string iosValue, GUIContent toggle, ref bool androidOn, ref bool iosOn) {
+        public static bool Draw(GUIContent label, ref string androidValue, ref string iosValue, GUIContent toggle, ref bool androidOn, ref bool iosOn,
+                                Object asset = null, string androidPath = null, string iosPath = null) {
             var id     = GUIUtility.GetControlID(FocusType.Passive);
             var window = GUIHelper.CurrentWindow;
             var name   = label?.text ?? "";
@@ -96,8 +99,8 @@ namespace RiseOn.Utils.Editor {
             var under = new Rect(value.x, value.y + below, value.width, line);
 
             EditorGUI.BeginChangeCheck();
-            androidValue = Field(Lerp(left, value, stacked), android, Width(android), androidValue, toggle, ref androidOn);
-            iosValue     = Field(Lerp(right, under, stacked), ios, Mathf.Lerp(Width(ios), Width(android), stacked), iosValue, toggle, ref iosOn);
+            androidValue = Field(Lerp(left, value, stacked), android, Width(android), androidValue, toggle, ref androidOn, asset, androidPath);
+            iosValue     = Field(Lerp(right, under, stacked), ios, Mathf.Lerp(Width(ios), Width(android), stacked), iosValue, toggle, ref iosOn, asset, iosPath);
             return EditorGUI.EndChangeCheck();
 
             // Where the pair is between one row and two, moving toward stacked or not. It changes only at layout, so every event of
@@ -172,12 +175,14 @@ namespace RiseOn.Utils.Editor {
             right = Rect.MinMaxRect(Mathf.Min(left.xMax + Gap, value.xMax), value.y, value.xMax, value.yMax);
         }
 
-        private static string Field(Rect rect, GUIContent name, float nameWidth, string value, GUIContent toggle, ref bool on) {
+        private static string Field(Rect rect, GUIContent name, float nameWidth, string value, GUIContent toggle, ref bool on, Object asset = null, string path = null) {
             var label = new Rect(rect.x, rect.y, Mathf.Min(nameWidth, rect.width), rect.height);
             GUI.Label(label, name, EditorStyles.label);
             var end = Mathf.Max(label.xMax, rect.xMax - ToggleWidth(toggle));
             // The field runs a pixel under the button, so their borders meet as one.
-            var text = EditorGUI.TextField(Rect.MinMaxRect(label.xMax, rect.y, toggle == null ? end : end + 1, rect.yMax), value ?? "");
+            var field = Rect.MinMaxRect(label.xMax, rect.y, toggle == null ? end : end + 1, rect.yMax);
+            var text  = EditorGUI.TextField(field, value ?? "");
+            if (asset) SettingsFocus.Drawn(asset, path, field);
             if (toggle != null) on = GUI.Toggle(Rect.MinMaxRect(end, rect.y, rect.xMax, rect.yMax), on, toggle, EditorStyles.miniButtonRight);
             return text;
         }

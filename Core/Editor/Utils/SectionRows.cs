@@ -141,7 +141,8 @@ namespace RiseOn.Utils.Editor {
                 RepaintView();
             }
 
-            var isNested = slots.Count > 0;
+            // In an item of another list, which gives it its inset; a section drawn in the item between them frames it anew, so it takes its own.
+            var isNested = slots.Count > 0 && slots.Peek().sections == Section.Depth;
             if (!isNested) {
                 root = this;
                 view = CurrentView();
@@ -623,6 +624,9 @@ namespace RiseOn.Utils.Editor {
             public readonly Rect        itemRect;
             public readonly int         index;
             public          bool        isMarked;
+
+            // How many sections were open as the item began.
+            public readonly int sections = Section.Depth;
 
             // The frames of the sections drawn in the item on this repaint.
             public readonly List<FrameInset> frames = new();

@@ -80,6 +80,9 @@ namespace RiseOn.Utils.Editor {
         // The sections being drawn, the innermost on top.
         private static readonly Stack<Section> drawing = new();
 
+        // How many sections are open, for a list to tell whether one frames it inside another list's item.
+        internal static int Depth => drawing.Count;
+
         // Frames for what something dragged will take, on the screen, drawn over the border once it is drawn.
         private readonly List<(Rect Rect, bool Fill)> dragFrames = new();
         private readonly Rect barValue;
@@ -91,12 +94,17 @@ namespace RiseOn.Utils.Editor {
         private bool begun;
         private bool open;
 
+        // An Inspector's hierarchy mode, which moves every foldout's arrow out to the left of its rect, past the box's edge; off within the section,
+        // as a settings page has it, so the foldouts of the fields inside keep their arrows in the box.
+        private readonly bool hierarchyMode = EditorGUIUtility.hierarchyMode;
+
         /// <summary>A section that stays open.</summary>
         /// <param name="buttons">How many buttons <see cref="Button"/> puts at the bar's right end.</param>
         /// <param name="padded">False for content with a frame of its own, or rows from <see cref="SectionRows"/>, which then meet the border.</param>
         /// <param name="barValue">As <see cref="Foldout(string,string,string,bool,int,bool,bool)"/>'s.</param>
         /// <param name="barOnly">The section is its bar, with no content under it, shaped as a folded section is: for one among foldouts of its kind.</param>
         public Section(string title, string tooltip = null, int buttons = 0, bool padded = true, bool barValue = false, bool barOnly = false) {
+            EditorGUIUtility.hierarchyMode = false;
             Begin(out bar);
             EditorGUI.LabelField(Title(bar, buttons, barValue), new GUIContent(title, tooltip));
             if (!barOnly) BeginContent(padded);
@@ -111,6 +119,7 @@ namespace RiseOn.Utils.Editor {
         }
 
         private Section(Rect bar, Rect barValue, string fadeKey, bool expanded, bool padded) {
+            EditorGUIUtility.hierarchyMode = false;
             this.bar      = bar;
             barOnScreen   = GUIUtility.GUIToScreenRect(bar);
             drawing.Push(this);
@@ -153,33 +162,52 @@ namespace RiseOn.Utils.Editor {
         /// A bool drawn as a checkbox on the bar, before the title: the section opens only while it is on, and opens as it turns on.<br/>
         /// One marked <c>[ReadOnly]</c> shows off and locked, for a feature the project cannot use now, with its <c>[Tooltip]</c> saying why.
         /// </param>
-        public static Section Foldout(InspectorProperty property, string title, string tooltip = null, int buttons = 0, bool padded = true, bool barValue = false, InspectorProperty toggle = null) {
+        /// <param name="titleField">
+        /// A string member's property, drawn as a text field in the title's place, after the arrow, which alone folds: for a section the page names, such as one item of a list.<br/>
+        /// Its <c>[Tooltip]</c> goes with it; <paramref name="title"/> is not drawn.
+        /// </param>
+        public static Section Foldout(InspectorProperty property, string title, string tooltip = null, int buttons = 0, bool padded = true, bool barValue = false, InspectorProperty toggle = null,
+                                      InspectorProperty titleField = null) {
             Begin(out var bar);
             var content = new GUIContent(title, tooltip);
-            var open    = toggle == null ? property.State.Expanded = Fold(Title(bar, buttons, barValue), property.State.Expanded, content) : ToggleTitle(bar, buttons, property, toggle, content);
+            var open = toggle != null ? ToggleTitle(bar, buttons, property, toggle, content)
+                : titleField != null  ? FieldTitle(Title(bar, buttons, barValue), property, titleField)
+                : property.State.Expanded = Fold(Title(bar, buttons, barValue), property.State.Expanded, content);
             // Every draw: an Alt+click on an outer section sets this one's state without its bar.
             SessionState.SetBool(Key(property), property.State.Expanded);
             return new Section(bar, barValue ? BarValueRect(bar, buttons) : default, $"{RuntimeHelpers.GetHashCode(property.Tree)}/{property.Path}", open, padded);
         }
 
-        // The arrow, locked shut while the toggle is off, then the toggle with the title, as Unity draws a toggled foldout; turning it on opens
-        // the section. Written through the value entry, so it reaches every object edited, with undo.
+        // The arrow, locked shut while the toggle is off, the box, then the title, as Unity draws a toggled header such as a Volume override's: the
+        // arrow and the title fold, the box alone turns the toggle, and turning it on opens the section. Written through the value entry, so it
+        // reaches every object edited, with undo.
         private static bool ToggleTitle(Rect bar, int buttons, InspectorProperty property, InspectorProperty toggle, GUIContent title) {
             const float arrow = 14;
-            var line  = RowContent(Title(bar, buttons), EditorGUIUtility.singleLineHeight);
+            const float box   = 16;
+            var line   = RowContent(Title(bar, buttons), EditorGUIUtility.singleLineHeight);
             var entry  = toggle.ValueEntry;
             var locked = toggle.GetAttribute<ReadOnlyAttribute>() != null;
             var on     = !locked && entry.WeakSmartValue is true;
             if (locked && toggle.GetAttribute<TooltipAttribute>() is { } why) title = new GUIContent(title.text, why.tooltip);
+
+            var check = new Rect(line.x + arrow, line.y, box, line.height);
+            var text  = Rect.MinMaxRect(check.xMax + LabelGap, line.y, line.xMax, line.yMax);
             using (new EditorGUI.DisabledScope(!on)) {
                 var open = Fold(new Rect(line.x, line.y, arrow, line.height), on && property.State.Expanded, GUIContent.none);
+                var e    = Event.current;
+                if (on && e.type is EventType.MouseDown && e.button == 0 && text.Contains(e.mousePosition)) {
+                    open = !open;
+                    e.Use();
+                }
+
                 if (on) property.State.Expanded = open;
             }
 
+            using (new EditorGUI.DisabledScope(locked)) GUI.Label(text, title, EditorStyles.label);
             EditorGUI.showMixedValue = !locked && entry.ValueState is PropertyValueState.PrimitiveValueConflict;
             EditorGUI.BeginChangeCheck();
             bool next;
-            using (new EditorGUI.DisabledScope(locked)) next = EditorGUI.ToggleLeft(new Rect(line.x + arrow, line.y, line.width - arrow, line.height), title, on);
+            using (new EditorGUI.DisabledScope(locked)) next = EditorGUI.Toggle(check, on);
             EditorGUI.showMixedValue = false;
             if (EditorGUI.EndChangeCheck()) {
                 entry.WeakSmartValue = next;
@@ -187,6 +215,30 @@ namespace RiseOn.Utils.Editor {
             }
 
             return on && property.State.Expanded;
+        }
+
+        // The arrow, then the field, where a click edits rather than folds. Written through the value entry, so it reaches every object edited, with undo.
+        private static bool FieldTitle(Rect title, InspectorProperty property, InspectorProperty field) {
+            const float arrow = 14;
+            var line = RowContent(title, EditorGUIUtility.singleLineHeight);
+            property.State.Expanded = Fold(new Rect(line.x, line.y, arrow, line.height), property.State.Expanded, GUIContent.none);
+
+            // As wide as its text, at least as wide as most names need so that a list's names line up, and never closer than the inset to what follows on the bar.
+            const float least = 120;
+            var entry  = field.ValueEntry;
+            var value  = entry.WeakSmartValue as string ?? "";
+            var width  = Mathf.Clamp(EditorStyles.textField.CalcSize(new GUIContent(value)).x + Inset, least, line.xMax - Inset - line.x - arrow);
+            var rect   = new Rect(line.x + arrow, line.y, width, line.height);
+            var indent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel    = 0;
+            EditorGUI.showMixedValue = entry.ValueState is PropertyValueState.PrimitiveValueConflict;
+            EditorGUI.BeginChangeCheck();
+            var text = EditorGUI.TextField(rect, value);
+            EditorGUI.showMixedValue = false;
+            if (EditorGUI.EndChangeCheck()) entry.WeakSmartValue = text;
+            EditorGUI.indentLevel = indent;
+            if (field.GetAttribute<TooltipAttribute>() is { } tip) GUI.Label(rect, new GUIContent("", tip.tooltip));
+            return property.State.Expanded;
         }
 
         /// <summary>Gives the property the fold it had this session, else <paramref name="open"/>.</summary>
@@ -202,6 +254,12 @@ namespace RiseOn.Utils.Editor {
         }
 
         private static string Key(InspectorProperty property) => $"RiseOn.Section.{property.Tree.TargetType.FullName}.{property.Path}";
+
+        // Opens the property's fold and the one its section keeps, for SettingsFocus.
+        internal static void Unfold(InspectorProperty property) {
+            property.State.Expanded = true;
+            SessionState.SetBool(Key(property), true);
+        }
 
         /// <summary>The bar's button in <paramref name="slot"/>, counted from the right; true when clicked.</summary>
         public bool Button(int slot, SdfIconType icon, string tooltip) => IconButton(ButtonRect(slot), icon, tooltip);
@@ -424,6 +482,7 @@ namespace RiseOn.Utils.Editor {
             if (folds) EndFade();
 
             GUILayout.EndVertical();
+            EditorGUIUtility.hierarchyMode = hierarchyMode;
             if (drawing.Count > 0 && drawing.Peek() == this) drawing.Pop();
             // The border goes over the content, so rows meet it rather than cover it. On the pixel grid, as the bar and the
             // background are, so the space to the next section is as many whole pixels as the space between two fields.

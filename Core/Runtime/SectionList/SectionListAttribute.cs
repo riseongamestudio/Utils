@@ -40,5 +40,14 @@ namespace RiseOn.Utils {
         /// By default a list of a <see cref="UnityEngine.Object"/> type picks that type; any other list adds as <see cref="New"/> says.
         /// </summary>
         public string Pick;
+
+        /// <summary>
+        /// A string member of the parent drawn as a text field in the bar's title, after the arrow, the section folding: for a list that stands for its parent,
+        /// one item of an outer list the page names, such as a plan of steps. The parent's drawer draws the list alone.
+        /// </summary>
+        public string TitleField;
+
+        /// <summary>A member of the parent drawn in the bar's value column, the title keeping to the label column: for the one value the list's parent has beside it, such as a plan's weight.</summary>
+        public string BarField;
     }
 }

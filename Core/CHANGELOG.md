@@ -4,6 +4,37 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.17] - 2026-11-20
+
+### Thêm
+
+- `[SectionList]` có `TitleField` (ô nhập tên của đối tượng chứa list ở chỗ tiêu đề) và `BarField`
+  (một member của đối tượng chứa list, kèm nhãn, ở cột giá trị trên thanh): một phần tử của list
+  ngoài thành một list có tên và giá trị trên thanh, như plan gồm các bước.
+- `Section.Foldout(property, ...)` có `titleField`: ô nhập ở chỗ tiêu đề, chỉ mũi tên gập mở.
+- `SettingsIssue`: lỗi cấu hình của trang settings, vẽ thành hộp báo có nút sửa và nút **Edit**.
+- `SettingsFocus`: đưa trang tới một ô (mở mục đang gập, cuộn tới, click vào ô hay nhãn của nó);
+  `PlatformFieldUtils.Draw` nhận `asset`, `androidPath`, `iosPath` để báo hai ô của nó.
+- `PackAdapters`, `PackageRow`, `PackageJobs`: phiên bản và nút Install, Update, Uninstall, Update All
+  của các adapter của một pack, như cửa sổ Package Manager, để trang settings của pack vẽ thành dòng
+  hay lên thanh; `PackageJobs` chạy từng thay đổi package một.
+- `CodeRename`: đổi tên thành viên của một kiểu sinh ra ở các script dưới `Assets` và package
+  embedded gọi `Type.ten`; `SettingsFocus.Asset` cho trang biết yêu cầu nào đang chờ để mở phần
+  nó tự gập.
+
+### Sửa
+
+- List nằm trong một mục, mà mục đó nằm trong dòng của một list khác (như list sự kiện trong dòng của
+  một dịch vụ), giữ lề trái của mình; trước đó nó coi mình là list lồng thẳng trong dòng nên bỏ lề, và
+  chữ None của list rỗng dính mép khung.
+- Mục có ô tick trên thanh (`Toggle` của `[SectionGroup]`, `toggle` của `Section.Foldout`): bấm
+  tiêu đề chỉ gập mở, ô vuông mới bật tắt; trước đó tiêu đề là nhãn của ô tick nên bấm vào thì
+  vừa bật tắt vừa gập mở.
+- Mũi tên gập của field bên trong `Section` (như một class Odin gập mở) nằm trong khung cả trong
+  Inspector của component; trước đó `hierarchyMode` của Inspector đẩy nó ra ngoài bên trái.
+- `[SectionReference]` của giá trị không có field nào để hiện chỉ còn thanh, bỏ mũi tên gập mở
+  vốn không mở ra gì.
+
 ## [1.0.16] - 2026-11-20
 
 ### Sửa

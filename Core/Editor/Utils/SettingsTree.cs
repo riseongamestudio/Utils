@@ -39,6 +39,7 @@ namespace RiseOn.Utils.Editor {
                 this.asset = asset;
             }
 
+            SettingsFocus.Open(tree, asset);
             // Odin records undo only when asked.
             tree.BeginDraw(true);
             return tree.RootProperty;
@@ -46,6 +47,7 @@ namespace RiseOn.Utils.Editor {
 
         public void End() {
             tree.EndDraw();
+            SettingsFocus.Scroll(tree, asset);
             if (tree.ApplyChanges()) EditorUtility.SetDirty(asset);
             // Every draw, so an undo reaches the disk as an edit does.
             DeferredSave.Request(asset);

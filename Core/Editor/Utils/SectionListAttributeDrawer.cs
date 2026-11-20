@@ -28,6 +28,11 @@ namespace RiseOn.Utils.Editor {
         private Type                ownPickType;
         private readonly List<(Object Object, bool IsNone)> pickedObjects = new();
 
+        // The parent's members drawn on the bar, as the title's field and in the value column.
+        private InspectorProperty titleField;
+        private InspectorProperty barField;
+        private Rect barFieldRect;
+
         // Objects that take the list's drop are over its bar: the section is lit, and they go to its end once let go.
         private bool isBarLit;
 
@@ -57,7 +62,9 @@ namespace RiseOn.Utils.Editor {
             var target = Property.Tree.WeakTargets[0] as Object;
             allowSceneObjects = !(target && EditorUtility.IsPersistent(target));
             rootPrefab        = target ? target.GetRootPrefab() : null;
-            if (Attribute.Foldable) Section.Restore(Property, !Attribute.Closed);
+            if (Attribute.TitleField != null) titleField = Property.Parent.Children[Attribute.TitleField];
+            if (Attribute.BarField != null) barField = Property.Parent.Children[Attribute.BarField];
+            if (Attribute.Foldable || titleField != null) Section.Restore(Property, !Attribute.Closed);
         }
 
         protected override void DrawPropertyLayout(GUIContent label) {
@@ -80,14 +87,38 @@ namespace RiseOn.Utils.Editor {
 
             var type = Event.current.type;
             Rect bar;
-            using (var section = Attribute.Foldable
-                       ? Section.Foldout(Property, label.text, label.tooltip, buttons: 1, padded: false)
-                       : new Section(label.text, label.tooltip, buttons: 1, padded: false)) {
+            using (var section = Attribute.Foldable || titleField != null
+                       ? Section.Foldout(Property, label.text, label.tooltip, buttons: 1, padded: false, barValue: barField != null, titleField: titleField)
+                       : new Section(label.text, label.tooltip, buttons: 1, padded: false, barValue: barField != null)) {
                 bar = section.Bar;
+                if (barField != null) DrawBarField(section.BarValue);
                 DrawSection(section);
             }
 
             HandleBarDrop(type, bar);
+        }
+
+        // The member's own drawer, in an area of the value column's size, so it lays out as on a row of its own.
+        // The layout pass has no rect for the bar yet, so the area lays out in the one the last repaint had; a change repaints again.
+        private void DrawBarField(Rect rect) {
+            var type = Event.current.type;
+            if (type is EventType.Layout) rect = barFieldRect;
+            else if (type is EventType.Repaint && rect != barFieldRect) {
+                barFieldRect = rect;
+                GUIHelper.RequestRepaint();
+            }
+
+            // With its label, whose column is as wide as the label's text, so the value keeps the room.
+            var label      = barField.Label;
+            var indent     = EditorGUI.indentLevel;
+            var labelWidth = EditorGUIUtility.labelWidth;
+            EditorGUI.indentLevel        = 0;
+            EditorGUIUtility.labelWidth = EditorStyles.label.CalcSize(label).x + Section.Inset;
+            GUILayout.BeginArea(rect);
+            barField.Draw(label);
+            GUILayout.EndArea();
+            EditorGUIUtility.labelWidth = labelWidth;
+            EditorGUI.indentLevel        = indent;
         }
 
         private void DrawSection(Section section) {
@@ -100,7 +131,7 @@ namespace RiseOn.Utils.Editor {
                 if (pickAs != null) Pick(section.ButtonRect(0), pickAs);
                 else if (set) picked.Add(value);
                 else Add(newItem == null ? New : () => newItem.GetValue());
-                if (Attribute.Foldable && pickAs == null) Property.State.Expanded = true;
+                if ((Attribute.Foldable || titleField != null) && pickAs == null) Property.State.Expanded = true;
             });
             if (!section.Open) return;
 
@@ -151,7 +182,7 @@ namespace RiseOn.Utils.Editor {
                     pickedObjects.Add((obj, false));
                 } else pickedObjects.Add((null, true));
 
-                if (Attribute.Foldable) Property.State.Expanded = true;
+                if (Attribute.Foldable || titleField != null) Property.State.Expanded = true;
                 if (window) window.Repaint();
             }, type, rootPrefab, allowSceneObjects);
         }
