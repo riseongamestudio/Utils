@@ -27,6 +27,9 @@ namespace RiseOn.Utils {
         /// </summary>
         public string Toggle;
 
+        /// <summary>With <see cref="Toggle"/>, the section folds and its members stay editable whether the box is ticked or not: for a feature whose settings are worth filling before it is on.</summary>
+        public bool OpenWhenOff;
+
         public SectionGroupAttribute(string title, float order = 0) : base(title, order) { }
 
         protected override void CombineValuesWith(PropertyGroupAttribute other) {
@@ -36,6 +39,7 @@ namespace RiseOn.Utils {
             Closed      |= section.Closed;
             Tooltip     ??= section.Tooltip;
             Toggle      ??= section.Toggle;
+            OpenWhenOff |= section.OpenWhenOff;
         }
     }
 }

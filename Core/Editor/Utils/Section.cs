@@ -162,15 +162,19 @@ namespace RiseOn.Utils.Editor {
         /// A bool drawn as a checkbox on the bar, before the title: the section opens only while it is on, and opens as it turns on.<br/>
         /// One marked <c>[ReadOnly]</c> shows off and locked, for a feature the project cannot use now, with its <c>[Tooltip]</c> saying why.
         /// </param>
+        /// <param name="openWhenOff">
+        /// With <paramref name="toggle"/>, the arrow folds the section whether the box is ticked or not, and what is under it stays editable while off: for a feature whose
+        /// settings are worth filling before it is on.
+        /// </param>
         /// <param name="titleField">
         /// A string member's property, drawn as a text field in the title's place, after the arrow, which alone folds: for a section the page names, such as one item of a list.<br/>
         /// Its <c>[Tooltip]</c> goes with it; <paramref name="title"/> is not drawn.
         /// </param>
         public static Section Foldout(InspectorProperty property, string title, string tooltip = null, int buttons = 0, bool padded = true, bool barValue = false, InspectorProperty toggle = null,
-                                      InspectorProperty titleField = null) {
+                                      InspectorProperty titleField = null, bool openWhenOff = false) {
             Begin(out var bar);
             var content = new GUIContent(title, tooltip);
-            var open = toggle != null ? ToggleTitle(bar, buttons, property, toggle, content)
+            var open = toggle != null ? ToggleTitle(bar, buttons, property, toggle, content, openWhenOff)
                 : titleField != null  ? FieldTitle(Title(bar, buttons, barValue), property, titleField)
                 : property.State.Expanded = Fold(Title(bar, buttons, barValue), property.State.Expanded, content);
             // Every draw: an Alt+click on an outer section sets this one's state without its bar.
@@ -179,9 +183,9 @@ namespace RiseOn.Utils.Editor {
         }
 
         // The arrow, shown only while the toggle is on, the box, then the title, as Unity draws a toggled header such as a Volume override's: the
-        // arrow and the title fold, the box alone turns the toggle, and turning it on opens the section. Written through the value entry, so it
-        // reaches every object edited, with undo.
-        private static bool ToggleTitle(Rect bar, int buttons, InspectorProperty property, InspectorProperty toggle, GUIContent title) {
+        // arrow and the title fold, the box alone turns the toggle, and turning it on opens the section; open when off, the arrow shows either way.
+        // Written through the value entry, so it reaches every object edited, with undo.
+        private static bool ToggleTitle(Rect bar, int buttons, InspectorProperty property, InspectorProperty toggle, GUIContent title, bool openWhenOff) {
             const float arrow = 14;
             const float box   = 16;
             var line   = RowContent(Title(bar, buttons), EditorGUIUtility.singleLineHeight);
@@ -192,8 +196,9 @@ namespace RiseOn.Utils.Editor {
 
             var check = new Rect(line.x + arrow, line.y, box, line.height);
             var text  = Rect.MinMaxRect(check.xMax + LabelGap, line.y, line.xMax, line.yMax);
-            // Off, there is nothing to open, so no arrow; its place stays, so the box does not move as it turns.
-            if (on) {
+            // Off, there is nothing to open, so no arrow, unless the section opens when off; its place stays, so the box does not move as it turns.
+            var folds = on || openWhenOff && !locked;
+            if (folds) {
                 var open = Fold(new Rect(line.x, line.y, arrow, line.height), property.State.Expanded, GUIContent.none);
                 var e    = Event.current;
                 if (e.type is EventType.MouseDown && e.button == 0 && text.Contains(e.mousePosition)) {
@@ -215,7 +220,7 @@ namespace RiseOn.Utils.Editor {
                 if (next) property.State.Expanded = true;
             }
 
-            return on && property.State.Expanded;
+            return folds && property.State.Expanded;
         }
 
         // The arrow, then the field, where a click edits rather than folds. Written through the value entry, so it reaches every object edited, with undo.
@@ -579,7 +584,7 @@ namespace RiseOn.Utils.Editor {
 
         protected override void DrawPropertyLayout(GUIContent label) {
             using var section = Attribute.Foldable || toggle != null
-                ? Section.Foldout(Property, Attribute.GroupName, Attribute.Tooltip, padded: !Attribute.Paddingless, toggle: toggle)
+                ? Section.Foldout(Property, Attribute.GroupName, Attribute.Tooltip, padded: !Attribute.Paddingless, toggle: toggle, openWhenOff: Attribute.OpenWhenOff)
                 : new Section(Attribute.GroupName, Attribute.Tooltip, padded: !Attribute.Paddingless);
             if (!section.Open) return;
 

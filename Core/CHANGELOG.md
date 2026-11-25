@@ -6,6 +6,12 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 
 ## [Unreleased]
 
+### Thêm
+
+- `SectionGroupAttribute.OpenWhenOff` và tham số `openWhenOff` của `Section.Foldout`:
+  mục có toggle trên thanh vẫn gập mở được và sửa được bên trong khi toggle tắt, cho
+  tính năng mà thiết lập đáng điền trước khi bật.
+
 ### Đổi
 
 - Mục có ô tick trên thanh (`Section.Foldout` với `toggle`): khi chưa tick thì không vẽ
