@@ -178,7 +178,7 @@ namespace RiseOn.Utils.Editor {
             return new Section(bar, barValue ? BarValueRect(bar, buttons) : default, $"{RuntimeHelpers.GetHashCode(property.Tree)}/{property.Path}", open, padded);
         }
 
-        // The arrow, locked shut while the toggle is off, the box, then the title, as Unity draws a toggled header such as a Volume override's: the
+        // The arrow, shown only while the toggle is on, the box, then the title, as Unity draws a toggled header such as a Volume override's: the
         // arrow and the title fold, the box alone turns the toggle, and turning it on opens the section. Written through the value entry, so it
         // reaches every object edited, with undo.
         private static bool ToggleTitle(Rect bar, int buttons, InspectorProperty property, InspectorProperty toggle, GUIContent title) {
@@ -192,15 +192,16 @@ namespace RiseOn.Utils.Editor {
 
             var check = new Rect(line.x + arrow, line.y, box, line.height);
             var text  = Rect.MinMaxRect(check.xMax + LabelGap, line.y, line.xMax, line.yMax);
-            using (new EditorGUI.DisabledScope(!on)) {
-                var open = Fold(new Rect(line.x, line.y, arrow, line.height), on && property.State.Expanded, GUIContent.none);
+            // Off, there is nothing to open, so no arrow; its place stays, so the box does not move as it turns.
+            if (on) {
+                var open = Fold(new Rect(line.x, line.y, arrow, line.height), property.State.Expanded, GUIContent.none);
                 var e    = Event.current;
-                if (on && e.type is EventType.MouseDown && e.button == 0 && text.Contains(e.mousePosition)) {
+                if (e.type is EventType.MouseDown && e.button == 0 && text.Contains(e.mousePosition)) {
                     open = !open;
                     e.Use();
                 }
 
-                if (on) property.State.Expanded = open;
+                property.State.Expanded = open;
             }
 
             using (new EditorGUI.DisabledScope(locked)) GUI.Label(text, title, EditorStyles.label);

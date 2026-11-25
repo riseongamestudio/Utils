@@ -4,6 +4,13 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [Unreleased]
+
+### Đổi
+
+- Mục có ô tick trên thanh (`Section.Foldout` với `toggle`): khi chưa tick thì không vẽ
+  mũi tên gập, vì mục chưa mở được; ô tick giữ nguyên chỗ.
+
 ## [1.0.18] - 2026-11-20
 
 ### Đổi
