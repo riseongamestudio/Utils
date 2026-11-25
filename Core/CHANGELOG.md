@@ -11,6 +11,13 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 - Mục có ô tick trên thanh (`Section.Foldout` với `toggle`): khi chưa tick thì không vẽ
   mũi tên gập, vì mục chưa mở được; ô tick giữ nguyên chỗ.
 
+### Sửa
+
+- Kéo đổi chỗ trong danh sách (`SectionRows`): một mục cao hơn các mục khác, ví dụ mục đang
+  mở ra, giờ kéo qua được các mục thấp. Trước đó nó dừng tại chỗ khi chạm đầu hay cuối danh
+  sách, vì danh sách so tâm của mục đang kéo; giờ so mép trên khi kéo lên, mép dưới khi kéo
+  xuống.
+
 ## [1.0.18] - 2026-11-20
 
 ### Đổi

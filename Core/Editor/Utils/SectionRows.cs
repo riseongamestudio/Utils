@@ -409,12 +409,16 @@ namespace RiseOn.Utils.Editor {
             Event.current.Use();
         }
 
-        // Where the dragged item lands: after every other item whose middle its own middle has passed.
+        // Where the dragged item lands: after every item above it whose middle its top edge has not passed, and every item below it
+        // whose middle its bottom edge has. Its edges rather than its middle, so an item taller than the others still passes them
+        // while the list's ends hold it.
         private int FindLanding(int count) {
-            var center = itemRects[dragIndex].center.y + dragOffset;
+            var moved  = itemRects[dragIndex];
+            var top    = moved.yMin + dragOffset;
+            var bottom = moved.yMax + dragOffset;
             var index  = 0;
             for (var i = 0; i < count; i++) {
-                if (i != dragIndex && itemRects[i].center.y < center) index++;
+                if (i != dragIndex && itemRects[i].center.y < (i < dragIndex ? top : bottom)) index++;
             }
 
             return index;
