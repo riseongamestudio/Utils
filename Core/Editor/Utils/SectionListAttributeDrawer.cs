@@ -31,7 +31,7 @@ namespace RiseOn.Utils.Editor {
         // The parent's members drawn on the bar, as the title's field and in the value column.
         private InspectorProperty titleField;
         private InspectorProperty barField;
-        private Rect barFieldRect;
+        private Vector2 barFieldSize;
 
         // Objects that take the list's drop are over its bar: the section is lit, and they go to its end once let go.
         private bool isBarLit;
@@ -100,12 +100,14 @@ namespace RiseOn.Utils.Editor {
         }
 
         // The member's own drawer, in an area of the value column's size, so it lays out as on a row of its own.
-        // The layout pass has no rect for the bar yet, so the area lays out in the one the last repaint had; a change repaints again.
+        // An area keeps the rect of the layout pass, which has no rect for the bar yet: so the area sits at the origin of a group on the bar,
+        // and only its size is the last repaint's. A bar that moves, as while a section above unfolds, takes the field along in the same
+        // frame; a new size repaints again.
         private void DrawBarField(Rect rect) {
             var type = Event.current.type;
-            if (type is EventType.Layout) rect = barFieldRect;
-            else if (type is EventType.Repaint && rect != barFieldRect) {
-                barFieldRect = rect;
+            var size = type is EventType.Layout ? barFieldSize : rect.size;
+            if (type is EventType.Repaint && size != barFieldSize) {
+                barFieldSize = size;
                 GUIHelper.RequestRepaint();
             }
 
@@ -115,9 +117,11 @@ namespace RiseOn.Utils.Editor {
             var labelWidth = EditorGUIUtility.labelWidth;
             EditorGUI.indentLevel        = 0;
             EditorGUIUtility.labelWidth = EditorStyles.label.CalcSize(label).x + Section.Inset;
-            GUILayout.BeginArea(rect);
+            GUI.BeginGroup(rect);
+            GUILayout.BeginArea(new Rect(Vector2.zero, size));
             barField.Draw(label);
             GUILayout.EndArea();
+            GUI.EndGroup();
             EditorGUIUtility.labelWidth = labelWidth;
             EditorGUI.indentLevel        = indent;
         }

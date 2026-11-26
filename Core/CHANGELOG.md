@@ -28,6 +28,8 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 - Trang settings vẽ lại ngay khi drawer Odin xin thêm một lượt (`GUIHelper.RequestRepaint`),
   như cửa sổ của Odin vẫn làm. Trước đó trang chờ tới lần rê chuột kế tiếp, nên mở một mục
   có ô trên thanh (như Weight của plan collapsible) có lúc thấy ô đó nằm lệch ở chỗ cũ.
+- Ô trên thanh của một dòng `[SectionList]` (như Weight của plan collapsible) đi cùng
+  thanh trong lúc một mục phía trên gập mở, thay vì nháy về chỗ của lượt vẽ trước.
 - Kéo đổi chỗ trong danh sách (`SectionRows`): một mục cao hơn các mục khác, ví dụ mục đang
   mở ra, giờ kéo qua được các mục thấp. Trước đó nó dừng tại chỗ khi chạm đầu hay cuối danh
   sách, vì danh sách so tâm của mục đang kéo; giờ so mép trên khi kéo lên, mép dưới khi kéo
