@@ -14,7 +14,7 @@ namespace RiseOn.Utils.Editor {
     /// switch (HelpBoxUtils.Draw("Unsaved keys.", MessageType.Warning, (new GUIContent("Apply"), true), (new GUIContent("Revert"), canRevert))) { ... }
     /// </code></example>
     public static class HelpBoxUtils {
-        /// <summary>The width of the box's button.</summary>
+        /// <summary>The least width of the box's button; one whose label needs more is as wide as its label.</summary>
         public const float ButtonWidth = 110;
 
         private const int IconGap = 2;
@@ -50,7 +50,9 @@ namespace RiseOn.Utils.Editor {
             var count   = buttons?.Length ?? 0;
             var content = new GUIContent(message);
             var height  = EditorGUIUtility.singleLineHeight + 2;
-            var style   = count == 0 ? plain : WithButtons(count);
+            var widths  = new float[count];
+            for (var i = 0; i < count; i++) widths[i] = Mathf.Max(ButtonWidth, Mathf.Ceil(GUI.skin.button.CalcSize(buttons[i].Content).x));
+            var style   = count == 0 ? plain : WithButtons(widths);
 
             // With buttons, a group holds the box at least as tall as a button with the box's own padding above and below;
             // a height on the box itself would replace the height its wrapped text needs.
@@ -71,7 +73,7 @@ namespace RiseOn.Utils.Editor {
             var right   = rect.xMax - box.padding.right;
             EditorGUIUtility.SetIconSize(new Vector2(Section.IconSize, Section.IconSize));
             for (var i = count - 1; i >= 0; i--) {
-                var place = new Rect(right - ButtonWidth, rect.center.y - height / 2, ButtonWidth, height);
+                var place = new Rect(right - widths[i], rect.center.y - height / 2, widths[i], height);
                 using (new EditorGUI.DisabledScope(!buttons[i].Enabled)) {
                     if (GUI.Button(PixelUtils.Snap(place), buttons[i].Content)) clicked = i;
                 }
@@ -83,14 +85,15 @@ namespace RiseOn.Utils.Editor {
             return clicked;
         }
 
-        // The text wraps short of every button.
-        private static GUIStyle WithButtons(int count) {
-            if (withButtons.TryGetValue(count, out var style)) return style;
+        // The text wraps short of every button; one style for each width the buttons take together.
+        private static GUIStyle WithButtons(float[] widths) {
+            var buttons = ButtonGap * (widths.Length - 1);
+            foreach (var width in widths) buttons += (int) width;
+            if (withButtons.TryGetValue(buttons, out var style)) return style;
 
-            var box     = EditorStyles.helpBox;
-            var buttons = (int) (ButtonWidth * count) + ButtonGap * (count - 1);
+            var box = EditorStyles.helpBox;
             style = new GUIStyle(plain) { padding = new RectOffset(plain.padding.left, box.padding.right * 2 + buttons, box.padding.top, box.padding.bottom), margin = new RectOffset() };
-            withButtons[count] = style;
+            withButtons[buttons] = style;
             return style;
         }
 

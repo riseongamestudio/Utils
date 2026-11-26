@@ -13,6 +13,10 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
   tính năng mà thiết lập đáng điền trước khi bật.
 - `[NoRowShade]` và `SectionRows.Shaded`: danh sách `[SectionList]` (hay `EnumMap` của
   `com.riseon.serializables`) không tô sọc xen kẽ, cho dòng mà mỗi dòng là một mục riêng.
+- `SettingsIssue.Info(message, fixLabel, fix)`: hộp thông tin đầu trang settings cho
+  một điều về cách thiết lập đang chạy, không phải chỗ thiếu (như pack đang chạy lớp
+  mặc định thay cho lớp game chưa có). `IsInfo` đúng với nó; build check của pack bỏ
+  qua nó, không dừng build và không in cảnh báo.
 
 ### Đổi
 
@@ -21,6 +25,8 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 - Thanh có ô tên (`titleField` của `Section.Foldout`, `TitleField` của `[SectionList]`, như
   plan collapsible): bấm vào phần trống của cột tiêu đề sau ô tên cũng gập mở, như thanh
   thường; trước đó chỉ mũi tên gập mở.
+- Nút trong hộp báo (`HelpBoxUtils.Draw`) rộng ít nhất `ButtonWidth`, nút có nhãn dài
+  hơn thì rộng theo nhãn, thay vì cắt nhãn.
 
 ### Sửa
 
