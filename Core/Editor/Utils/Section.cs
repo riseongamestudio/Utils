@@ -167,7 +167,7 @@ namespace RiseOn.Utils.Editor {
         /// settings are worth filling before it is on.
         /// </param>
         /// <param name="titleField">
-        /// A string member's property, drawn as a text field in the title's place, after the arrow, which alone folds: for a section the page names, such as one item of a list.<br/>
+        /// A string member's property, drawn as a text field in the title's place, after the arrow: for a section the page names, such as one item of a list. The arrow and the rest of the title's place fold; a click on the field edits.<br/>
         /// Its <c>[Tooltip]</c> goes with it; <paramref name="title"/> is not drawn.
         /// </param>
         public static Section Foldout(InspectorProperty property, string title, string tooltip = null, int buttons = 0, bool padded = true, bool barValue = false, InspectorProperty toggle = null,
@@ -223,7 +223,8 @@ namespace RiseOn.Utils.Editor {
             return folds && property.State.Expanded;
         }
 
-        // The arrow, then the field, where a click edits rather than folds. Written through the value entry, so it reaches every object edited, with undo.
+        // The arrow, then the field, where a click edits rather than folds; the title's place past the field folds, as a title does.
+        // Written through the value entry, so it reaches every object edited, with undo.
         private static bool FieldTitle(Rect title, InspectorProperty property, InspectorProperty field) {
             const float arrow = 14;
             var line = RowContent(title, EditorGUIUtility.singleLineHeight);
@@ -244,6 +245,14 @@ namespace RiseOn.Utils.Editor {
             if (EditorGUI.EndChangeCheck()) entry.WeakSmartValue = text;
             EditorGUI.indentLevel = indent;
             if (field.GetAttribute<TooltipAttribute>() is { } tip) GUI.Label(rect, new GUIContent("", tip.tooltip));
+
+            var rest = Rect.MinMaxRect(rect.xMax, title.y, title.xMax, title.yMax);
+            var e    = Event.current;
+            if (e.type is EventType.MouseDown && e.button == 0 && rest.Contains(e.mousePosition)) {
+                property.State.Expanded = !property.State.Expanded;
+                e.Use();
+            }
+
             return property.State.Expanded;
         }
 

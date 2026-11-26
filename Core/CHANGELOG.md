@@ -18,6 +18,9 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 
 - Mục có ô tick trên thanh (`Section.Foldout` với `toggle`): khi chưa tick thì không vẽ
   mũi tên gập, vì mục chưa mở được; ô tick giữ nguyên chỗ.
+- Thanh có ô tên (`titleField` của `Section.Foldout`, `TitleField` của `[SectionList]`, như
+  plan collapsible): bấm vào phần trống của cột tiêu đề sau ô tên cũng gập mở, như thanh
+  thường; trước đó chỉ mũi tên gập mở.
 
 ### Sửa
 

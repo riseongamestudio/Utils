@@ -229,7 +229,7 @@ Tùy chọn của `[SectionList]`:
 | `Drop` | Tên method hay biểu thức Odin biến object kéo vào list thành phần tử, tìm trên đối tượng chứa list, object là tham số `obj` (`UnityEngine.Object`); trả mặc định hay `null` là không nhận. Cho list của kiểu bọc object, như `ListSerObject` |
 | `Pick` | Tên member hay biểu thức Odin trả `Type` của object mà + chọn, như interface phần tử bọc; đi cùng `Drop`, nó biến object được chọn thành phần tử |
 | `Foldable`, `Closed` | Như của `[SectionGroup]` |
-| `TitleField` | Tên một member `string` của đối tượng chứa list, vẽ thành ô nhập ở chỗ tiêu đề, sau mũi tên; mục thành gập mở được, chỉ mũi tên gập mở. Cho list đứng thay đối tượng chứa nó, khi đối tượng là một phần tử của list ngoài và có tên trên trang (như một plan gồm các bước). Dev viết drawer cho đối tượng chỉ vẽ list (ví dụ `Property.Children["steps"].Draw(null)`); không thì member này và `BarField` hiện thêm thành dòng riêng |
+| `TitleField` | Tên một member `string` của đối tượng chứa list, vẽ thành ô nhập ở chỗ tiêu đề, sau mũi tên; mục thành gập mở được: mũi tên và phần trống của cột tiêu đề sau ô gập mở, bấm vào ô là sửa chữ. Cho list đứng thay đối tượng chứa nó, khi đối tượng là một phần tử của list ngoài và có tên trên trang (như một plan gồm các bước). Dev viết drawer cho đối tượng chỉ vẽ list (ví dụ `Property.Children["steps"].Draw(null)`); không thì member này và `BarField` hiện thêm thành dòng riêng |
 | `BarField` | Tên một member của đối tượng chứa list, vẽ ở cột giá trị trên thanh, kèm nhãn của nó (cột nhãn vừa đủ chữ); tiêu đề chỉ chiếm cột nhãn của trang. Cho giá trị duy nhất đi kèm list, như weight của plan |
 
 List của một enum là một tập hợp: + chỉ đưa các giá trị list chưa có, dòng giữ giá trị của nó và
@@ -290,7 +290,7 @@ using (var section = Section.Foldout("MyPack.Prompt", "Prompt", barValue: true))
 | `padded` | `false` khi nội dung có khung riêng (tab) hoặc là dòng của `SectionRows`, chạm viền |
 | `barValue` | Tiêu đề chỉ chiếm cột nhãn, cột giá trị trên thanh là `section.BarValue`, kết thúc sát nút đầu tiên như giá trị của một dòng kết thúc sát nút × |
 | `barOnly` | Mục chỉ có thanh, hình như mục đang gập: cho một mục đứng giữa các mục gập mở cùng loại |
-| `titleField` | Chỉ ở `Section.Foldout(property, ...)`: `InspectorProperty` của một member `string`, vẽ thành ô nhập ở chỗ tiêu đề, sau mũi tên, rộng theo chữ (tối thiểu 120 để tên thường dài ngắn vẫn thẳng hàng); chỉ mũi tên gập mở, bấm vào ô là sửa chữ. Tooltip của ô lấy `[Tooltip]` của member; `title` không vẽ |
+| `titleField` | Chỉ ở `Section.Foldout(property, ...)`: `InspectorProperty` của một member `string`, vẽ thành ô nhập ở chỗ tiêu đề, sau mũi tên, rộng theo chữ (tối thiểu 120 để tên thường dài ngắn vẫn thẳng hàng); mũi tên và phần trống của cột tiêu đề sau ô gập mở, bấm vào ô là sửa chữ. Tooltip của ô lấy `[Tooltip]` của member; `title` không vẽ |
 
 Vẽ mọi thứ trên thanh (nút, `BarValue`) trước, rồi mới đọc `section.Open`: lần đọc đầu bắt đầu
 phần nội dung, phần này mờ dần và cắt theo khi gập mở. Vẽ thanh sau đó thì giá trị trên thanh
