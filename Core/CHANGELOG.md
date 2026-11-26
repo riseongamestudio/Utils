@@ -19,6 +19,10 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 
 ### Sửa
 
+- Mở drop-down chọn giá trị (`ChoiceSearchWindow`, mọi ô enum của trang settings) từ
+  trong một danh sách, như ô loại của sản phẩm IAP, không còn làm Console báo
+  `EndLayoutGroup: BeginLayoutGroup must be called first`: cửa sổ drop-down đo và mở ra
+  sau lượt vẽ của trang, thay vì vẽ chen giữa lượt đó.
 - Kéo đổi chỗ trong danh sách (`SectionRows`): một mục cao hơn các mục khác, ví dụ mục đang
   mở ra, giờ kéo qua được các mục thấp. Trước đó nó dừng tại chỗ khi chạm đầu hay cuối danh
   sách, vì danh sách so tâm của mục đang kéo; giờ so mép trên khi kéo lên, mép dưới khi kéo

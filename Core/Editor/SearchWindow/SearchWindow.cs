@@ -229,21 +229,30 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                 Frame(this, folded);
                 ShapeCorners();
 
-                // As wide as its rows before it unfolds, not widened midway: the folded windows, drawn here, lay the rows out to measure.
-                repaintNow(this);
-                if (listWindow != null) repaintNow(listWindow);
-                WidenToRows();
-
-                // Unfolds at once to the height it is likely to take, with no pause while the layout runs; the fit then corrects the move
-                // where the layout says otherwise, which a list of plain rows never does.
-                var likely = Mathf.Min(GetLikelyRowsHeight(), GetMaxListHeight());
-                MoveTo(GetAnchor(openingAnchor ?? anchor, likely), GetControlsFrameHeight(), likely + ListBorder);
+                // Out of the draw of the view that opened it, when that view is drawing: a window drawn in the middle of another's draw leaves
+                // that one's layout groups unbalanced, and it logs "EndLayoutGroup: BeginLayoutGroup must be called first".
+                if (Event.current != null) EditorApplication.delayCall += Unfold;
+                else Unfold();
                 return;
             }
 
             minSize  = minWindowSize;
             position = PlaceUnderButton(button, LoadSize(defaultSize));
             ShowAuxWindow();
+        }
+
+        // As wide as its rows before it unfolds, not widened midway: the folded windows, drawn here, lay the rows out to measure. Then it
+        // unfolds at once to the height it is likely to take, with no pause while the layout runs; the fit then corrects the move where the
+        // layout says otherwise, which a list of plain rows never does.
+        private void Unfold() {
+            if (!this) return;
+
+            repaintNow(this);
+            if (listWindow != null) repaintNow(listWindow);
+            WidenToRows();
+
+            var likely = Mathf.Min(GetLikelyRowsHeight(), GetMaxListHeight());
+            MoveTo(GetAnchor(openingAnchor ?? anchor, likely), GetControlsFrameHeight(), likely + ListBorder);
         }
 
         /// <summary>
