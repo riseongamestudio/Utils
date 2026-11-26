@@ -25,6 +25,9 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
   trong một danh sách, như ô loại của sản phẩm IAP, không còn làm Console báo
   `EndLayoutGroup: BeginLayoutGroup must be called first`: cửa sổ drop-down đo và mở ra
   sau lượt vẽ của trang, thay vì vẽ chen giữa lượt đó.
+- Trang settings vẽ lại ngay khi drawer Odin xin thêm một lượt (`GUIHelper.RequestRepaint`),
+  như cửa sổ của Odin vẫn làm. Trước đó trang chờ tới lần rê chuột kế tiếp, nên mở một mục
+  có ô trên thanh (như Weight của plan collapsible) có lúc thấy ô đó nằm lệch ở chỗ cũ.
 - Kéo đổi chỗ trong danh sách (`SectionRows`): một mục cao hơn các mục khác, ví dụ mục đang
   mở ra, giờ kéo qua được các mục thấp. Trước đó nó dừng tại chỗ khi chạm đầu hay cuối danh
   sách, vì danh sách so tâm của mục đang kéo; giờ so mép trên khi kéo lên, mép dưới khi kéo

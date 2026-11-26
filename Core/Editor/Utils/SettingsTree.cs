@@ -1,5 +1,6 @@
 ﻿using System;
 using Sirenix.OdinInspector.Editor;
+using Sirenix.Utilities.Editor;
 using UnityEditor;
 using Object = UnityEngine.Object;
 
@@ -51,6 +52,10 @@ namespace RiseOn.Utils.Editor {
             if (tree.ApplyChanges()) EditorUtility.SetDirty(asset);
             // Every draw, so an undo reaches the disk as an edit does.
             DeferredSave.Request(asset);
+            // A drawer asks Odin for one more repaint when what it drew is a pass behind, such as a field laid out in the last repaint's
+            // rect; Odin's own windows answer that, a settings page has to, or the page waits for the next move of the mouse.
+            var window = GUIHelper.CurrentWindow;
+            if (window) GUIHelper.RepaintIfRequested(window);
         }
 
         public void Dispose() {
