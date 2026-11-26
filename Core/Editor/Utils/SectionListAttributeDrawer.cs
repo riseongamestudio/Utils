@@ -69,6 +69,7 @@ namespace RiseOn.Utils.Editor {
 
         protected override void DrawPropertyLayout(GUIContent label) {
             label ??= Property.Label;
+            rows.Shaded = Property.GetAttribute<NoRowShadeAttribute>() == null && Property.Parent?.GetAttribute<NoRowShadeAttribute>() == null;
             if (newItem != null) ValueResolver.DrawErrors(newItem);
             if (dropped != null) ValueResolver.DrawErrors(dropped);
             if (pickType != null) ValueResolver.DrawErrors(pickType);

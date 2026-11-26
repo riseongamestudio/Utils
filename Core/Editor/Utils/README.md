@@ -194,12 +194,13 @@ khiến Odin nhường field cho drawer của Unity, field đó mất nhãn ng�
 
 ### Attribute trong lớp dữ liệu
 
-Ba attribute ở `RiseOn.Utils` (runtime, chỉ có trong Editor) đặt mục của trang ngay trên field:
+Các attribute ở `RiseOn.Utils` (runtime, chỉ có trong Editor) đặt mục của trang ngay trên field:
 
 | Attribute | Vẽ gì |
 |---|---|
 | `[SectionGroup("Title")]` | Gom các member mang nó thành một mục, thay cho `[FoldoutGroup]` của Odin |
 | `[SectionList]` | Một list hay mảng thành một mục: + trên thanh thêm, × ở dòng xóa, kéo tay nắm ở đầu dòng để đổi chỗ, kéo object từ Project hay Hierarchy vào để chèn (list object hay list có `Drop`). Thanh lấy nhãn và tooltip của member |
+| `[NoRowShade]` | Đặt cùng `[SectionList]`, hay trên một `EnumMap` của `com.riseon.serializables`: các dòng không tô sọc xen kẽ. Dùng khi mỗi dòng là một mục riêng, như một mục gập mở, vì thanh của mục đã tách các dòng. Đặt trên list, hoặc trên member bọc list (như `ListSerRef`, `ListSerObject`) |
 | `[SectionReference]` | Một member `[SerializeReference]` mà Editor tự chọn lớp (như lớp quản lý duy nhất của game kế thừa từ lớp gốc của pack) thành một mục gập mở: script của giá trị nằm trên thanh, chỉ đọc, các field của nó bên trong. Giá trị không có field nào để hiện thì mục chỉ có thanh, không có mũi tên gập mở. Thanh không có ô chọn kiểu |
 
 Tùy chọn của `[SectionGroup]`:
@@ -339,6 +340,7 @@ Căn theo pixel chỉ làm lúc vẽ (`PixelUtils`).
 Các dòng của một danh sách trong mục `padded: false`, cho danh sách vẽ bằng code (danh sách
 field thì dùng `[SectionList]`, nó vẽ bằng chính `SectionRows`). Dòng sọc xen kẽ như list của
 Odin, không sáng lên dưới chuột; mục nằm trong một dòng giữ nền riêng, sọc của dòng chừa nó ra.
+`Shaded = false` bỏ sọc, cho dòng mà mỗi dòng là một mục riêng.
 `isSelected` tô dòng được chọn bằng màu dòng được chọn của Unity; `select` nhận cú nhấn mà control
 trong dòng không nhận, kèm phím bổ trợ (Ctrl, Cmd, Shift), để người gọi tự giữ lựa chọn nhiều dòng.
 Danh sách rỗng hiện một câu gợi ý. Dòng đổi chỗ được có tay nắm ở đầu trái, dòng xóa được có × ở đầu phải; hai ô vuông

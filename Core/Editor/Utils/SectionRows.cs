@@ -30,6 +30,9 @@ namespace RiseOn.Utils.Editor {
     /// }
     /// </code></example>
     public sealed class SectionRows {
+        /// <summary>Every other row is shaded, so a row reads across; false for rows that are sections of their own (see <see cref="RiseOn.Utils.NoRowShadeAttribute"/>).</summary>
+        public bool Shaded { get; set; } = true;
+
         // Where the rows below a first row marked by the item start: under the handle's middle; in a nested list, where the first row starts,
         // so a foldout below lines up with the item's own instead of standing out to its left.
         private const int BodyInset       = 1 + (int) Section.ButtonWidth / 2;
@@ -223,7 +226,7 @@ namespace RiseOn.Utils.Editor {
             var snapped = PixelUtils.Snap(rect);
             sectionFrames.TryGetValue((root.view, index), out var frames);
             if (isSelected?.Invoke(index) is true) FillAround(snapped, frames, Selected);
-            else if (index % 2 is 1) FillAround(snapped, frames, Section.Shade);
+            else if (Shaded && index % 2 is 1) FillAround(snapped, frames, Section.Shade);
 
             return rect;
         }

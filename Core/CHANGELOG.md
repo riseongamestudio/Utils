@@ -11,6 +11,8 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 - `SectionGroupAttribute.OpenWhenOff` và tham số `openWhenOff` của `Section.Foldout`:
   mục có toggle trên thanh vẫn gập mở được và sửa được bên trong khi toggle tắt, cho
   tính năng mà thiết lập đáng điền trước khi bật.
+- `[NoRowShade]` và `SectionRows.Shaded`: danh sách `[SectionList]` (hay `EnumMap` của
+  `com.riseon.serializables`) không tô sọc xen kẽ, cho dòng mà mỗi dòng là một mục riêng.
 
 ### Đổi
 
