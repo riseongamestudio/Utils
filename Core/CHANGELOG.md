@@ -6,11 +6,22 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-26
+
+Bản lớn vì `PackageJobs` và `PackAdapters` bỏ tham số `owner` (xem Đổi): pack gọi chúng
+phải sửa theo.
+
 ### Thêm
 
-- `SectionGroupAttribute.OpenWhenOff` và tham số `openWhenOff` của `Section.Foldout`:
-  mục có toggle trên thanh vẫn gập mở được và sửa được bên trong khi toggle tắt, cho
-  tính năng mà thiết lập đáng điền trước khi bật.
+- `IEditorPauseHandler`: dừng game trong Editor ở chỗ máy thật dừng Unity. Pack gọi
+  `IEditorPauseHandler.Pause()` / `Resume()` (lồng nhau được đếm); game không có lớp
+  riêng thì `Time.timeScale` về 0 và âm thanh dừng. Game tự định nghĩa cách dừng bằng
+  một lớp cài `OnPause` / `OnResume`; source generator của pack tìm và đăng ký lớp đó,
+  analyzer báo lỗi `RISEONUTILS001`-`003`. Ngoài Editor hai hàm không làm gì, chỉ in
+  một warning mỗi lần chạy.
+- `Section.CutLabel`: style nhãn một dòng, cắt bằng "…" khi hẹp, cho chữ trên dòng tự đặt.
+  Dòng vòng chờ khi `PackageRow` đang đổi phiên bản dùng nó thay vì xuống dòng tràn khỏi
+  dòng.
 - `[NoRowShade]` và `SectionRows.Shaded`: danh sách `[SectionList]` (hay `EnumMap` của
   `com.riseon.serializables`) không tô sọc xen kẽ, cho dòng mà mỗi dòng là một mục riêng.
 - `SettingsIssue.Info(message, fixLabel, fix)`: hộp thông tin đầu trang settings cho
@@ -21,13 +32,25 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 
 ### Đổi
 
-- Mục có ô tick trên thanh (`Section.Foldout` với `toggle`): khi chưa tick thì không vẽ
-  mũi tên gập, vì mục chưa mở được; ô tick giữ nguyên chỗ.
+- Mục có ô tick trên thanh (`Section.Foldout` với `toggle`, `Toggle` của
+  `[SectionGroup]`): khi chưa tick vẫn gập mở và sửa được như mọi mục, để điền thiết
+  lập trước khi bật. Trước đó mục chưa tick không mở được.
 - Thanh có ô tên (`titleField` của `Section.Foldout`, `TitleField` của `[SectionList]`, như
   plan collapsible): bấm vào phần trống của cột tiêu đề sau ô tên cũng gập mở, như thanh
   thường; trước đó chỉ mũi tên gập mở.
 - Nút trong hộp báo (`HelpBoxUtils.Draw`) rộng ít nhất `ButtonWidth`, nút có nhãn dài
   hơn thì rộng theo nhãn, thay vì cắt nhãn.
+- Hộp báo có nút (`HelpBoxUtils.Draw`): khi để nút xuống dưới chữ thì hộp thấp hơn, như
+  trong cửa sổ hẹp, nút xuống góc phải dưới chữ và chữ chiếm cả bề ngang hộp; đổi theo
+  ngay cả khi đang kéo cửa sổ.
+- `PackageJobs`: nút đã bấm (Install, Update, Uninstall, Update All, chọn phiên bản) quay
+  vòng chờ tại chỗ cho tới khi Package Manager xong, rê chuột hiện việc đang chạy; dòng
+  vòng chờ riêng trong mục bỏ. Nút khởi động thay đổi package vẽ bằng
+  `PackageJobs.Button(rect, label, key)`; control khác gọi `Press(key)` và hỏi `Spins(key)`.
+  `Change(what, add, remove)`, `Begin(what)` và `new PackAdapters(core, all)` không nhận
+  `owner` nữa; `DrawRunning(owner)` và `PackAdapters.Owner` bỏ. Pack gọi chúng thì bỏ
+  `owner`, bỏ lời gọi `DrawRunning`, và vẽ nút thay đổi package bằng
+  `PackageJobs.Button`.
 
 ### Sửa
 

@@ -21,14 +21,11 @@ namespace RiseOn.Utils {
         public bool Closed;
 
         /// <summary>
-        /// A bool member of the group drawn as a checkbox on the bar, before the title, for a section that is a feature turned on or off, such as a shadow: it opens only while the box is ticked, and opens as it is ticked.<br/>
+        /// A bool member of the group drawn as a checkbox on the bar, before the title, for a section that is a feature turned on or off, such as a shadow: it opens as the box is ticked, and folds and edits as any other whether ticked or not, so its settings can be filled before it is on.<br/>
         /// Makes the section foldable; set on any one member.<br/>
         /// A bool marked <c>[ReadOnly]</c> shows unticked and locked, for a feature the project cannot use now, such as one needing a package it lacks; its <c>[Tooltip]</c> says why.
         /// </summary>
         public string Toggle;
-
-        /// <summary>With <see cref="Toggle"/>, the section folds and its members stay editable whether the box is ticked or not: for a feature whose settings are worth filling before it is on.</summary>
-        public bool OpenWhenOff;
 
         public SectionGroupAttribute(string title, float order = 0) : base(title, order) { }
 
@@ -39,7 +36,6 @@ namespace RiseOn.Utils {
             Closed      |= section.Closed;
             Tooltip     ??= section.Tooltip;
             Toggle      ??= section.Toggle;
-            OpenWhenOff |= section.OpenWhenOff;
         }
     }
 }

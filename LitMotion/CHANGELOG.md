@@ -4,6 +4,17 @@ Mọi thay đổi đáng kể của `com.riseon.utils.litmotion` được ghi �
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), đánh số theo
 [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [1.0.2] - 2026-11-26
+
+### Đổi
+
+- Phụ thuộc RiseOn lên bản phát hành cùng đợt: `com.riseon.utils` 2.0.0.
+
+### Sửa
+
+- Nhãn của ô `EaseExt` trong cửa sổ hẹp cắt bằng "…" trên một dòng, thay vì tràn khỏi
+  dòng.
+
 ## [1.0.1] - 2026-11-20
 
 ### Đổi

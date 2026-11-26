@@ -20,7 +20,7 @@ Package `com.riseon.utils.litmotion`, namespace `RiseOn.Utils.LitMotion`. Xây t
 |---|---|---|
 | Unity 6000.3 | | Bản đang dùng để phát triển |
 | [Odin Inspector](https://odininspector.com) | Cài tay từ Asset Store | Drawer |
-| [`com.riseon.utils`](../Core/README.md) 1.0.18 | Tự cài theo `package.json` | `RectFieldUtils` cho drawer |
+| [`com.riseon.utils`](../Core/README.md) 2.0.0 | Tự cài theo `package.json` | `RectFieldUtils` và `Section.CutLabel` cho drawer |
 | [`com.annulusgames.lit-motion`](https://github.com/annulusgames/LitMotion) 2.0.2 | Tự cài theo `package.json`, từ OpenUPM | `Ease`, `EaseUtility` |
 
 "Tự cài" là Package Manager tự lấy theo version từ Unity Registry và các registry khai
@@ -49,7 +49,7 @@ package. `com.riseon.utils` và LitMotion được kéo về tự động:
     }
   ],
   "dependencies": {
-    "com.riseon.utils.litmotion": "1.0.1"
+    "com.riseon.utils.litmotion": "1.0.2"
   }
 }
 ```

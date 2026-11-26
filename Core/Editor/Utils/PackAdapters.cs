@@ -37,15 +37,11 @@ namespace RiseOn.Utils.Editor {
         // Each adapter's versions in the core's registry, newest first; none while the core is a local folder.
         private readonly Dictionary<string, string[]> versions = new();
 
-        /// <param name="owner">Unique among pages: the changes it starts show where <see cref="PackageJobs.DrawRunning"/> draws it.</param>
         /// <param name="core">A type of the pack's core, which finds the core's package.</param>
-        public PackAdapters(string owner, Type core, params PackAdapter[] all) {
-            Owner     = owner;
+        public PackAdapters(Type core, params PackAdapter[] all) {
             this.core = core;
             All       = all;
         }
-
-        public string Owner { get; }
 
         public IReadOnlyList<PackAdapter> All { get; }
 
@@ -98,7 +94,7 @@ namespace RiseOn.Utils.Editor {
             var latest  = offered?.FirstOrDefault();
             return new PackageRow(adapter.Name, package.version, latest
                                 , install: latest == null ? null : () => Install(adapter, latest, "Updating")
-                                , uninstall: package.isDirectDependency ? uninstall ?? (() => PackageJobs.Change(Owner, $"Uninstalling {adapter.Name}", null, new[] { adapter.Package })) : null
+                                , uninstall: package.isDirectDependency ? uninstall ?? (() => PackageJobs.Change($"Uninstalling {adapter.Name}", null, new[] { adapter.Package })) : null
                                 , tooltip: package.source is PackageSource.Local ? $"From {package.resolvedPath}" : null
                                 , versions: offered
                                 , installVersion: version => Install(adapter, version, "Installing"));
@@ -109,7 +105,7 @@ namespace RiseOn.Utils.Editor {
             var root    = Core();
             var local   = root is { source: PackageSource.Local } ? Path.Combine(Path.GetDirectoryName(root.resolvedPath)!, adapter.Folder).Replace('\\', '/') : null;
             var offered = versions.TryGetValue(adapter.Package, out var found) ? found : null;
-            Action install = local != null && Directory.Exists(local) ? () => PackageJobs.Change(Owner, $"Installing {adapter.Name}", new[] { "file:" + local }, null)
+            Action install = local != null && Directory.Exists(local) ? () => PackageJobs.Change($"Installing {adapter.Name}", new[] { "file:" + local }, null)
                            : local != null ? null
                            : () => Install(adapter, offered?[0], "Installing");
             return new PackageRow(adapter.Name, null, offered?.FirstOrDefault(), install, null
@@ -123,7 +119,7 @@ namespace RiseOn.Utils.Editor {
         }
 
         private void Install(PackAdapter adapter, string version, string verb) {
-            PackageJobs.Change(Owner, $"{verb} {adapter.Name}", new[] { version == null ? adapter.Package : $"{adapter.Package}@{version}" }, null);
+            PackageJobs.Change($"{verb} {adapter.Name}", new[] { version == null ? adapter.Package : $"{adapter.Package}@{version}" }, null);
         }
 
         /// <summary>At the bar's end, as the Package Manager window's Update All: every adapter behind its newest version in one change, grayed out while none is.</summary>
@@ -132,11 +128,9 @@ namespace RiseOn.Utils.Editor {
             var names    = string.Join(", ", outdated.Select(entry => entry.Adapter.Name));
             var label    = new GUIContent("Update All", outdated.Count == 0 ? "Every adapter in the project is on its newest version" : $"Update {names}");
             var width    = EditorStyles.miniButton.CalcSize(label).x;
-            using (new EditorGUI.DisabledScope(outdated.Count == 0 || PackageJobs.IsRunning)) {
-                if (!GUI.Button(new Rect(value.xMax - width, value.y, width, value.height), label, EditorStyles.miniButton)) return;
-            }
+            if (!PackageJobs.Button(new Rect(value.xMax - width, value.y, width, value.height), label, $"{core.FullName}/Update All", outdated.Count > 0)) return;
 
-            PackageJobs.Change(Owner, $"Updating {names}", outdated.Select(entry => $"{entry.Adapter.Package}@{entry.Row.Latest}").ToArray(), null);
+            PackageJobs.Change($"Updating {names}", outdated.Select(entry => $"{entry.Adapter.Package}@{entry.Row.Latest}").ToArray(), null);
             GUIUtility.ExitGUI();
         }
     }

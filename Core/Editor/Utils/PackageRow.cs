@@ -79,7 +79,7 @@ namespace RiseOn.Utils.Editor {
         }
 
         /// <summary>
-        /// A row's value column: the version in the project, an arrow to the newest when that is newer, then Install, Update and Uninstall as they apply, waiting while <see cref="PackageJobs"/> runs a change.
+        /// A row's value column: the version in the project, an arrow to the newest when that is newer, then Install, Update and Uninstall as they apply, waiting while <see cref="PackageJobs"/> runs a change, the one pressed spinning.
         /// </summary>
         public static void Draw(Rect value, PackageRow row) {
             // Only what can be done: Install while missing, Update while a newer version exists; then Uninstall.
@@ -98,9 +98,7 @@ namespace RiseOn.Utils.Editor {
                 var width  = ButtonWidth(buttons[i].Label);
                 var button = new Rect(value.xMax - width, value.y, width, value.height);
                 value.xMax = button.x - Section.LabelGap;
-                using (new EditorGUI.DisabledScope(PackageJobs.IsRunning)) {
-                    if (!GUI.Button(button, buttons[i].Label, EditorStyles.miniButton)) continue;
-                }
+                if (!PackageJobs.Button(button, buttons[i].Label, $"{row.Name}/{buttons[i].Label.text}")) continue;
 
                 buttons[i].Act(button);
                 GUIUtility.ExitGUI();
@@ -119,11 +117,20 @@ namespace RiseOn.Utils.Editor {
             shown.text    = $"{shown.text}  ▾";
             shown.tooltip = row.Latest == null ? "Pick another version" : $"Newest: {row.Latest}. Pick another version";
             var pick = new Rect(value.x, value.y, Mathf.Min(value.width, EditorStyles.label.CalcSize(shown).x), value.height);
+            var key  = $"{row.Name}/Version";
+            if (PackageJobs.Spins(key)) {
+                EditorGUIUtility.SetIconSize(new Vector2(Section.IconSize, Section.IconSize));
+                GUI.Label(value, SpinnerUtils.Content(row.Installed, PackageJobs.Running), Section.CutLabel);
+                EditorGUIUtility.SetIconSize(Vector2.zero);
+                return;
+            }
+
             EditorGUIUtility.AddCursorRect(pick, MouseCursor.Link);
             using (new EditorGUI.DisabledScope(PackageJobs.IsRunning)) {
                 if (!EditorGUI.DropdownButton(pick, shown, FocusType.Passive, EditorStyles.label)) return;
             }
 
+            PackageJobs.Press(key);
             PickVersion(pick, false, row, row.Installed);
         }
 

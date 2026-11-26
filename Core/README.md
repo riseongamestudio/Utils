@@ -46,7 +46,7 @@ lỗi từ `RiseOn.Utils.Requirements`.
     }
   ],
   "dependencies": {
-    "com.riseon.utils": "1.0.18"
+    "com.riseon.utils": "2.0.0"
   }
 }
 ```
@@ -152,6 +152,7 @@ Cách dùng từng tool: [Tool trong Editor](Editor/Tools/README.md).
 |---|---|---|
 | Singleton | `Singleton<T>`, `ISingleton<T>` | [Runtime/Singleton](Runtime/Singleton/README.md) |
 | Bounds2D | `Bounds` bản 2D, serialize được | [Runtime/Bounds2D](Runtime/Bounds2D/README.md) |
+| EditorPauseHandler | `IEditorPauseHandler`: dừng game trong Editor khi máy thật dừng Unity (quảng cáo toàn màn hình, popup ATT); game tự định nghĩa cách dừng bằng một lớp cài nó | [Runtime/EditorPauseHandler](Runtime/EditorPauseHandler/README.md) |
 | DirectionExt | Một hướng có sẵn hoặc một góc tự chọn, xoay bằng mũi tên trong Inspector (Odin) | [Runtime/DirectionExt](Runtime/DirectionExt/README.md) |
 | Utils | Vector, Transform, Collection, Random, Undo, UnityEvent, Handles, Gizmos, Math, Rich text... | [Runtime/Utils](Runtime/Utils/README.md) |
 | EnumLabel | Đặt nhãn phần tử mảng theo enum (Odin) | [Runtime/EnumLabel](Runtime/EnumLabel/README.md) |

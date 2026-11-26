@@ -22,7 +22,7 @@ namespace RiseOn.Utils.LitMotion.Editor {
         protected override void DrawPropertyLayout(GUIContent label) {
             var row = EditorGUILayout.GetControlRect();
             var value = SirenixEditorGUI.PrefixRect(row, label, out var prefix);
-            if (label != null) GUI.Label(prefix, label);
+            if (label != null) GUI.Label(prefix, label, Section.CutLabel);
 
             GUIHelper.PushIndentLevel(0);
             if (ValueEntry.SmartValue.IsCustom) {
