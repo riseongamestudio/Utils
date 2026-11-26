@@ -230,11 +230,12 @@ namespace RiseOn.Utils.Editor {
             var line = RowContent(title, EditorGUIUtility.singleLineHeight);
             property.State.Expanded = Fold(new Rect(line.x, line.y, arrow, line.height), property.State.Expanded, GUIContent.none);
 
-            // As wide as its text, at least as wide as most names need so that a list's names line up, and never closer than the inset to what follows on the bar.
+            // As wide as its text, at least as wide as most names need so that a list's names line up, and never closer than the inset to what follows on the bar,
+            // even where the column is narrower than that least.
             const float least = 120;
             var entry  = field.ValueEntry;
             var value  = entry.WeakSmartValue as string ?? "";
-            var width  = Mathf.Clamp(EditorStyles.textField.CalcSize(new GUIContent(value)).x + Inset, least, line.xMax - Inset - line.x - arrow);
+            var width  = Mathf.Max(0, Mathf.Min(Mathf.Max(EditorStyles.textField.CalcSize(new GUIContent(value)).x + Inset, least), line.xMax - Inset - line.x - arrow));
             var rect   = new Rect(line.x + arrow, line.y, width, line.height);
             var indent = EditorGUI.indentLevel;
             EditorGUI.indentLevel    = 0;

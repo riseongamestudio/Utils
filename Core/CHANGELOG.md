@@ -15,8 +15,9 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
   `com.riseon.serializables`) không tô sọc xen kẽ, cho dòng mà mỗi dòng là một mục riêng.
 - `SettingsIssue.Info(message, fixLabel, fix)`: hộp thông tin đầu trang settings cho
   một điều về cách thiết lập đang chạy, không phải chỗ thiếu (như pack đang chạy lớp
-  mặc định thay cho lớp game chưa có). `IsInfo` đúng với nó; build check của pack bỏ
-  qua nó, không dừng build và không in cảnh báo.
+  mặc định thay cho lớp game chưa có), hộp có icon thông tin, có thể kèm một nút.
+  `IsInfo` đúng với nó; nó không dừng build, và build check của pack tạo nó phải bỏ nó
+  khỏi các cảnh báo in ra.
 
 ### Đổi
 
@@ -39,6 +40,8 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
   có ô trên thanh (như Weight của plan collapsible) có lúc thấy ô đó nằm lệch ở chỗ cũ.
 - Ô trên thanh của một dòng `[SectionList]` (như Weight của plan collapsible) đi cùng
   thanh trong lúc một mục phía trên gập mở, thay vì nháy về chỗ của lượt vẽ trước.
+- Ô tên trên thanh (`TitleField` của `[SectionList]`, như tên plan collapsible) không còn
+  tràn qua cột giá trị khi cửa sổ hẹp tới mức cột nhãn dưới 120 điểm: ô co theo cột.
 - Kéo đổi chỗ trong danh sách (`SectionRows`): một mục cao hơn các mục khác, ví dụ mục đang
   mở ra, giờ kéo qua được các mục thấp. Trước đó nó dừng tại chỗ khi chạm đầu hay cuối danh
   sách, vì danh sách so tâm của mục đang kéo; giờ so mép trên khi kéo lên, mép dưới khi kéo
