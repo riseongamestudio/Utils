@@ -475,12 +475,12 @@ namespace RiseOn.Utils.Editor {
 
         /// <summary>
         /// Odin's fade, the one its foldouts use, for content that folds under a row; true while any of it shows.<br/>
-        /// Odin asks only its own windows to repaint while it fades, so this asks the window it draws in, a settings page included.<br/>
+        /// Odin asks only its own windows to repaint while it fades, so this asks the window it draws in, a settings page included (<see cref="RepaintUtils"/>).<br/>
         /// Call <see cref="EndFade"/> after it whatever it returns.
         /// </summary>
         public static bool BeginFade(object key, bool open) {
             var shows = SirenixEditorGUI.BeginFadeGroup(key, open, out var faded);
-            if (faded is > 0 and < 1) HandleUtility.Repaint();
+            if (faded is > 0 and < 1) RepaintUtils.Request();
             return shows;
         }
 

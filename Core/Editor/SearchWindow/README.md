@@ -29,6 +29,7 @@ if (GUI.Button(buttonRect, "Pick")) {
 | `ObjectSearchWindow.Open(rect, title, onSelected, filterType, rootPrefab, allowSceneObjects, current, mode)` | `onSelected` nhận `SearchNode`, object nằm trong `node.Data`. `filterType` có thể là interface hay generic definition. `rootPrefab`: tìm trong prefab đang mở thay vì scene. `current`: giá trị field đang giữ, cửa sổ mở ra là tô sẵn nó |
 | `ChoiceSearchWindow.Open<T>(rect, title, choices, onSelected, onCanceled, mode, selected, search)` | `choices`: các `SearchChoice<T>(path, value, disabledReason, icon)`; dấu `/` trong `path` tạo thư mục, như `Transform/localScale`; `value` null là dòng None; `icon` nạp khi dòng hiện ra. Thư mục và lựa chọn giữ đúng thứ tự đưa vào. Danh sách chỉ được duyệt khi cửa sổ đã hiện. `onSelected` nhận giá trị của lựa chọn; `onCanceled` chạy khi cửa sổ đóng mà chưa chọn gì (Esc, bấm ra ngoài). Chọn nhiều bước: gọi `Present<T>(title, choices, onSelected)` của cửa sổ trả về, từ trong `onSelected` của bước trước; cửa sổ giữ nguyên chỗ và sang bước sau; lựa chọn dẫn tới bước sau đặt `hasNextStep: true` để hiện mũi tên như thư mục. `selected`: giá trị đang giữ, được làm nổi, mở sẵn thư mục chứa nó và cuộn tới. `search: false` bỏ ô tìm, cho danh sách ngắn nhìn là thấy hết |
 | `ChoiceSearchWindow.OpenToggles<T>(rect, title, choices, isOn, onToggled, mode, search)` | Chọn nhiều: mỗi lần chọn gọi `onToggled` với lựa chọn đó rồi cửa sổ vẫn mở; lựa chọn có dấu tích khi `isOn` trả về true, hỏi lại sau mỗi lần bật tắt. Dùng cho enum `[Flags]` |
+| `ChoiceSearchWindow.OpenOrder<T>(rect, title, choices, order, onChanged, mode)` | Chọn nhiều có thứ tự, như danh sách mediation của một format: các lựa chọn đang bật lên đầu, có dấu tích, theo thứ tự `order` trả về, cuối dòng có tay cầm; các lựa chọn tắt ở dưới, theo thứ tự đưa vào. Bấm một dòng thì tắt nó, hoặc bật và xếp cuối nhóm bật; kéo một dòng đang bật lên xuống thì các dòng nó đi qua dạt ra nhường chỗ, thả ra thì nó vào chỗ mới. Sau mỗi thay đổi `onChanged` nhận các giá trị bật theo thứ tự mới, rồi mọi dòng trượt tới chỗ của nó. `order` được hỏi lại sau mỗi thay đổi và mỗi lần undo, redo, nên các dòng theo giá trị đang có. Không có ô tìm; cửa sổ mở tới khi đóng như mọi drop-down |
 
 `rect` là vùng của nút bấm, tính trong `OnGUI` như `GUILayoutUtility.GetLastRect()`.
 Cửa sổ mở ngay dưới nút, hoặc phía trên khi bên dưới không đủ chỗ, theo một trong hai
@@ -105,7 +106,12 @@ Kế thừa `SearchWindow`, khai các tab trong `RegisterSections` bằng
 `AddSection(tên, builder)`. `builder` nhận `SectionBuildContext`, dựng cây
 `SearchNode`, báo tiến độ bằng `ctx.ReportProgress` rồi gọi `ctx.Complete(root)`.
 Mở cửa sổ bằng `Show(rect, title, onSelected, defaultSize, searchText, mode, onCanceled, search)` từ một hàm
-`Open` tĩnh như hai lớp có sẵn; `defaultSize` là cỡ của lần mở đầu tiên. Gọi
+`Open` tĩnh như hai lớp có sẵn; `defaultSize` là cỡ của lần mở đầu tiên. Cho kéo đổi thứ tự thì gọi
+`AllowReorder(movable, reordered)` trước `Show`, cho danh sách hiện trọn, không ô tìm (lúc đang tìm thì không kéo được):
+dòng mà `movable` cho phép thì có tay cầm và kéo được giữa các dòng như nó;
+thả ra thì `reordered` nhận các node đó theo thứ tự mới, việc của nó là xếp lại con của thư mục theo đó, rồi các dòng trượt
+vào chỗ. Bấm mà không kéo thì vẫn là chọn, chỉ là chọn khi nhả chuột thay vì khi nhấn. Sửa thứ tự con của thư mục theo
+cách khác (như một lần chọn đưa dòng xuống cuối) thì gọi `MoveRows()` để các dòng trượt từ chỗ cũ tới chỗ mới. Gọi
 `PreselectOnOpen(data)` trước `Show` để tô sẵn mục có `Data` bằng `data`; ghi đè
 `StateKey` để nhớ tab riêng theo từng trường hợp. Giao diện nằm trong
 `SearchWindow.uss` cạnh script.

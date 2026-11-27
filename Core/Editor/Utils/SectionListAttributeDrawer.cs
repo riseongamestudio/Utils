@@ -83,7 +83,7 @@ namespace RiseOn.Utils.Editor {
                 }
 
                 pickedObjects.Clear();
-                GUIHelper.RequestRepaint();
+                RepaintUtils.Request();
             }
 
             var type = Event.current.type;
@@ -108,7 +108,7 @@ namespace RiseOn.Utils.Editor {
             var size = type is EventType.Layout ? barFieldSize : rect.size;
             if (type is EventType.Repaint && size != barFieldSize) {
                 barFieldSize = size;
-                GUIHelper.RequestRepaint();
+                RepaintUtils.Request();
             }
 
             // With its label, whose column is as wide as the label's text, so the value keeps the room.
@@ -170,7 +170,7 @@ namespace RiseOn.Utils.Editor {
             }
 
             if (isBarLit) Section.DrawDropLight(GUILayoutUtility.GetLastRect());
-            if (isBarLit != wasLit) GUIHelper.RequestRepaint();
+            if (isBarLit != wasLit) RepaintUtils.Request();
         }
 
         private bool Takes(Object obj) => obj && (allowSceneObjects || EditorUtility.IsPersistent(obj)) && !IsNone(take(obj, 0));
@@ -199,7 +199,7 @@ namespace RiseOn.Utils.Editor {
                 resolver.QueueInsertAt(index + i, Enumerable.Range(0, ValueEntry.ValueCount).Select(target => (object) take(obj, target)).ToArray());
             }
 
-            GUIHelper.RequestRepaint();
+            RepaintUtils.Request();
         }
 
         private static bool IsNone(TElement value) {
@@ -227,7 +227,7 @@ namespace RiseOn.Utils.Editor {
 
             // One each object edited, so no two share a new instance.
             resolver.QueueInsertAt(index, Enumerable.Range(0, ValueEntry.ValueCount).Select(_ => (object) make()).ToArray());
-            GUIHelper.RequestRepaint();
+            RepaintUtils.Request();
         }
 
         // Odin's resolver has no move, so the item leaves its place and comes back at the other, in every object edited.

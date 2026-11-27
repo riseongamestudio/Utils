@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -72,6 +73,15 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         public void AddChild(SearchNode item) {
             children ??= new List<SearchNode>(1);
             children.Add(item);
+        }
+
+        /// <summary>Puts the children in the order of <paramref name="key"/>, least first, keeping the order of those it ranks alike.</summary>
+        internal void OrderChildren(Func<SearchNode, int> key) {
+            if (children == null) return;
+
+            var ordered = children.OrderBy(key).ToList();
+            children.Clear();
+            children.AddRange(ordered);
         }
 
         public void AddRangeChildren(IEnumerable<SearchNode> items) {

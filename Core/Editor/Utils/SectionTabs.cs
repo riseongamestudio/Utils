@@ -59,7 +59,7 @@ namespace RiseOn.Utils.Editor {
         }
 
         private void DrawSlide(Action<int> drawPage) {
-            HandleUtility.Repaint();
+            RepaintUtils.Request();
             if (Event.current.type is EventType.Repaint && started < 0) started = EditorApplication.timeSinceStartup;
             // Ease-out quad: at the window's few frames a cubic covers most of the way in the first one and reads as a jump.
             var eased  = 1 - (1 - progress) * (1 - progress);
@@ -112,7 +112,7 @@ namespace RiseOn.Utils.Editor {
 
                 if (i != Selected) requested = i;
                 Event.current.Use();
-                HandleUtility.Repaint();
+                RepaintUtils.Request();
             }
 
             return row;

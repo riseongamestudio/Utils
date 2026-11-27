@@ -16,7 +16,7 @@ namespace RiseOn.Utils.Editor {
 
         /// <summary>The spinner's current frame and the text, for any label; the icon draws at the size the label's style gives it.</summary>
         public static GUIContent Content(string text, string tooltip = null) {
-            HandleUtility.Repaint();
+            RepaintUtils.Request();
             var frame = (int) (EditorApplication.timeSinceStartup * FramesPerSecond) % Frames;
             return new GUIContent(text, EditorGUIUtility.IconContent($"WaitSpin{frame:00}").image, tooltip);
         }

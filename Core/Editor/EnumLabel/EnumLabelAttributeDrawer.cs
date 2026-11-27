@@ -193,7 +193,7 @@ namespace RiseOn.Utils.Editor {
                 GUIUtility.hotControl = controlId;
 
                 currentEvent.Use();
-                GUIHelper.RequestRepaint();
+                RepaintUtils.Request();
                 return;
             }
 
@@ -264,13 +264,13 @@ namespace RiseOn.Utils.Editor {
 
             var selectedTypeName = selectedType.AssemblyQualifiedName;
             if (SetSelectedEnumTypeName(selectedTypeName, ChangeEnumTypeUndoName)) {
-                GUIHelper.RequestRepaint();
+                RepaintUtils.Request();
             }
         }
 
         private void ClearSelectedEnumType() {
             if (SetSelectedEnumTypeName(string.Empty, ClearEnumTypeUndoName)) {
-                GUIHelper.RequestRepaint();
+                RepaintUtils.Request();
             }
         }
 
@@ -279,7 +279,7 @@ namespace RiseOn.Utils.Editor {
             if (defaultEnumTypeName == null) return;
 
             if (SetSelectedEnumTypeName(defaultEnumTypeName, ResetEnumTypeUndoName)) {
-                GUIHelper.RequestRepaint();
+                RepaintUtils.Request();
             }
         }
 

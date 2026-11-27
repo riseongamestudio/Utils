@@ -16,7 +16,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
     /// Opens as a <see cref="SearchWindowMode"/>: a window like Unity's own object picker, or a drop-down under the field like Odin's selectors.<br/>
     /// Subclasses add sections in <see cref="RegisterSections"/> and open the window with <see cref="Show"/>.
     /// </summary>
-    public abstract class SearchWindow : EditorWindow {
+    public abstract partial class SearchWindow : EditorWindow {
         private const float  ItemHeight        = 20f;
         private const double AnimationDuration = 0.4;
         private const string StyleSheetPath    = "SearchWindow/SearchWindow.uss"; // relative to this assembly's asmdef
@@ -68,6 +68,9 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         // so a click on the button that opened it would open a second one: opening it again from its button closes it instead, as a toggle,
         // and opening another closes it first.
         private static SearchWindow openDropDown;
+
+        /// <summary>Whether a drop-down is open, one that may be making edit after edit, as one that toggles or orders does.</summary>
+        internal static bool IsDropDownOpen => openDropDown != null;
         private static Action pendingCancel;
         private static Rect   pendingButton;
         private static double pendingSince;
@@ -1486,7 +1489,7 @@ namespace RiseOn.Utils.Editor.SearchWindow {
         }
 
         private Page CreatePage() {
-            var newPage = new Page { Root = new VisualElement() };
+            var newPage = new Page { Root = new VisualElement(), Movable = IsMovable, Shift = ShiftOf };
             newPage.Root.AddToClassList(Uss.Page);
 
             newPage.Breadcrumb = new VisualElement();
@@ -1560,16 +1563,42 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             };
             row.Add(action);
 
-            // The highlight follows the mouse, like Unity's Add Component popup.
-            row.RegisterCallback<PointerMoveEvent>(_ => {
+            // The handle of a row that can be dragged to another place (AllowReorder): two short bars, as a reorderable ListView's.
+            // Picked, for its cursor; a press on it is the row's.
+            var grip = new VisualElement();
+            grip.AddToClassList(Uss.RowGrip);
+            for (var bar = 0; bar < 2; bar++) {
+                var line = new VisualElement { pickingMode = PickingMode.Ignore };
+                line.AddToClassList(Uss.RowGripBar);
+                grip.Add(line);
+            }
+
+            row.Add(grip);
+
+            // The highlight follows the mouse, like Unity's Add Component popup; it stays on a row being pressed or dragged.
+            row.RegisterCallback<PointerMoveEvent>(evt => {
+                if (pressed != null) {
+                    Drag(evt);
+                    return;
+                }
+
                 if (isAnimating || owner != page || row.userData is not int index || index == page.SelectedIndex) return;
 
                 Select(index, scrollTo: false);
             });
+            row.RegisterCallback<PointerUpEvent>(evt => {
+                if (evt.button == 0) Release(row, evt.pointerId);
+            });
+            row.RegisterCallback<PointerCaptureOutEvent>(evt => Release(row, evt.pointerId));
 
             row.RegisterCallback<PointerDownEvent>(evt => {
                 if (evt.button != 0 || isAnimating || owner != page || evt.target == action) return;
                 if (row.userData is not int index || index >= page.Items.Count) return;
+
+                if (!isInSearchMode && IsMovable(page.Items[index])) {
+                    Press(row, evt, index);
+                    return;
+                }
 
                 evt.StopPropagation();
                 Select(index, scrollTo: false);
@@ -1617,6 +1646,10 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             action.userData      = item;
             action.text          = item.ActionLabel;
             action.style.display = item.ActionLabel == null ? DisplayStyle.None : DisplayStyle.Flex;
+
+            var movable = !owner.IsInSearchMode && owner.Movable(item);
+            row[4].style.display = movable ? DisplayStyle.Flex : DisplayStyle.None;
+            row.style.translate  = new Translate(0, owner.Shift(item));
         }
 
         private static string RowText(Page owner, SearchNode item) {
@@ -1754,6 +1787,10 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             public bool          IsReversed;
             public bool          ShowsIcons;
 
+            /// <summary>Whether a row can be dragged to another place, and how far it shows from its place as it slides there.</summary>
+            public Func<SearchNode, bool>  Movable;
+            public Func<SearchNode, float> Shift;
+
             /// <summary>How far the list is scrolled from where it starts: its top, or its bottom when turned over.</summary>
             public float ScrollFromStart {
                 get {
@@ -1839,6 +1876,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
             public const string RowLabel    = "search-window__row-label";
             public const string RowArrow    = "search-window__row-arrow";
             public const string RowAction   = "search-window__row-action";
+            public const string RowGrip     = "search-window__row-grip";
+            public const string RowGripBar  = "search-window__row-grip-bar";
         }
 
         #endregion

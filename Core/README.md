@@ -46,7 +46,7 @@ lỗi từ `RiseOn.Utils.Requirements`.
     }
   ],
   "dependencies": {
-    "com.riseon.utils": "2.0.0"
+    "com.riseon.utils": "2.1.0"
   }
 }
 ```
@@ -163,7 +163,7 @@ Cách dùng từng tool: [Tool trong Editor](Editor/Tools/README.md).
 | Foldout đệ quy | Alt+click foldout bất kỳ trong Inspector của Odin mở hay gập cả nhánh bên dưới | [Editor/Utils](Editor/Utils/README.md#foldout-đệ-quy) |
 | Cửa sổ tìm kiếm | `ComponentSearchWindow`, `ObjectSearchWindow`, `ChoiceSearchWindow` cho drawer riêng, dạng cửa sổ hoặc drop-down | [Editor/SearchWindow](Editor/SearchWindow/README.md) |
 | Chọn giá trị | Mọi ô enum, của Odin lẫn Unity, và mọi ô `[ValueDropdown]` của một giá trị mở drop-down `ChoiceSearchWindow`; `ChoiceFieldUtils` cho ô vẽ tay | [Editor/Utils](Editor/Utils/README.md#chọn-giá-trị-choicefieldutils) |
-| Utils Editor | `PrefabUtils`, `InspectorPropertyUtils`, `RectFieldUtils`, `InlineEditorImitator` cho người viết drawer; `SettingsPage`, `SettingsTree`, `SettingsAssetUtils`, `SettingsAssetInspector`, `Section`, `SectionRows`, `SectionTabs`, các ô dùng chung (`PlatformFieldUtils`, `HelpBoxUtils`, `ScriptUtils`, `SpinnerUtils`), `SettingsIssue`, `SettingsFocus`, `PackAdapters`, `PackageRow`, `PackageJobs`, `DeferredSave`, `AssetFindUtils` cho trang settings và inspector; `PixelUtils`, `HoverUtils` cho control vẽ tay | [Editor/Utils](Editor/Utils/README.md) |
+| Utils Editor | `PrefabUtils`, `InspectorPropertyUtils`, `RectFieldUtils`, `InlineEditorImitator` cho người viết drawer; `SettingsPage`, `SettingsTree`, `SettingsAssetUtils`, `SettingsAssetInspector`, `Section`, `SectionRows`, `SectionTabs`, các ô dùng chung (`PlatformFieldUtils`, `PlatformMarks`, `HelpBoxUtils`, `ScriptUtils`, `SpinnerUtils`), `RepaintUtils`, `SettingsIssue`, `SettingsFocus`, `PackAdapters`, `PackageRow`, `PackageJobs`, `DeferredSave`, `AssetFindUtils` cho trang settings và inspector; `PixelUtils`, `HoverUtils` cho control vẽ tay | [Editor/Utils](Editor/Utils/README.md) |
 
 ## Lịch sử thay đổi
 

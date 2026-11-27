@@ -261,6 +261,26 @@
     -unity-text-align: middle-center;
 }
 
+/* The handle at the end of a row that can be dragged to another place: two short bars, as a reorderable ListView draws its own, in
+   a square as tall as the row, the pointer a hand over the row's end. */
+.search-window .search-window__row-grip {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    cursor: pan;
+}
+
+.search-window .search-window__row-grip-bar {
+    width: 8px;
+    height: 1px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    background-color: var(--unity-colors-default-text);
+    opacity: 0.6;
+}
+
 /* A choice's button at the row's end, such as Install; full strength on a grayed-out row, as it is what the row offers. */
 .search-window .search-window__row-action {
     flex-shrink: 0;

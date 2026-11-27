@@ -6,6 +6,29 @@ Mọi thay đổi đáng kể của `com.riseon.utils` được ghi ở đây. �
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-11-27
+
+### Thêm
+
+- `PlatformMarks`: icon Android và Apple của Unity (như Build Profiles), thay cho chữ
+  Android, iOS ở chỗ giá trị hai nền tảng đứng cạnh nhau; `Width` là bề rộng phần hình
+  thật của icon.
+- `ChoiceSearchWindow.OpenOrder`: drop-down chọn nhiều có thứ tự, kéo dòng để đổi thứ tự.
+- `SearchWindow.AllowReorder`, `SearchWindow.MoveRows`: cho cửa sổ riêng kéo đổi thứ tự dòng,
+  các dòng trượt tới chỗ mới.
+- `RepaintUtils.Request()`: vẽ lại cửa sổ đang vẽ GUI ở tick kế tiếp, kể cả Project Settings.
+
+### Sửa
+
+- Hiệu ứng trên trang Project Settings (gập mở, trượt tab, cặp ô Android/iOS chuyển giữa một
+  và hai dòng, vòng quay) đứng giữa chừng tới khi chuột di; giờ chạy hết một mạch.
+
+### Đổi
+
+- `PlatformFieldUtils` đặt icon nền tảng trước mỗi ô thay cho chữ Android, iOS.
+- `DeferredSave` chờ cả khi drop-down của `SearchWindow` đang mở, nên một loạt thay đổi trong
+  drop-down chỉ ghi file một lần khi nó đóng.
+
 ## [2.0.0] - 2026-11-26
 
 Bản lớn vì `PackageJobs` và `PackAdapters` bỏ tham số `owner` (xem Đổi): pack gọi chúng

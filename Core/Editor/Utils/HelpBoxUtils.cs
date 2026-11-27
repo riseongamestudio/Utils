@@ -82,7 +82,7 @@ namespace RiseOn.Utils.Editor {
                 if (count > 0) {
                     if (lastWidths.Count > 256) lastWidths.Clear();
                     lastWidths[key] = (rect.width, view);
-                    if (IsShorterUnder(content, widths, height, rect.width) != under) HandleUtility.Repaint();
+                    if (IsShorterUnder(content, widths, height, rect.width) != under) RepaintUtils.Request();
                 }
             }
 

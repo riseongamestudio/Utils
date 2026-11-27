@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace RiseOn.Utils.Editor.SearchWindow {
@@ -10,7 +12,8 @@ namespace RiseOn.Utils.Editor.SearchWindow {
     /// A choice with an action has a button at its row's end, such as Install for one that cannot be picked yet.<br/>
     /// It opens as a drop-down by default, as wide as the button and as tall as its rows.<br/>
     /// A pick made in steps shows each next list in the same window with <see cref="Present{T}"/>, from the callback of the step before.<br/>
-    /// <see cref="OpenToggles{T}"/> picks several instead: each pick toggles its choice, ticked while on, and the window stays open for more.
+    /// <see cref="OpenToggles{T}"/> picks several instead: each pick toggles its choice, ticked while on, and the window stays open for more.<br/>
+    /// <see cref="OpenOrder{T}"/> picks several in an order: the ones on first, in their order, dragged to reorder.
     /// </summary>
     public class ChoiceSearchWindow : SearchWindow {
         private static readonly Vector2 defaultSize = new(250f, 360f);
@@ -68,6 +71,66 @@ namespace RiseOn.Utils.Editor.SearchWindow {
                 window.RefreshRows();
             }, defaultSize, mode: mode, search: search);
             return window;
+        }
+
+        /// <summary>
+        /// Opens a window that puts some of the choices in an order: the ones on first, ticked, in their order, each with a handle at its end, then the ones off.<br/>
+        /// Picking a choice turns it off, or on after the ones on; dragging a row that is on moves it among them, the rows it passes making way. After each change
+        /// <paramref name="onChanged"/> gets the values on in their new order, and every row slides to its place. The window stays open, closing as any drop-down does.<br/>
+        /// <paramref name="order"/> gives the values on, in their order: asked again after each change and each undo or redo, so the rows follow the value they show.
+        /// </summary>
+        public static ChoiceSearchWindow OpenOrder<T>(
+            Rect btnRect
+          , string title
+          , IEnumerable<SearchChoice<T>> choices
+          , Func<IReadOnlyList<T>> order
+          , Action<List<T>> onChanged
+          , SearchWindowMode mode = SearchWindowMode.DropDown) {
+            var window = CreateInstance<ChoiceSearchWindow>();
+            var all    = choices.ToList();
+            window.isOn = node => node.Data is T value && order().Contains(value);
+            window.Prepare(title, all.OrderBy(choice => Place(choice.Value)));
+            window.AllowReorder(window.isOn, moved => {
+                onChanged(moved.Select(node => (T) node.Data).ToList());
+                Arrange();
+            });
+
+            Undo.undoRedoPerformed += Undone;
+            window.Show(btnRect, title, node => {
+                if (node.Data is not T value) return;
+
+                var on = order().ToList();
+                if (!on.Remove(value)) on.Add(value);
+                onChanged(on);
+                window.KeepOpen();
+                Arrange();
+                window.MoveRows();
+            }, defaultSize, mode: mode, search: false);
+            return window;
+
+            // On first, in their order, then off as the choices came.
+            int Place(T value) {
+                var at = order().ToList().IndexOf(value);
+                return at >= 0 ? at : order().Count + all.FindIndex(choice => EqualityComparer<T>.Default.Equals(choice.Value, value));
+            }
+
+            // The rows in the order of the value now, ticked as it says.
+            void Arrange() {
+                if (window.tree?.Children == null) return;
+
+                window.tree.OrderChildren(node => node.Data is T value ? Place(value) : int.MaxValue);
+                window.Tick(window.tree);
+            }
+
+            void Undone() {
+                if (!window) {
+                    Undo.undoRedoPerformed -= Undone;
+                    return;
+                }
+
+                Arrange();
+                window.MoveRows();
+            }
         }
 
         /// <summary>

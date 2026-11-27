@@ -598,7 +598,7 @@ namespace RiseOn.Utils.Editor {
             var run = pending;
             pending = null;
             run();
-            GUIHelper.RequestRepaint();
+            RepaintUtils.Request();
             InternalEditorUtility.RepaintAllViews();
         }
 

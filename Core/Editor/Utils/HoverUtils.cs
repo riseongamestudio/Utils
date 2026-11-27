@@ -26,7 +26,7 @@ namespace RiseOn.Utils.Editor {
             if (type is EventType.MouseMove or EventType.MouseDrag or EventType.MouseLeaveWindow && over != hovered.Contains(id)) {
                 if (over) hovered.Add(id);
                 else hovered.Remove(id);
-                HandleUtility.Repaint();
+                RepaintUtils.Request();
             }
 
             return over;

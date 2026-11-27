@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace RiseOn.Utils.Editor {
     /// <summary>
-    /// A text value for Android and one for iOS under one label: both on the label's row, the two fields as wide as each other, while each is at least <see cref="FieldMinWidth"/> wide, else a row each, as Unity drops a vector's fields to a row of their own in a narrow Inspector.<br/>
+    /// A text value for Android and one for iOS under one label, each after its platform's mark (<see cref="PlatformMarks"/>): both on the label's row, the two fields as wide as each other, while each is at least <see cref="FieldMinWidth"/> wide, else a row each, as Unity drops a vector's fields to a row of their own in a narrow Inspector.<br/>
     /// Between one row and two the iOS field slides to its place and the rows below with it, as <see cref="SectionTabs"/> slides, repainting every frame of it on any window; a window opening shows the pair in its place at once.<br/>
     /// Every Android and iOS pair of a settings page draws with it.
     /// </summary>
@@ -16,8 +16,8 @@ namespace RiseOn.Utils.Editor {
         /// <summary>The least width of each field for both to share a row: an AdMob ad unit id, the longest these pairs hold, shows whole.</summary>
         public const float FieldMinWidth = 250;
 
-        private static readonly GUIContent android = new("Android");
-        private static readonly GUIContent ios     = new("iOS");
+        private static GUIContent android => PlatformMarks.Android;
+        private static GUIContent ios => PlatformMarks.IOS;
 
         // As long as SectionTabs' slide, and eased as it is.
         private const float Duration = 0.25f;
@@ -85,22 +85,21 @@ namespace RiseOn.Utils.Editor {
                 // at once on the next frame, rather than sliding to it as the window opens.
                 if (!pair.Shown && (pair.Width < 0 || Fits(pair.Width, extra) != Fits(value.width, extra))) {
                     pair.Settle = true;
-                    HandleUtility.Repaint();
+                    RepaintUtils.Request();
                 }
 
                 pair.Width = lastWidths[name] = value.width;
                 pair.Shown = true;
             }
 
-            // On one row each name as wide as its own text, as a vector's X, Y and Z are, so it sits by its field, the fields as wide
-            // as each other; stacked, the Android field takes the row and the iOS one the row below, its name as wide as the longer, so
-            // the two fields start in line.
+            // Each field after its platform's mark, the fields as wide as each other; stacked, the Android field takes the row and the
+            // iOS one the row below, each mark as wide as the wider, so the fields start in line.
             Split(value, out var left, out var right);
             var under = new Rect(value.x, value.y + below, value.width, line);
 
             EditorGUI.BeginChangeCheck();
-            androidValue = Field(Lerp(left, value, stacked), android, Width(android), androidValue, toggle, ref androidOn, asset, androidPath);
-            iosValue     = Field(Lerp(right, under, stacked), ios, Mathf.Lerp(Width(ios), Width(android), stacked), iosValue, toggle, ref iosOn, asset, iosPath);
+            androidValue = Field(Lerp(left, value, stacked), android, Mathf.Lerp(MarkWidth(android), Widest, stacked), androidValue, toggle, ref androidOn, asset, androidPath);
+            iosValue     = Field(Lerp(right, under, stacked), ios, Mathf.Lerp(MarkWidth(ios), Widest, stacked), iosValue, toggle, ref iosOn, asset, iosPath);
             return EditorGUI.EndChangeCheck();
 
             // Where the pair is between one row and two, moving toward stacked or not. It changes only at layout, so every event of
@@ -125,7 +124,7 @@ namespace RiseOn.Utils.Editor {
 
                 if (stack.Progress < 1) {
                     if (Event.current.type is EventType.Repaint && stack.Started < 0) stack.Started = EditorApplication.timeSinceStartup;
-                    HandleUtility.Repaint();
+                    RepaintUtils.Request();
                 }
 
                 return stack.Value;
@@ -146,23 +145,23 @@ namespace RiseOn.Utils.Editor {
         public static bool Draw(Rect value, ref string androidValue, ref string iosValue, GUIContent toggle, ref bool androidOn, ref bool iosOn) {
             EditorGUI.BeginChangeCheck();
             Split(value, out var left, out var right);
-            androidValue = Field(left, android, Width(android), androidValue, toggle, ref androidOn);
-            iosValue     = Field(right, ios, Width(ios), iosValue, toggle, ref iosOn);
+            androidValue = Field(left, android, MarkWidth(android), androidValue, toggle, ref androidOn);
+            iosValue     = Field(right, ios, MarkWidth(ios), iosValue, toggle, ref iosOn);
             return EditorGUI.EndChangeCheck();
         }
 
-        // A name's text and Unity's space between a label and its field.
-        private static float Width(GUIContent name) {
-            return EditorStyles.label.CalcSize(name).x + Section.LabelGap;
-        }
+        // A platform's mark and Unity's space between a label and its field.
+        private static float MarkWidth(GUIContent mark) => PlatformMarks.Width(mark) + Section.LabelGap;
 
-        // Between the Android field and the iOS name: Unity's space between the fields of one row, as in Vector2Field
+        private static float Widest => Mathf.Max(MarkWidth(android), MarkWidth(ios));
+
+        // Between the Android field and the iOS mark: Unity's space between the fields of one row, as in Vector2Field
         // (EditorGUI.kSpacingSubLabel).
         private const float Gap = 4;
 
         private static bool Fits(float width, float extra) {
             Split(new Rect(0, 0, width, 0), out var left, out _);
-            return left.width - Width(android) - extra >= FieldMinWidth;
+            return left.width - MarkWidth(android) - extra >= FieldMinWidth;
         }
 
         // A toggle after a field: a button joined to the field's right edge, as one control.
@@ -170,18 +169,18 @@ namespace RiseOn.Utils.Editor {
             return toggle == null ? 0 : EditorStyles.miniButtonRight.CalcSize(toggle).x;
         }
 
-        // The row's value column in two, each field after its name and as wide as the other. Too narrow for the names, they share
+        // The row's value column in two, each field after its mark and as wide as the other. Too narrow for the marks, they share
         // what there is, so neither covers the other.
         private static void Split(Rect value, out Rect left, out Rect right) {
-            var names = Width(android) + Width(ios) + Gap;
-            var width = value.width >= names ? Width(android) + (value.width - names) / 2 : Mathf.Max(0, value.width - Gap) * Width(android) / (names - Gap);
+            var marks = MarkWidth(android) + MarkWidth(ios) + Gap;
+            var width = value.width >= marks ? MarkWidth(android) + (value.width - marks) / 2 : Mathf.Max(0, value.width - Gap) * MarkWidth(android) / (marks - Gap);
             left  = new Rect(value.x, value.y, width, value.height);
             right = Rect.MinMaxRect(Mathf.Min(left.xMax + Gap, value.xMax), value.y, value.xMax, value.yMax);
         }
 
-        private static string Field(Rect rect, GUIContent name, float nameWidth, string value, GUIContent toggle, ref bool on, Object asset = null, string path = null) {
-            var label = new Rect(rect.x, rect.y, Mathf.Min(nameWidth, rect.width), rect.height);
-            GUI.Label(label, name, EditorStyles.label);
+        private static string Field(Rect rect, GUIContent mark, float markWidth, string value, GUIContent toggle, ref bool on, Object asset = null, string path = null) {
+            var label = new Rect(rect.x, rect.y, Mathf.Min(markWidth, rect.width), rect.height);
+            PlatformMarks.Draw(label, mark);
             var end = Mathf.Max(label.xMax, rect.xMax - ToggleWidth(toggle));
             // The field runs a pixel under the button, so their borders meet as one.
             var field = Rect.MinMaxRect(label.xMax, rect.y, toggle == null ? end : end + 1, rect.yMax);
